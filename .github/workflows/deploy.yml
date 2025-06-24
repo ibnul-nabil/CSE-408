@@ -1,0 +1,62 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend/tourify
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tourify-backend:latest
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tourify-frontend:latest
+
+      - name: Deploy to VM
+        env:
+          VM_HOST: ${{ secrets.VM_HOST }}
+          VM_USER: ${{ secrets.VM_USERNAME }}
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # Pull latest images
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/tourify-backend:latest
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/tourify-frontend:latest
+            
+            # Navigate to project directory
+            cd /path/to/your/project
+            
+            # Stop existing containers but preserve volumes
+            docker-compose down
+            
+            # Start containers with new images
+            docker-compose up -d
+            
+            # Clean up old images
+            docker image prune -f 
