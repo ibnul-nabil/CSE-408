@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
+const API_URL = 'http://20.40.57.81:8080'; // Add API URL configuration
+
 const SessionDebug = () => {
   const { user, loading } = useAuth();
   const [debugInfo, setDebugInfo] = useState('');
@@ -17,7 +19,7 @@ Loading: ${loading}`);
 
     if (token) {
       try {
-        const response = await fetch('http://localhost:8080/api/auth/validate', {
+        const response = await fetch(`${API_URL}/api/auth/validate`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',

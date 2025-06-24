@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const AuthContext = createContext();
+const API_URL = 'http://20.40.57.81:8080'; // Add API URL configuration
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -20,7 +21,7 @@ export const AuthProvider = ({ children }) => {
     // Call backend logout endpoint
     if (token) {
       try {
-        await fetch('http://localhost:8080/api/auth/logout', {
+        await fetch(`${API_URL}/api/auth/logout`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -40,7 +41,7 @@ export const AuthProvider = ({ children }) => {
   const validateSession = useCallback(async (token) => {
     try {
       console.log('🔍 Validating session...');
-      const response = await fetch('http://localhost:8080/api/auth/validate', {
+      const response = await fetch(`${API_URL}/api/auth/validate`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

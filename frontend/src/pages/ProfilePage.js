@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './ProfilePage.css';
 
+const API_URL = 'http://20.40.57.81:8080'; // Add API URL configuration
+
 const TABS = [
   { key: 'blogs', label: 'My Blogs', icon: '📝' },
   { key: 'tours', label: 'My Tours', icon: '✈️' },
@@ -23,7 +25,7 @@ const ProfilePage = () => {
       try {
         setLoading(true);
         // Use the authenticated user's ID from context
-        const res = await fetch(`http://localhost:8080/api/profile/${authUser.userId}`);
+        const res = await fetch(`${API_URL}/api/profile/${authUser.userId}`);
         if (!res.ok) throw new Error('Failed to fetch user');
         const data = await res.json();
         setUser(data);

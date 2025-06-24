@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './CreateTourPage.css';
-
+const API_URL = 'http://20.40.57.81:8080'; // Add API URL configuration
 const CreateTourPage = () => {
   const [search, setSearch] = useState('');
   const [searchResults, setSearchResults] = useState([]); // Destinations
@@ -20,7 +20,7 @@ const CreateTourPage = () => {
       setLoading(true);
       try {
         // Replace with your actual endpoint for destinations
-        const response = await fetch(`http://localhost:8080/api/destinations?search=${encodeURIComponent(query)}`);
+        const response = await fetch(`${API_URL}/api/destinations?search=${encodeURIComponent(query)}`);
         if (!response.ok) throw new Error('Failed to fetch destinations');
         const data = await response.json();
         setSearchResults(data);
@@ -53,7 +53,7 @@ const CreateTourPage = () => {
     if (!subplaceResults[destinationId]) {
       setSubplaceLoading({ ...subplaceLoading, [destinationId]: true });
       try {
-        const response = await fetch(`http://localhost:8080/api/destinations/${destinationId}/subplaces`);
+        const response = await fetch(`${API_URL}/api/destinations/${destinationId}/subplaces`);
         if (!response.ok) throw new Error('Failed to fetch subplaces');
         const data = await response.json();
         setSubplaceResults(prev => ({ ...prev, [destinationId]: data }));

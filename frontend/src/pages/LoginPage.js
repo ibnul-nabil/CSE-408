@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './LoginPage.css';
 
+const API_URL = 'http://20.40.57.81:8080'; // Add API URL configuration
+
 const LoginPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -38,7 +40,7 @@ const LoginPage = () => {
           return;
         }
 
-        const response = await fetch('http://localhost:8080/api/auth/signup', {
+        const response = await fetch(`${API_URL}/api/auth/signup`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -62,7 +64,7 @@ const LoginPage = () => {
         }
       } else {
         // Login logic
-        const response = await fetch('http://localhost:8080/api/auth/login', {
+        const response = await fetch(`${API_URL}/api/auth/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
