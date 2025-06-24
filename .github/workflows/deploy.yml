@@ -50,7 +50,7 @@ jobs:
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/tourify-frontend:latest
             
             # Navigate to project directory
-            cd /path/to/your/project
+            cd /home/ibnul/tourify
             
             # Stop existing containers but preserve volumes
             docker-compose down
