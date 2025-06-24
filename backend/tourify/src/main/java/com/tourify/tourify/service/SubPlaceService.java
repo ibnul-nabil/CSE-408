@@ -12,7 +12,7 @@ public class SubPlaceService {
     @Autowired
     private SubPlaceRepository subPlaceRepository;
 
-    public List<SubPlace> findByDestination(String destination) {
-        return subPlaceRepository.findByDestinationName(destination);
+    public List<SubPlace> findByDestinationId(Long destinationId) {
+        return subPlaceRepository.findByDestinationId(destinationId);
     }
 }

@@ -1,247 +1,225 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import './ProfilePage.css';
 
+const TABS = [
+  { key: 'blogs', label: 'My Blogs', icon: '📝' },
+  { key: 'tours', label: 'My Tours', icon: '✈️' },
+  { key: 'saved', label: 'Saved Items', icon: '📌' },
+];
+
 const ProfilePage = () => {
-  const { id } = useParams();
   const navigate = useNavigate();
+  const { user: authUser, logout } = useAuth();
   const [user, setUser] = useState(null);
-  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('blogs');
+  const [selectedBlog, setSelectedBlog] = useState(null); // For modal
 
   useEffect(() => {
-    const fetchUserData = async () => {
+    const fetchUser = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/api/profile/${id}`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const userData = await response.json();
-        setUser(userData);
+        setLoading(true);
+        // Use the authenticated user's ID from context
+        const res = await fetch(`http://localhost:8080/api/profile/${authUser.userId}`);
+        if (!res.ok) throw new Error('Failed to fetch user');
+        const data = await res.json();
+        setUser(data);
       } catch (err) {
-        console.error('Error fetching user data:', err);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
+    console.log('authUser:', authUser);
+    if (authUser && (authUser.userId)) {
+      fetchUser();
+    }
+  }, [authUser]);
 
-    fetchUserData();
-  }, [id]);
+  const handleCreateTour = () => navigate('/create-tour');
 
-  const handleCreateTour = () => {
-    navigate('/create-tour');
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
-
-  if (error) {
-    return (
-      <div className="error-container">
-        <div className="error-content">
-          <div className="error-icon">⚠️</div>
-          <h2 className="error-title">Oops! Something went wrong</h2>
-          <p className="error-message">{error}</p>
-          <button 
-            onClick={() => window.location.reload()}
-            className="retry-button"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   if (loading) {
     return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-        <p className="loading-text">Loading your profile...</p>
+      <div className="profile-loading">
+        <div className="profile-spinner"></div>
+        <p>Loading profile...</p>
       </div>
     );
   }
+  if (error) {
+    return (
+      <div className="profile-error">
+        <p>❌ {error}</p>
+        <button onClick={() => window.location.reload()}>Retry</button>
+      </div>
+    );
+  }
+  if (!user) return null;
+
+  // Quick stats
+  const stats = [
+    { label: 'Tours', value: user.tours?.length || 0, icon: '✈️' },
+    { label: 'Blogs', value: user.blogs?.length || 0, icon: '📝' },
+    { label: 'Saved', value: user.saved?.length || 0, icon: '📌' },
+  ];
+
+  // Recent activity
+  const latestBlog = user.blogs?.[0];
+  const latestTour = user.tours?.[0];
 
   return (
-    <div className="profile-container">
-      {/* Hero Section */}
-      <div className="hero-section">
-        <div className="hero-content">
-          <div className="profile-header">
-            <div className="relative">
-              <img
-                src={user.profile_image || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"}
-                alt={`${user.username}'s profile`}
-                className="profile-image"
-              />
-              <div className="online-status"></div>
-            </div>
-            <div className="profile-info">
-              <h1 className="username">{user.username}</h1>
-              <p className="user-email">{user.email}</p>
-              <div className="tags-container">
-                <span className="tag">Traveler</span>
-                <span className="tag">Explorer</span>
-                <span className="tag">Adventurer</span>
+    <div className="profile-main-container">
+      {/* User Info Card */}
+      <section className="profile-user-card">
+        <img
+          src={user.profile_image || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'}
+          alt="Profile"
+          className="profile-avatar"
+        />
+        <div className="profile-user-details">
+          <h2>{user.username}</h2>
+          <p className="profile-email">{user.email}</p>
+          {user.bio && <p className="profile-bio">{user.bio}</p>}
+          <button onClick={handleLogout} className="logout-btn">
+            Logout
+          </button>
+        </div>
+      </section>
+
+      {/* Quick Stats */}
+      <section className="profile-stats-bar">
+        {stats.map((stat) => (
+          <div key={stat.label} className="profile-stat">
+            <span className="profile-stat-icon">{stat.icon}</span>
+            <span className="profile-stat-value">{stat.value}</span>
+            <span className="profile-stat-label">{stat.label}</span>
+          </div>
+        ))}
+      </section>
+
+      {/* Create Tour Button */}
+      <section className="profile-create-tour">
+        <button className="profile-create-tour-btn" onClick={handleCreateTour}>
+          <span role="img" aria-label="plane">✈️</span> Create New Tour
+        </button>
+      </section>
+
+      {/* Recent Activity */}
+      <section className="profile-recent-activity">
+        <h3>Recent Activity</h3>
+        <div className="profile-recent-cards">
+          {latestTour ? (
+            <div className="profile-recent-card">
+              <div className="profile-recent-img-wrap">
+                <img
+                  src={latestTour.image || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=250&fit=crop'}
+                  alt={latestTour.title}
+                />
+              </div>
+              <div>
+                <h4>{latestTour.title}</h4>
+                <p>{latestTour.description?.substring(0, 60) || 'No description.'}</p>
               </div>
             </div>
+          ) : <div className="profile-recent-empty">No recent tours</div>}
+          {latestBlog ? (
+            <div className="profile-recent-card">
+              <div className="profile-recent-img-wrap">
+                <img
+                  src={'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=250&fit=crop'}
+                  alt={latestBlog.title}
+                />
+              </div>
+              <div>
+                <h4>{latestBlog.title}</h4>
+                <p>{latestBlog.content?.substring(0, 60) || 'No content.'}</p>
+              </div>
+            </div>
+          ) : <div className="profile-recent-empty">No recent blogs</div>}
+        </div>
+      </section>
+
+      {/* Tab Navigation */}
+      <nav className="profile-tabs">
+        {TABS.map(tab => (
+          <button
+            key={tab.key}
+            className={`profile-tab-btn${activeTab === tab.key ? ' active' : ''}`}
+            onClick={() => setActiveTab(tab.key)}
+          >
+            <span>{tab.icon}</span> {tab.label}
+          </button>
+        ))}
+      </nav>
+
+      {/* Tab Content */}
+      <section className="profile-tab-content">
+        {activeTab === 'blogs' && (
+          <div>
+            {user.blogs?.length ? (
+              <ul className="profile-list">
+                {user.blogs.map(blog => (
+                  <li key={blog.id} className="profile-list-item">
+                    <h4>{blog.title}</h4>
+                    <p>{blog.content?.length > 100 ? blog.content.substring(0, 100) + '...' : blog.content}</p>
+                    {blog.content?.length > 100 && (
+                      <button className="read-more-btn" onClick={() => setSelectedBlog(blog)}>
+                        Read More
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            ) : <div className="profile-empty">No blogs yet.</div>}
+          </div>
+        )}
+        {activeTab === 'tours' && (
+          <div>
+            {user.tours?.length ? (
+              <ul className="profile-list">
+                {user.tours.map(tour => (
+                  <li key={tour.id} className="profile-list-item">
+                    <h4>{tour.title}</h4>
+                    <p>{tour.description?.substring(0, 100)}</p>
+                  </li>
+                ))}
+              </ul>
+            ) : <div className="profile-empty">No tours yet.</div>}
+          </div>
+        )}
+        {activeTab === 'saved' && (
+          <div>
+            {user.saved?.length ? (
+              <ul className="profile-list">
+                {user.saved.map(item => (
+                  <li key={item.id} className="profile-list-item">
+                    <h4>{item.title || item.name}</h4>
+                  </li>
+                ))}
+              </ul>
+            ) : <div className="profile-empty">No saved items yet.</div>}
+          </div>
+        )}
+      </section>
+
+      {/* Blog Modal */}
+      {selectedBlog && (
+        <div className="blog-modal-overlay" onClick={() => setSelectedBlog(null)}>
+          <div className="blog-modal" onClick={e => e.stopPropagation()}>
+            <button className="blog-modal-close" onClick={() => setSelectedBlog(null)}>&times;</button>
+            <h2>{selectedBlog.title}</h2>
+            <p>{selectedBlog.content}</p>
           </div>
         </div>
-      </div>
-
-      <div className="main-content">
-        {/* Create Tour CTA */}
-        <div className="create-tour-cta">
-          <button
-            onClick={handleCreateTour}
-            className="create-tour-button"
-          >
-            <span className="emoji">✈️</span>
-            Create New Tour
-          </button>
-          <p className="cta-text">Share your travel experiences with the world</p>
-        </div>
-
-        {/* Tab Navigation */}
-        <div className="tab-navigation">
-          <button
-            className={`tab-button ${activeTab === 'blogs' ? 'active' : ''}`}
-            onClick={() => setActiveTab('blogs')}
-          >
-            My Blogs
-          </button>
-          <button
-            className={`tab-button ${activeTab === 'tours' ? 'active' : ''}`}
-            onClick={() => setActiveTab('tours')}
-          >
-            My Tours
-          </button>
-          <button
-            className={`tab-button ${activeTab === 'saved' ? 'active' : ''}`}
-            onClick={() => setActiveTab('saved')}
-          >
-            Saved Items
-          </button>
-        </div>
-
-        {/* Content based on active tab */}
-        {activeTab === 'blogs' && (
-          <section className="content-section">
-            <div className="section-header">
-              <h2 className="section-title">
-                <span className="section-icon">📝</span>
-                My Travel Blogs
-              </h2>
-              <span className="section-badge">
-                {user.blogs?.length || 0} posts
-              </span>
-            </div>
-
-            {(!user.blogs || user.blogs.length === 0) ? (
-              <div className="empty-state">
-                <div className="empty-icon">📖</div>
-                <h3 className="empty-title">No blogs yet</h3>
-                <p className="empty-text">Start sharing your travel stories!</p>
-              </div>
-            ) : (
-              <div className="blog-grid">
-                {user.blogs.map((blog) => (
-                  <article key={blog.id} className="blog-card">
-                    <div className="relative">
-                      <img
-                        src={ "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=250&fit=crop"}
-                        alt={blog.title}
-                        className="blog-image"
-                      />
-                      <div className="blog-badge">
-                        {blog.destination || 'Travel'}
-                      </div>
-                    </div>
-                    <div className="blog-content">
-                      <h3 className="blog-title">{blog.title}</h3>
-                      <p className="blog-excerpt">{blog.content}</p>
-                      <button className="read-more">
-                        Read More
-                        <span className="read-more-arrow">→</span>
-                      </button>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )}
-          </section>
-        )}
-
-        {activeTab === 'tours' && (
-          <section className="content-section">
-            <div className="section-header">
-              <h2 className="section-title">
-                <span className="section-icon">🌟</span>
-                My Tour Packages
-              </h2>
-              <span className="section-badge">
-                {user.tours?.length || 0} tours
-              </span>
-            </div>
-
-            {(!user.tours || user.tours.length === 0) ? (
-              <div className="empty-state">
-                <div className="empty-icon">✈️</div>
-                <h3 className="empty-title">No tours created yet</h3>
-                <p className="empty-text">Create your first tour package!</p>
-              </div>
-            ) : (
-              <div className="tour-grid">
-                {user.tours.map((tour) => (
-                  <div key={tour.id} className="tour-card">
-                    <div className="relative">
-                      <img
-                        src={tour.image || "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=250&fit=crop"}
-                        alt={tour.title}
-                        className="tour-image"
-                      />
-                      {tour.rating && (
-                        <div className="tour-rating">
-                          ⭐ {tour.rating}
-                        </div>
-                      )}
-                    </div>
-                    <div className="tour-details">
-                      <h3 className="tour-title">{tour.title}</h3>
-                      <div className="tour-meta">
-                        {tour.price && <span className="tour-price">${tour.price}</span>}
-                        {tour.duration && (
-                          <span className="tour-duration">
-                            {tour.duration} days
-                          </span>
-                        )}
-                      </div>
-                      <button className="tour-button">
-                        View Details
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-        )}
-
-        {activeTab === 'saved' && (
-          <section className="content-section">
-            <div className="section-header">
-              <h2 className="section-title">
-                <span className="section-icon">❤️</span>
-                Saved Items
-              </h2>
-            </div>
-            <div className="empty-state">
-              <div className="empty-icon">📌</div>
-              <h3 className="empty-title">No saved items yet</h3>
-              <p className="empty-text">Save your favorite tours and blogs!</p>
-            </div>
-          </section>
-        )}
-      </div>
+      )}
     </div>
   );
 };

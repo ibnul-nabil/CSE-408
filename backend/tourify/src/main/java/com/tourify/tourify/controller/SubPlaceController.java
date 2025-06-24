@@ -16,12 +16,9 @@ public class SubPlaceController {
     @Autowired
     private SubPlaceService subPlaceService;
 
-    @GetMapping("/subplaces")
-    public ResponseEntity<List<SubPlace>> getSubPlaces(
-            @RequestParam String destination
-    ) {
-        System.out.println("Destination: " + destination);
-        List<SubPlace> subplaces = subPlaceService.findByDestination(destination);
+    @GetMapping("/destinations/{destinationId}/subplaces")
+    public ResponseEntity<List<SubPlace>> getSubPlacesByDestinationId(@PathVariable Long destinationId) {
+        List<SubPlace> subplaces = subPlaceService.findByDestinationId(destinationId);
         return ResponseEntity.ok(subplaces);
     }
 }

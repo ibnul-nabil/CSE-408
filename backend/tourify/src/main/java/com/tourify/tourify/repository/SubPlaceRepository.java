@@ -10,7 +10,5 @@ import java.util.List;
 
 @Repository
 public interface SubPlaceRepository extends JpaRepository<SubPlace, Long> {
-    @Query("SELECT s FROM SubPlace s WHERE s.destination.id = " +
-            "(SELECT d.id FROM Destination d WHERE LOWER(d.name) = LOWER(:destinationName))")
-    List<SubPlace> findByDestinationName(@Param("destinationName") String destinationName);
+    List<SubPlace> findByDestinationId(Long destinationId);
 }

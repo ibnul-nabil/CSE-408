@@ -10,6 +10,6 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-    @Query("SELECT u FROM User u LEFT JOIN FETCH u.blogs LEFT JOIN FETCH u.tours WHERE u.id = :userId")
-    Optional<User> findByIdWithBlogsAndTours(@Param("userId") Long userId);
+    User findByUsername(String username);
+    User findByEmail(String email);
 }
