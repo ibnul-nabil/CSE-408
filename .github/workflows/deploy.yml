@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: Deploy to VM
 
 on:
   push:
@@ -6,65 +6,23 @@ on:
       - main
 
 jobs:
-  build-and-push:
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build and push backend image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./backend/tourify
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tourify-backend:latest
-
-      - name: Build and push frontend image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./frontend
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tourify-frontend:latest
-
-      - name: Copy deployment files to VM
-        uses: appleboy/scp-action@v0.1.7
+      - name: Deploy to VM via SSH
+        uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "deploy.sh"
-          target: "/home/ibnul/tourify"
-
-      - name: Deploy to VM
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.VM_PORT }} # 22
           script: |
-            # Ensure docker group exists and user is in it
-            sudo groupadd -f docker
-            sudo usermod -aG docker $USER
-            
-            # Navigate to project directory
-            cd /home/ibnul/tourify
-            
-            # Make deploy script executable and run it
-            chmod +x deploy.sh
-            ./deploy.sh ${{ secrets.DOCKERHUB_USERNAME }}
-            
-            # Use sudo for docker commands
-            sudo docker-compose down
-            sudo docker-compose up -d
-            
-            # Verify deployment
-            sudo docker ps 
+            cd /home/ibnul/CSE-408
+            git pull origin main
+            docker-compose -f docker-compose.prod.yml build --no-cache
+            docker-compose -f docker-compose.prod.yml up -d
+            docker image prune -af
