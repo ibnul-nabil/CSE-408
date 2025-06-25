@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './CreateTourPage.css';
-//const API_URL = 'http://20.40.57.81:8080'; // Add API URL configuration
-const API_URL = 'http://localhost:8080'; // Add API URL configuration
+const API_URL = 'http://20.40.57.81:8080'; // Add API URL configuration
+//const API_URL = 'http://localhost:8080'; // Add API URL configuration
 const CreateTourPage = () => {
   const [search, setSearch] = useState('');
   const [searchResults, setSearchResults] = useState([]); // Destinations

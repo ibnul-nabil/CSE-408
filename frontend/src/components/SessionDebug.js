@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
-//const API_URL = 'http://20.40.57.81:8080'; // Add API URL configuration
-const API_URL = 'http://localhost:8080'; // Add API URL configuration
+const API_URL = 'http://20.40.57.81:8080'; // Add API URL configuration
+//const API_URL = 'http://localhost:8080'; // Add API URL configuration
 
 const SessionDebug = () => {
   const { user, loading } = useAuth();
