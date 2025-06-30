@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './LoginPage.css';
 
-const API_URL = 'http://20.40.57.81:8080'; // Add API URL configuration
-//const API_URL = 'http://localhost:8080'; // Add API URL configuration
+//const API_URL = 'http://20.40.57.81:8080'; // Add API URL configuration
+const API_URL = 'http://localhost:8080'; // Add API URL configuration
 
 const LoginPage = () => {
   const navigate = useNavigate();

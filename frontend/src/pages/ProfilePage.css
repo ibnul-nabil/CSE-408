@@ -69,12 +69,15 @@
   font-size: 0.95rem;
 }
 
-/* Create Tour Button */
-.profile-create-tour {
-  text-align: center;
+/* Create Buttons */
+.profile-create-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
   margin-bottom: 2.5rem;
 }
-.profile-create-tour-btn {
+
+.profile-create-btn {
   background: linear-gradient(90deg, #3b82f6 0%, #7c3aed 100%);
   color: #fff;
   font-weight: 600;
@@ -86,9 +89,25 @@
   box-shadow: 0 2px 8px rgba(59,130,246,0.08);
   transition: background 0.2s, transform 0.2s;
 }
-.profile-create-tour-btn:hover {
-  background: linear-gradient(90deg, #2563eb 0%, #7c3aed 100%);
+
+.profile-create-btn:hover {
   transform: translateY(-2px) scale(1.03);
+}
+
+.profile-create-btn.tour {
+  background: linear-gradient(90deg, #3b82f6 0%, #7c3aed 100%);
+}
+
+.profile-create-btn.tour:hover {
+  background: linear-gradient(90deg, #2563eb 0%, #7c3aed 100%);
+}
+
+.profile-create-btn.blog {
+  background: linear-gradient(90deg, #10b981 0%, #3b82f6 100%);
+}
+
+.profile-create-btn.blog:hover {
+  background: linear-gradient(90deg, #059669 0%, #3b82f6 100%);
 }
 
 /* Recent Activity */
@@ -228,6 +247,13 @@
   }
   .profile-tab-content {
     padding: 1rem 0.5rem;
+  }
+  .profile-create-buttons {
+    flex-direction: column;
+    padding: 0 1rem;
+  }
+  .profile-create-btn {
+    width: 100%;
   }
 }
 

@@ -5,6 +5,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ProfilePage from "./pages/ProfilePage";
 import CreateTourPage from "./pages/CreateTourPage";
 import LoginPage from "./pages/LoginPage";
+import CreateBlogPage from './pages/CreateBlogPage';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/create-blog" element={<CreateBlogPage />} />
           <Route 
             path="/profile" 
             element={

@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const AuthContext = createContext();
-const API_URL = 'http://20.40.57.81:8080'; // Add API URL configuration
-//const API_URL = 'http://localhost:8080'; // Add API URL configuration
+//const API_URL = 'http://20.40.57.81:8080'; // Add API URL configuration
+const API_URL = 'http://localhost:8080'; // Add API URL configuration
 
 export const useAuth = () => {
   const context = useContext(AuthContext);

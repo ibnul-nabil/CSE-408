@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './ProfilePage.css';
 
-const API_URL = 'http://20.40.57.81:8080'; // Add API URL configuration
-//const API_URL = 'http://localhost:8080'; // Add API URL configuration
+//const API_URL = 'http://20.40.57.81:8080'; // Add API URL configuration
+const API_URL = 'http://localhost:8080'; // Add API URL configuration
 
 const TABS = [
   { key: 'blogs', label: 'My Blogs', icon: '📝' },
@@ -43,6 +43,7 @@ const ProfilePage = () => {
   }, [authUser]);
 
   const handleCreateTour = () => navigate('/create-tour');
+  const handleCreateBlog = () => navigate('/create-blog');
 
   const handleLogout = () => {
     logout();
@@ -108,10 +109,13 @@ const ProfilePage = () => {
         ))}
       </section>
 
-      {/* Create Tour Button */}
-      <section className="profile-create-tour">
-        <button className="profile-create-tour-btn" onClick={handleCreateTour}>
+      {/* Create Buttons */}
+      <section className="profile-create-buttons">
+        <button className="profile-create-btn tour" onClick={handleCreateTour}>
           <span role="img" aria-label="plane">✈️</span> Create New Tour
+        </button>
+        <button className="profile-create-btn blog" onClick={handleCreateBlog}>
+          <span role="img" aria-label="pencil">📝</span> Create New Blog
         </button>
       </section>
 
