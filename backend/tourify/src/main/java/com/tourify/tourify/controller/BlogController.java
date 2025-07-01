@@ -47,4 +47,14 @@ public class BlogController {
         if (user == null) return List.of();
         return blogRepository.findByUser(user);
     }
+
+    // Get a single blog by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getBlogById(@PathVariable Long id) {
+        Blog blog = blogRepository.findById(id).orElse(null);
+        if (blog == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(blog);
+    }
 }
