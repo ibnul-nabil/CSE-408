@@ -14,22 +14,26 @@ const FinalizeRoutePage = () => {
       {selectedDestinations.length === 0 ? (
         <div className="finalize-route-empty">No route selected.</div>
       ) : (
-        <div className="minimal-timeline-container">
+        <div className="aesthetic-timeline">
           {selectedDestinations.map(({ destination, subplaces }, idx) => (
-            <div key={destination.id} className="minimal-timeline-event">
-              <div className="minimal-timeline-dot" />
-              <div className="minimal-timeline-label">{destination.name}</div>
-              {subplaces.length > 0 && (
-                <div className="minimal-subplace-list">
-                  {subplaces.map(sub => (
-                    <div key={sub.id} className="minimal-subplace-item">
-                      <div className="minimal-subplace-dot" />
-                      <div className="minimal-subplace-label">{sub.name}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {idx !== selectedDestinations.length - 1 && <div className="minimal-timeline-connector" />}
+            <div key={destination.id} className="aesthetic-timeline-event">
+              <div className="aesthetic-timeline-dot" />
+              {idx !== selectedDestinations.length - 1 && <div className="aesthetic-timeline-connector" />}
+              <div className="aesthetic-timeline-content">
+                <div className="aesthetic-destination-name">{destination.name}</div>
+                <div className="aesthetic-destination-type">{destination.type}</div>
+                {subplaces.length > 0 && (
+                  <div className="aesthetic-mini-timeline">
+                    {subplaces.map((sub, subIdx) => (
+                      <div key={sub.id} className="aesthetic-mini-timeline-item">
+                        <div className="aesthetic-mini-timeline-dot" />
+                        {subIdx !== subplaces.length - 1 && <div className="aesthetic-mini-timeline-connector" />}
+                        <span className="aesthetic-mini-timeline-label">{sub.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>

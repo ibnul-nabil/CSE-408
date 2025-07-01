@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './CreateTourPage.css';
+import { useNavigate } from 'react-router-dom';
 //const API_URL = 'http://20.40.57.81:8080'; // Add API URL configuration
 const API_URL = 'http://localhost:8080'; // Add API URL configuration
 const CreateTourPage = () => {
@@ -11,6 +12,7 @@ const CreateTourPage = () => {
   const [subplaceLoading, setSubplaceLoading] = useState({}); // {destinationId: boolean}
   const [subplaceResults, setSubplaceResults] = useState({}); // {destinationId: [subplaces]}
   const [showSubplaces, setShowSubplaces] = useState({}); // {destinationId: boolean}
+  const navigate = useNavigate();
 
   // Search for destinations
   const handleSearchChange = async (e) => {
@@ -222,6 +224,15 @@ const CreateTourPage = () => {
                 </div>
               </div>
             ))}
+          </div>
+          {/* Finalize Route Button */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
+            <button
+              className="finalize-route-btn"
+              onClick={() => navigate('/finalize-route', { state: { selectedDestinations } })}
+            >
+              Finalize Route
+            </button>
           </div>
         </div>
       )}
