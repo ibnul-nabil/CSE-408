@@ -42,7 +42,7 @@ const ProfilePage = () => {
     }
   }, [authUser]);
 
-  const handleCreateTour = () => navigate('/create-tour');
+  const handleCreateTour = () => navigate('/create-tour-info');
   const handleCreateBlog = () => navigate('/create-blog');
 
   const handleLogout = () => {
@@ -186,16 +186,24 @@ const ProfilePage = () => {
           </div>
         )}
         {activeTab === 'tours' && (
-          <div>
+          <div className="profile-tour-card-vertical-list">
             {user.tours?.length ? (
-              <ul className="profile-list">
-                {user.tours.map(tour => (
-                  <li key={tour.id} className="profile-list-item">
+              user.tours.map(tour => (
+                <div key={tour.id} className="profile-tour-card-vertical hoverable">
+                  <div className="profile-tour-card-content">
                     <h4>{tour.title}</h4>
-                    <p>{tour.description?.substring(0, 100)}</p>
-                  </li>
-                ))}
-              </ul>
+                    <div>Status: <span className="profile-tour-status">{tour.status}</span></div>
+                    {tour.startDate && <div>Start: {tour.startDate}</div>}
+                    {tour.endDate && <div>End: {tour.endDate}</div>}
+                    {tour.destinations && tour.destinations.length > 0 && (
+                      <div><strong>Destinations:</strong> {tour.destinations.join(', ')}</div>
+                    )}
+                    {tour.subplaces && tour.subplaces.length > 0 && (
+                      <div><strong>Sub-places:</strong> {tour.subplaces.join(', ')}</div>
+                    )}
+                  </div>
+                </div>
+              ))
             ) : <div className="profile-empty">No tours yet.</div>}
           </div>
         )}

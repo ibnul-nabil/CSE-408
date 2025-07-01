@@ -9,6 +9,7 @@ import CreateBlogPage from './pages/CreateBlogPage';
 import BlogListPage from './pages/BlogListPage';
 import BlogDetailPage from './pages/BlogDetailPage';
 import FinalizeRoutePage from './pages/FinalizeRoutePage';
+import CreateTourInfoPage from './pages/CreateTourInfoPage';
 
 function App() {
   return (
@@ -37,6 +38,22 @@ function App() {
           <Route path="/blogs" element={<BlogListPage />} />
           <Route path="/blogs/:id" element={<BlogDetailPage />} />
           <Route path="/finalize-route" element={<FinalizeRoutePage />} />
+          <Route 
+            path="/create-tour-info" 
+            element={
+              <ProtectedRoute>
+                <CreateTourInfoPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/select-places" 
+            element={
+              <ProtectedRoute>
+                <CreateTourPage />
+              </ProtectedRoute>
+            } 
+          />
         </Routes>
       </Router>
     </AuthProvider>

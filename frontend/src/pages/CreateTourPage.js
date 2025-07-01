@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import './CreateTourPage.css';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 //const API_URL = 'http://20.40.57.81:8080'; // Add API URL configuration
 const API_URL = 'http://localhost:8080'; // Add API URL configuration
 const CreateTourPage = () => {
+  const location = useLocation();
+  const { title, startDate, endDate } = location.state || {};
   const [search, setSearch] = useState('');
   const [searchResults, setSearchResults] = useState([]); // Destinations
   const [selectedDestinations, setSelectedDestinations] = useState([]); // [{destination, subplaces: []}]
@@ -92,6 +94,18 @@ const CreateTourPage = () => {
 
   // Check if destination is already added
   const isDestinationAdded = (destinationId) => selectedDestinations.some(d => d.destination.id === destinationId);
+
+  // Add this function to go to finalize route page
+  const handleFinalizeRoute = () => {
+    navigate('/finalize-route', {
+      state: {
+        title,
+        startDate,
+        endDate,
+        selectedDestinations
+      }
+    });
+  };
 
   return (
     <div className="create-tour-container">
@@ -229,9 +243,9 @@ const CreateTourPage = () => {
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
             <button
               className="finalize-route-btn"
-              onClick={() => navigate('/finalize-route', { state: { selectedDestinations } })}
+              onClick={handleFinalizeRoute}
             >
-              Finalize Route
+              Next: Finalize Route
             </button>
           </div>
         </div>

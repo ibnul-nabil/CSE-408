@@ -389,3 +389,38 @@
   font-size: 0.95rem;
   margin-top: 8px;
 }
+
+/* Tour Card Vertical List Styles */
+.profile-tour-card-vertical-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.profile-tour-card-vertical {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 1.5rem 2rem;
+  transition: box-shadow 0.2s, transform 0.2s;
+  border: 1px solid #e0e0e0;
+  cursor: pointer;
+}
+
+.profile-tour-card-vertical .profile-tour-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.profile-tour-card-vertical .profile-tour-status {
+  font-weight: 500;
+  color: #1976d2;
+}
+
+.hoverable:hover {
+  box-shadow: 0 6px 24px rgba(25, 118, 210, 0.18), 0 1.5px 6px rgba(0,0,0,0.08);
+  transform: translateY(-2px) scale(1.02);
+  border-color: #1976d2;
+}

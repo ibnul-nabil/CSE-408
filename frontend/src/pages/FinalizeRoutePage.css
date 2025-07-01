@@ -1,17 +1,30 @@
 .finalize-route-container {
-  max-width: 900px;
-  margin: 40px auto;
-  padding: 32px;
-  background: #f9f9f9;
-  border-radius: 18px;
-  box-shadow: 0 6px 32px rgba(0,0,0,0.10);
+  max-width: 700px;
+  margin: 2.5rem auto;
+  background: #fff;
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+  padding: 2.5rem 2rem 2rem 2rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 .finalize-route-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #1976d2;
   text-align: center;
-  font-size: 2.2rem;
-  font-weight: bold;
-  margin-bottom: 32px;
-  color: #00796b;
+}
+.finalize-route-summary {
+  background: #f3f6fa;
+  border-radius: 1rem;
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 1px 4px rgba(25,118,210,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 500;
 }
 .finalize-route-list {
   display: flex;
@@ -48,23 +61,23 @@
   margin-bottom: 4px;
 }
 .finalize-route-empty {
-  text-align: center;
-  color: #888;
+  color: #9ca3af;
   font-size: 1.1rem;
-  margin-top: 40px;
+  text-align: center;
+  margin: 2rem 0;
 }
 .back-btn {
   background: none;
   border: none;
-  color: #00796b;
+  color: #1976d2;
   font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1.2rem;
   cursor: pointer;
-  margin-bottom: 18px;
   transition: color 0.2s;
 }
 .back-btn:hover {
-  color: #004d40;
-  text-decoration: underline;
+  color: #10b981;
 }
 @media (max-width: 900px) {
   .finalize-route-container {
@@ -384,12 +397,10 @@
   padding: 0;
 }
 
+/* --- Restored Classic Timeline Style --- */
 .aesthetic-timeline {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  margin-top: 40px;
+  margin: 2rem 0 2.5rem 0;
   padding-left: 56px;
   border-left: 4px solid #e0f7fa;
 }
@@ -489,6 +500,27 @@
   font-weight: 500;
   letter-spacing: 0.01em;
 }
+
+.confirm-tour-btn {
+  display: block;
+  width: 100%;
+  margin: 2.5rem 0 0 0;
+  padding: 1.1rem 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, #1976d2 0%, #10b981 100%);
+  color: #fff;
+  border: none;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 8px rgba(25,118,210,0.10);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+.confirm-tour-btn:hover {
+  background: linear-gradient(90deg, #10b981 0%, #1976d2 100%);
+  transform: translateY(-2px) scale(1.03);
+}
+
 @media (max-width: 700px) {
   .aesthetic-timeline {
     padding-left: 18px;
