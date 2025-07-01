@@ -170,21 +170,18 @@ const ProfilePage = () => {
       {/* Tab Content */}
       <section className="profile-tab-content">
         {activeTab === 'blogs' && (
-          <div>
+          <div className="profile-blog-card-grid">
             {user.blogs?.length ? (
-              <ul className="profile-list">
-                {user.blogs.map(blog => (
-                  <li key={blog.id} className="profile-list-item">
+              user.blogs.map(blog => (
+                <div key={blog.id} className="profile-blog-card" onClick={() => navigate(`/blogs/${blog.id}`)}>
+                  <img className="profile-blog-card-img" src={blog.thumbnail_url || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=250&fit=crop'} alt={blog.title} />
+                  <div className="profile-blog-card-content">
                     <h4>{blog.title}</h4>
                     <p>{blog.content?.length > 100 ? blog.content.substring(0, 100) + '...' : blog.content}</p>
-                    {blog.content?.length > 100 && (
-                      <button className="read-more-btn" onClick={() => setSelectedBlog(blog)}>
-                        Read More
-                      </button>
-                    )}
-                  </li>
-                ))}
-              </ul>
+                    <span className="profile-blog-card-destination">{blog.destination}</span>
+                  </div>
+                </div>
+              ))
             ) : <div className="profile-empty">No blogs yet.</div>}
           </div>
         )}
@@ -218,15 +215,7 @@ const ProfilePage = () => {
       </section>
 
       {/* Blog Modal */}
-      {selectedBlog && (
-        <div className="blog-modal-overlay" onClick={() => setSelectedBlog(null)}>
-          <div className="blog-modal" onClick={e => e.stopPropagation()}>
-            <button className="blog-modal-close" onClick={() => setSelectedBlog(null)}>&times;</button>
-            <h2>{selectedBlog.title}</h2>
-            <p>{selectedBlog.content}</p>
-          </div>
-        </div>
-      )}
+      {/* Removed modal, now using navigation to detail page */}
     </div>
   );
 };

@@ -1,0 +1,20 @@
+[33m343a7a62[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32msaad[m[33m)[m upto blog
+[33m5d6c137d[m[33m ([m[1;31morigin/saad[m[33m, [m[1;31morigin/nabil[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/imon[m[33m, [m[1;31morigin/HEAD[m[33m)[m blog creation implemented
+[33mc84b960d[m test
+[33md9c7852d[m prod file change
+[33md64981f9[m deploy by pulling repo
+[33m31337295[m test
+[33mbae5eb48[m cors debug
+[33m78c6d991[m url issue in the frontend
+[33m0352961c[m crossconfig issue
+[33mceac47e8[m frontend issue
+[33m61ec9830[m docker deamon issue
+[33ma7f1a579[m changes token
+[33m6b4607c2[m trying
+[33me3c370c5[m Merge branch 'main' of https://github.com/ibnul-nabil/CSE-408
+[33m38ae62ce[m initial ci.cd setup
+[33m801d401f[m Update deploy.yml
+[33m1a96684b[m 4th commit : ci/cd pipeline and deploy
+[33m27082e7d[m 3rd commit: docker implemented
+[33mb07ed4e1[m 2nd commit: login/signup implemented
+[33m69174ecf[m 1st commit

@@ -6,6 +6,8 @@ import ProfilePage from "./pages/ProfilePage";
 import CreateTourPage from "./pages/CreateTourPage";
 import LoginPage from "./pages/LoginPage";
 import CreateBlogPage from './pages/CreateBlogPage';
+import BlogListPage from './pages/BlogListPage';
+import BlogDetailPage from './pages/BlogDetailPage';
 
 function App() {
   return (
@@ -31,6 +33,8 @@ function App() {
               </ProtectedRoute>
             } 
           />
+          <Route path="/blogs" element={<BlogListPage />} />
+          <Route path="/blogs/:id" element={<BlogDetailPage />} />
         </Routes>
       </Router>
     </AuthProvider>
