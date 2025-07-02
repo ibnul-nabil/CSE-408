@@ -38,7 +38,7 @@ const CreateBlogPage = () => {
 
     // Get stored user data as backup
     const storedUser = JSON.parse(localStorage.getItem('user'));
-    const userId = user?.userId || storedUser?.userId;
+    const userId = user?.id || storedUser?.id;
 
     // Debug log
     console.log('Submitting with user:', user);

@@ -21,7 +21,7 @@ const FinalizeRoutePage = () => {
 
     // Get userId from context or localStorage (as in CreateBlogPage)
     const storedUser = JSON.parse(localStorage.getItem("user"));
-    const userId = user?.userId || storedUser?.userId;
+    const userId = user?.id || storedUser?.id;
     const token = localStorage.getItem("token");
 
     if (!userId) {

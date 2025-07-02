@@ -23,6 +23,7 @@ public class BlogController {
     // Create a new blog post
     @PostMapping
     public ResponseEntity<?> createBlog(@RequestBody Blog blog) {
+        System.out.println(" ---------blog crate in blog controller");
         try {
             // Get the user ID from the blog object
             Long userId = blog.getUser().getId();
@@ -51,6 +52,7 @@ public class BlogController {
     // Get a single blog by ID
     @GetMapping("/{id}")
     public ResponseEntity<?> getBlogById(@PathVariable Long id) {
+        System.out.println("--------{blog id api} slow detailed blog in blog controller ");
         Blog blog = blogRepository.findById(id).orElse(null);
         if (blog == null) {
             return ResponseEntity.notFound().build();

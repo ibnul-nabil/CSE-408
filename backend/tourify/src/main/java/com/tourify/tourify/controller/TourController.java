@@ -26,6 +26,7 @@ public class TourController {
 
     @PostMapping
     public ResponseEntity<?> createTour(@RequestBody TourCreationRequest req) {
+
         try {
             // 1. Get user
             Long userId = req.getUserId();

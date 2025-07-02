@@ -26,7 +26,7 @@ const ProfilePage = () => {
       try {
         setLoading(true);
         // Use the authenticated user's ID from context
-        const res = await fetch(`${API_URL}/api/profile/${authUser.userId}`);
+        const res = await fetch(`${API_URL}/api/profile/${authUser.id}`);
         if (!res.ok) throw new Error('Failed to fetch user');
         const data = await res.json();
         setUser(data);
@@ -37,7 +37,7 @@ const ProfilePage = () => {
       }
     };
     console.log('authUser:', authUser);
-    if (authUser && (authUser.userId)) {
+    if (authUser && (authUser.id)) {
       fetchUser();
     }
   }, [authUser]);
@@ -71,12 +71,12 @@ const ProfilePage = () => {
   // Quick stats
   const stats = [
     { label: 'Tours', value: user.tours?.length || 0, icon: '✈️' },
-    { label: 'Blogs', value: user.blogs?.length || 0, icon: '📝' },
+    { label: 'Blogs', value: user.blogSummaries?.length || 0, icon: '📝' },
     { label: 'Saved', value: user.saved?.length || 0, icon: '📌' },
   ];
 
   // Recent activity
-  const latestBlog = user.blogs?.[0];
+  const latestBlog = user.blogSummaries?.[0];
   const latestTour = user.tours?.[0];
 
   return (
@@ -127,13 +127,13 @@ const ProfilePage = () => {
             <div className="profile-recent-card">
               <div className="profile-recent-img-wrap">
                 <img
-                  src={latestTour.image || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=250&fit=crop'}
+                  src={'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=250&fit=crop'}
                   alt={latestTour.title}
                 />
               </div>
               <div>
                 <h4>{latestTour.title}</h4>
-                <p>{latestTour.description?.substring(0, 60) || 'No description.'}</p>
+                <p>Status: {latestTour.status} • {latestTour.startDate ? `From ${latestTour.startDate}` : 'No dates'}</p>
               </div>
             </div>
           ) : <div className="profile-recent-empty">No recent tours</div>}
@@ -147,7 +147,7 @@ const ProfilePage = () => {
               </div>
               <div>
                 <h4>{latestBlog.title}</h4>
-                <p>{latestBlog.content?.substring(0, 60) || 'No content.'}</p>
+                <p>Destination: {latestBlog.destination || 'No destination.'}</p>
               </div>
             </div>
           ) : <div className="profile-recent-empty">No recent blogs</div>}
@@ -171,13 +171,13 @@ const ProfilePage = () => {
       <section className="profile-tab-content">
         {activeTab === 'blogs' && (
           <div className="profile-blog-card-grid">
-            {user.blogs?.length ? (
-              user.blogs.map(blog => (
+            {user.blogSummaries?.length ? (
+              user.blogSummaries.map(blog => (
                 <div key={blog.id} className="profile-blog-card" onClick={() => navigate(`/blogs/${blog.id}`)}>
-                  <img className="profile-blog-card-img" src={blog.thumbnail_url || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=250&fit=crop'} alt={blog.title} />
+                  <img className="profile-blog-card-img" src={'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=250&fit=crop'} alt={blog.title} />
                   <div className="profile-blog-card-content">
                     <h4>{blog.title}</h4>
-                    <p>{blog.content?.length > 100 ? blog.content.substring(0, 100) + '...' : blog.content}</p>
+                    <p>Destination: {blog.destination || 'No destination'}</p>
                     <span className="profile-blog-card-destination">{blog.destination}</span>
                   </div>
                 </div>
