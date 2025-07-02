@@ -1,5 +1,8 @@
 package com.tourify.tourify.controller;
 
+import com.tourify.tourify.dto.StopDTO;
+import com.tourify.tourify.dto.TourCreationRequest;
+import com.tourify.tourify.dto.TourResponseDTO;
 import com.tourify.tourify.entity.*;
 import com.tourify.tourify.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +50,7 @@ public class TourController {
 
             // 4. Create RouteStops (NOT NULL: route, placeType, placeId, stopOrder)
             if (req.getRoute() != null && req.getRoute().getStops() != null) {
-                for (TourCreationRequest.StopDTO stopDTO : req.getRoute().getStops()) {
+                for (StopDTO stopDTO : req.getRoute().getStops()) {
                     RouteStop stop = new RouteStop();
                     stop.setRoute(route);
                     stop.setPlaceType(stopDTO.getPlaceType());
@@ -65,63 +68,4 @@ public class TourController {
         }
     }
 
-    // DTO for request
-    public static class TourCreationRequest {
-        private String title;
-        private String startDate;
-        private String endDate;
-        private java.math.BigDecimal estimatedCost;
-        private RouteDTO route;
-        private Long userId;
-        // getters and setters
-        public String getTitle() { return title; }
-        public void setTitle(String title) { this.title = title; }
-        public String getStartDate() { return startDate; }
-        public void setStartDate(String startDate) { this.startDate = startDate; }
-        public String getEndDate() { return endDate; }
-        public void setEndDate(String endDate) { this.endDate = endDate; }
-        public java.math.BigDecimal getEstimatedCost() { return estimatedCost; }
-        public void setEstimatedCost(java.math.BigDecimal estimatedCost) { this.estimatedCost = estimatedCost; }
-        public RouteDTO getRoute() { return route; }
-        public void setRoute(RouteDTO route) { this.route = route; }
-        public Long getUserId() { return userId; }
-        public void setUserId(Long userId) { this.userId = userId; }
-        public static class RouteDTO {
-            private String routeSource;
-            private List<StopDTO> stops;
-            public String getRouteSource() { return routeSource; }
-            public void setRouteSource(String routeSource) { this.routeSource = routeSource; }
-            public List<StopDTO> getStops() { return stops; }
-            public void setStops(List<StopDTO> stops) { this.stops = stops; }
-        }
-        public static class StopDTO {
-            private String placeType;
-            private Integer placeId;
-            private Integer stopOrder;
-            public String getPlaceType() { return placeType; }
-            public void setPlaceType(String placeType) { this.placeType = placeType; }
-            public Integer getPlaceId() { return placeId; }
-            public void setPlaceId(Integer placeId) { this.placeId = placeId; }
-            public Integer getStopOrder() { return stopOrder; }
-            public void setStopOrder(Integer stopOrder) { this.stopOrder = stopOrder; }
-        }
-    }
-
-    // DTO for response
-    public static class TourResponseDTO {
-        private Long id;
-        private String title;
-        private String status;
-        public TourResponseDTO(Long id, String title, String status) {
-            this.id = id;
-            this.title = title;
-            this.status = status;
-        }
-        public Long getId() { return id; }
-        public void setId(Long id) { this.id = id; }
-        public String getTitle() { return title; }
-        public void setTitle(String title) { this.title = title; }
-        public String getStatus() { return status; }
-        public void setStatus(String status) { this.status = status; }
-    }
 } 

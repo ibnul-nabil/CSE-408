@@ -1,0 +1,70 @@
+/* Create Tour Info Page Styles */
+.create-tour-info-container {
+  max-width: 420px;
+  margin: 3rem auto;
+  background: #fff;
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+  padding: 2.5rem 2rem 2rem 2rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.create-tour-info-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.create-tour-info-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.create-tour-info-form label {
+  font-size: 1.08rem;
+  font-weight: 500;
+  color: #1976d2;
+  margin-bottom: 0.2rem;
+}
+.create-tour-info-form input[type="text"],
+.create-tour-info-form input[type="date"] {
+  padding: 0.7rem 1rem;
+  border: 1.5px solid #e0e7ef;
+  border-radius: 0.6rem;
+  font-size: 1.08rem;
+  transition: border 0.2s, box-shadow 0.2s;
+  background: #f9fafb;
+}
+.create-tour-info-form input:focus {
+  border-color: #1976d2;
+  outline: none;
+  box-shadow: 0 2px 8px rgba(25,118,210,0.08);
+}
+.form-error {
+  color: #e53935;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+.submit-btn {
+  margin-top: 1.2rem;
+  padding: 1rem 0;
+  font-size: 1.18rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, #1976d2 0%, #10b981 100%);
+  color: #fff;
+  border: none;
+  border-radius: 0.7rem;
+  box-shadow: 0 2px 8px rgba(25,118,210,0.10);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+.submit-btn:hover {
+  background: linear-gradient(90deg, #10b981 0%, #1976d2 100%);
+  transform: translateY(-2px) scale(1.03);
+}
+.create-tour-info-container h1 {
+  text-align: center;
+  color: #1976d2;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+} 
