@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import './CreateTourPage.css';
 import { useNavigate, useLocation } from 'react-router-dom';
-//const API_URL = 'http://20.40.57.81:8080'; // Add API URL configuration
-const API_URL = 'http://localhost:8080'; // Add API URL configuration
+
+const API_URL =  process.env.REACT_APP_URL;
+
 const CreateTourPage = () => {
   const location = useLocation();
   const { title, startDate, endDate } = location.state || {};

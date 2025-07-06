@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const AuthContext = createContext();
-//const API_URL = 'http://20.40.57.81:8080'; // Add API URL configuration
-const API_URL = 'http://localhost:8080'; // Add API URL configuration
+// Temporarily hardcode the API URL
+const API_URL = 'http://localhost:8080';
+console.log('Auth Context - API URL:', API_URL); // Debug log
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -22,7 +23,10 @@ export const AuthProvider = ({ children }) => {
     // Call backend logout endpoint
     if (token) {
       try {
-        await fetch(`${API_URL}/api/auth/logout`, {
+        const logoutUrl = `${API_URL}/api/auth/logout`;
+        console.log('Logout URL:', logoutUrl); // Debug log
+        
+        await fetch(logoutUrl, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -42,7 +46,10 @@ export const AuthProvider = ({ children }) => {
   const validateSession = useCallback(async (token) => {
     try {
       console.log('🔍 Validating session...');
-      const response = await fetch(`${API_URL}/api/auth/validate`, {
+      const validateUrl = `${API_URL}/api/auth/validate`;
+      console.log('Validate URL:', validateUrl); // Debug log
+
+      const response = await fetch(validateUrl, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -51,7 +58,7 @@ export const AuthProvider = ({ children }) => {
 
       if (response.ok) {
         const userData = await response.json();
-        console.log('✅ Session valid - user authenticated');
+        console.log('✅ Session valid - user authenticated:', userData);
         return userData;
       } else {
         console.log('❌ Session invalid or expired');

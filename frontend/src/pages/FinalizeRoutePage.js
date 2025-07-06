@@ -3,7 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from "../context/AuthContext";
 import './FinalizeRoutePage.css';
 
-const API_URL = "http://localhost:8080"; // Adjust if needed
+const API_URL =  process.env.REACT_APP_URL;
+
 
 const FinalizeRoutePage = () => {
   const location = useLocation();

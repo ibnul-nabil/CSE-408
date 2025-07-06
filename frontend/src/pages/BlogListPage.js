@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './BlogListPage.css';
 
-const API_URL = 'http://localhost:8080';
+const API_URL =  process.env.REACT_APP_URL;
+
 
 const BlogListPage = () => {
   const [blogs, setBlogs] = useState([]);

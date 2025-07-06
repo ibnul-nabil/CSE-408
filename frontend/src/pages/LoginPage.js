@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './LoginPage.css';
 
-//const API_URL = 'http://20.40.57.81:8080'; // Add API URL configuration
-const API_URL = 'http://localhost:8080'; // Add API URL configuration
+// Temporarily hardcode the API URL
+const API_URL =  process.env.REACT_APP_URL;
+
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -41,7 +42,10 @@ const LoginPage = () => {
           return;
         }
 
-        const response = await fetch(`${API_URL}/api/auth/signup`, {
+        const signupUrl = `${API_URL}/api/auth/signup`;
+        console.log('Signup URL:', signupUrl); // Debug log
+
+        const response = await fetch(signupUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -56,7 +60,6 @@ const LoginPage = () => {
         const data = await response.json();
 
         if (response.ok) {
-          // Sign up successful, switch to login
           setIsSignUp(false);
           setFormData({ username: '', password: '', confirmPassword: '' });
           setError('Account created successfully! Please login.');
@@ -65,7 +68,10 @@ const LoginPage = () => {
         }
       } else {
         // Login logic
-        const response = await fetch(`${API_URL}/api/auth/login`, {
+        const loginUrl = `${API_URL}/api/auth/login`;
+        console.log('Login URL:', loginUrl); // Debug log
+
+        const response = await fetch(loginUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -77,18 +83,17 @@ const LoginPage = () => {
         });
 
         const data = await response.json();
+        console.log('Login response:', data); // Debug log
 
         if (response.ok) {
-          // Use AuthContext to login
           login(data.user, data.token);
-          
-          // Navigate to profile page (no ID in URL)
           navigate('/profile');
         } else {
           setError(data.message || 'Invalid username or password');
         }
       }
     } catch (err) {
+      console.error('Request error:', err); // Debug log
       setError('Network error. Please try again.');
     } finally {
       setLoading(false);
