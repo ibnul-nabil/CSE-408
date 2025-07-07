@@ -10,6 +10,7 @@ public class ProfileResponse {
     private String username;
     private String email;
     private String profileImage;
+    private String coverPhoto;
     private List<Blog> blogs;
 
     private List<BlogSummary> blogSummaries;
@@ -64,6 +65,14 @@ public class ProfileResponse {
 
     public void setProfileImage(String profileImage) {
         this.profileImage = profileImage;
+    }
+
+    public String getCoverPhoto() {
+        return coverPhoto;
+    }
+
+    public void setCoverPhoto(String coverPhoto) {
+        this.coverPhoto = coverPhoto;
     }
 
     public List<Blog> getBlogs() {

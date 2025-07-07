@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import PhotoUploadModal from '../components/PhotoUploadModal';
+import { getImageUrl } from '../utils/imageUtils';
 import './ProfilePage.css';
 
 const API_URL = process.env.REACT_APP_URL;
@@ -12,6 +14,8 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeNav, setActiveNav] = useState('profile');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalPhotoType, setModalPhotoType] = useState('profile'); // 'profile' or 'cover'
 
   // Sample interests - this should come from your backend
   const interests = ['Adventure Travel', 'Photography', 'Food & Culture', 'Backpacking'];
@@ -39,6 +43,21 @@ const ProfilePage = () => {
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  const handlePhotoClick = (photoType) => {
+    setModalPhotoType(photoType);
+    setModalOpen(true);
+    
+
+  };
+
+  const handlePhotoUpdate = (newPhotoUrl) => {
+    if (modalPhotoType === 'profile') {
+      setUser(prev => ({ ...prev, profileImage: newPhotoUrl }));
+    } else {
+      setUser(prev => ({ ...prev, coverPhoto: newPhotoUrl }));
+    }
   };
 
   if (loading) {
@@ -104,21 +123,39 @@ const ProfilePage = () => {
       <div className="profile-main-content">
         {/* Cover Photo Section */}
         <div className="profile-cover-section">
-          <img
-            src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800"
-            alt="Cover"
-            className="profile-cover-photo"
-          />
+          <div className="cover-photo-container">
+            <img
+              src={getImageUrl(user.coverPhoto) || "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800"}
+              alt="Cover"
+              className="profile-cover-photo"
+              onClick={() => handlePhotoClick('cover')}
+            />
+            <button 
+              className="photo-edit-btn cover-edit-btn"
+              onClick={() => handlePhotoClick('cover')}
+              title="Update cover photo"
+            >
+              📷
+            </button>
+          </div>
         </div>
 
         {/* Profile Info Section */}
         <div className="profile-info-section">
           <div className="profile-avatar-container">
             <img
-              src={user.profile_image || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d'}
+              src={getImageUrl(user.profileImage || user.profile_image) || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d'}
               alt="Profile"
               className="profile-avatar"
+              onClick={() => handlePhotoClick('profile')}
             />
+            <button 
+              className="photo-edit-btn profile-edit-btn"
+              onClick={() => handlePhotoClick('profile')}
+              title="Update profile picture"
+            >
+              📷
+            </button>
           </div>
 
           <div className="profile-header">
@@ -173,7 +210,7 @@ const ProfilePage = () => {
               return (
                 <div key={blog.id} className="content-card" onClick={() => navigate(`/blogs/${blog.id}`)}>
                   <img
-                    src={blog.thumbnailUrl || blog.firstMediaUrl || "https://images.unsplash.com/photo-1488646953014-85cb44e25828"}
+                    src={getImageUrl(blog.thumbnailUrl || blog.firstMediaUrl) || "https://images.unsplash.com/photo-1488646953014-85cb44e25828"}
                     alt={blog.title || 'Blog post'}
                     className="card-image"
                   />
@@ -192,6 +229,19 @@ const ProfilePage = () => {
           </div>
         </div>
       </div>
+
+      {/* Photo Upload Modal */}
+      <PhotoUploadModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        currentPhoto={modalPhotoType === 'profile' 
+          ? getImageUrl(user.profileImage || user.profile_image)
+          : getImageUrl(user.coverPhoto || user.cover_photo)
+        }
+        photoType={modalPhotoType}
+        userId={user.id}
+        onPhotoUpdate={handlePhotoUpdate}
+      />
     </div>
   );
 };

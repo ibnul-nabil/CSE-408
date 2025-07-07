@@ -22,6 +22,9 @@ public class User {
     @Column(name = "profile_image")
     private String profileImage;
 
+    @Column(name = "cover_photo")
+    private String coverPhoto;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<Blog> blogs;
@@ -56,6 +59,8 @@ public class User {
     public String getProfileImage() { return profileImage; }
     public void setProfileImage(String profileImage) { this.profileImage = profileImage; }
 
+    public String getCoverPhoto() { return coverPhoto; }
+    public void setCoverPhoto(String coverPhoto) { this.coverPhoto = coverPhoto; }
 
     public List<Blog> getBlogs() { return blogs; }
     public void setBlogs(List<Blog> blogs) { this.blogs = blogs; }

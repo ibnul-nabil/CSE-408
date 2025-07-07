@@ -56,6 +56,7 @@ public class ProfileController {
             dto.setUsername(user.getUsername());
             dto.setEmail(user.getEmail());
             dto.setProfileImage(user.getProfileImage());
+            dto.setCoverPhoto(user.getCoverPhoto());
             
             // Add profile statistics
             dto.setTotalBlogs(blogRepository.countByUserId(id));
@@ -253,5 +254,87 @@ public class ProfileController {
         return summary;
     }
 
+    private void deleteImageFile(String imageUrl) {
+        try {
+            // Extract filename from URL (assuming URL format like "/images/filename.jpg")
+            if (imageUrl.startsWith("/") || imageUrl.startsWith("images/")) {
+                String filename = imageUrl;
+                if (filename.startsWith("/")) {
+                    filename = filename.substring(1);
+                }
+                
+                // Create file path relative to the upload directory
+                java.io.File fileToDelete = new java.io.File(filename);
+                
+                if (fileToDelete.exists()) {
+                    boolean deleted = fileToDelete.delete();
+                    if (deleted) {
+                        System.out.println("Successfully deleted old image: " + filename);
+                    } else {
+                        System.err.println("Failed to delete old image: " + filename);
+                    }
+                } else {
+                    System.out.println("Old image file not found: " + filename);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error deleting old image file: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @PutMapping("/{id}/profile-image")
+    public ResponseEntity<?> updateProfileImage(@PathVariable Long id, @RequestBody String profileImageUrl) {
+        // Remove any surrounding quotes from the JSON string
+        profileImageUrl = profileImageUrl.replaceAll("^\"|\"$", "");
+        Optional<User> userOpt = userRepository.findById(id);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            
+            // Store old image URL for deletion
+            String oldImageUrl = user.getProfileImage();
+            
+            // Update profile image
+            user.setProfileImage(profileImageUrl);
+            userRepository.save(user);
+            
+            // Delete old image file if it exists and is not a default image
+            if (oldImageUrl != null && !oldImageUrl.trim().isEmpty() && 
+                !oldImageUrl.contains("unsplash.com") && !oldImageUrl.contains("placeholder")) {
+                deleteImageFile(oldImageUrl);
+            }
+            
+            return ResponseEntity.ok().body("{\"message\": \"Profile image updated successfully\"}");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PutMapping("/{id}/cover-photo")
+    public ResponseEntity<?> updateCoverPhoto(@PathVariable Long id, @RequestBody String coverPhotoUrl) {
+        // Remove any surrounding quotes from the JSON string
+        coverPhotoUrl = coverPhotoUrl.replaceAll("^\"|\"$", "");
+        Optional<User> userOpt = userRepository.findById(id);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            
+            // Store old cover photo URL for deletion
+            String oldCoverPhotoUrl = user.getCoverPhoto();
+            
+            // Update cover photo
+            user.setCoverPhoto(coverPhotoUrl);
+            userRepository.save(user);
+            
+            // Delete old cover photo file if it exists and is not a default image
+            if (oldCoverPhotoUrl != null && !oldCoverPhotoUrl.trim().isEmpty() && 
+                !oldCoverPhotoUrl.contains("unsplash.com") && !oldCoverPhotoUrl.contains("placeholder")) {
+                deleteImageFile(oldCoverPhotoUrl);
+            }
+            
+            return ResponseEntity.ok().body("{\"message\": \"Cover photo updated successfully\"}");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
 }

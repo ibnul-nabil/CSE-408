@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import AutocompleteInput from '../components/AutocompleteInput';
 import DestinationTags from '../components/DestinationTags';
 import { filterDestinations } from '../data/destinations';
+import { getImageUrl } from '../utils/imageUtils';
 import './CreateBlogPage.css';
 
 const API_URL = process.env.REACT_APP_URL;
@@ -363,7 +364,7 @@ const CreateBlogPage = () => {
       <div className="create-blog-card">
         <div className="post-header">
           <img 
-            src={user?.profile_image || 'https://via.placeholder.com/40'} 
+            src={getImageUrl(user?.profile_image) || 'https://via.placeholder.com/40'} 
             alt="Profile" 
             className="profile-pic"
           />
