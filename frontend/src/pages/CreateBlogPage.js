@@ -200,49 +200,45 @@ const CreateBlogPage = () => {
         }
       }
 
-      // Upload media files if any
-      let uploadedMediaUrls = [];
-      
-      if (mediaFiles.length > 0) {
-        for (let i = 0; i < mediaFiles.length; i++) {
-          const mediaFile = mediaFiles[i];
-          const formData = new FormData();
-          formData.append('file', mediaFile.file);
-          formData.append('userId', userId);
+      // Upload media files
+      const mediaUploadPromises = mediaFiles.map(async (media, index) => {
+        const formData = new FormData();
+        formData.append('file', media.file);
+        formData.append('userId', userId);
 
-          const uploadResponse = await fetch(`${API_URL}/api/upload/media`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`
-            },
-            body: formData,
-          });
+        const response = await fetch(`${API_URL}/api/upload/media`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData,
+        });
 
-          if (uploadResponse.ok) {
-            const uploadResult = await uploadResponse.json();
-            uploadedMediaUrls.push({
-              mediaUrl: uploadResult.url,
-              mediaType: mediaFile.type,
-              fileName: mediaFile.fileName,
-              fileSize: mediaFile.fileSize,
-              mimeType: mediaFile.mimeType,
-              mediaOrder: i,
-              isThumbnail: false // No longer auto-set as thumbnail
-            });
-          } else {
-            throw new Error(`Failed to upload ${mediaFile.fileName}`);
-          }
+        if (response.ok) {
+          const result = await response.json();
+          return {
+            mediaUrl: result.url,
+            mediaType: media.type,
+            fileName: media.fileName,
+            fileSize: Math.min(media.fileSize, 2147483647),
+            mimeType: media.mimeType,
+            mediaOrder: index
+          };
+        } else {
+          throw new Error(`Failed to upload ${media.fileName}`);
         }
-      }
+      });
 
-      // Create blog with uploaded media URLs
+      const uploadedMedia = await Promise.all(mediaUploadPromises);
+
+      // Create blog request
       const blogData = {
-        userId: userId,
         title: title.trim(),
         content: content.trim(),
         customDestinations: destinations,
+        userId: userId,
         thumbnailUrl: thumbnailUrl,
-        media: uploadedMediaUrls,
+        media: uploadedMedia,
         status: "published"
       };
 
@@ -257,92 +253,74 @@ const CreateBlogPage = () => {
 
       if (response.ok) {
         setSuccess(true);
+        // Reset form state
         setTitle('');
         setContent('');
+        setDestination('');
         setDestinations([]);
         setMediaFiles([]);
         setThumbnailFile(null);
-        // Reset touched state to prevent red error styling on cleared fields
         setTouched({
           title: false,
           content: false,
           destination: false
         });
-        setTimeout(() => navigate('/profile'), 2000);
+        
+        setTimeout(() => {
+          navigate('/my-blogs');
+        }, 2000);
       } else {
-        const data = await response.json();
-        setError(data.message || 'Failed to create blog post');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create blog post');
       }
-    } catch (err) {
-      console.error('Error creating blog:', err);
-      setError('Network error. Please try again.');
+    } catch (error) {
+      console.error('Error creating blog:', error);
+      setError(error.message || 'Failed to create blog post. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  // If no user data is available, show login message
-  if (!user && !JSON.parse(localStorage.getItem('user'))) {
-    return (
-      <div className="create-blog-container">
-        <div className="create-blog-card">
-          <h2>Please log in to create a blog post</h2>
-        </div>
-      </div>
-    );
-  }
-
   const showError = (field) => {
-    if (field === 'destination') {
-      return touched[field] && destinations.length === 0;
-    }
-    return touched[field] && !eval(field).trim();
+    const errors = {
+      title: !title.trim() ? 'Title is required' : '',
+      content: !content.trim() ? 'Content is required' : '',
+      destination: destinations.length === 0 ? 'At least one destination is required' : ''
+    };
+    return touched[field] && errors[field];
   };
 
-  // Handle destination input changes and generate suggestions
   const handleDestinationChange = (value) => {
     setDestination(value);
-    const suggestions = filterDestinations(value, 8);
-    setDestinationSuggestions(suggestions);
-    
-    // Clear destination error when user starts typing
-    if (touched.destination) {
-      setTouched(prev => ({ ...prev, destination: false }));
+    if (value.length > 0) {
+      const suggestions = filterDestinations(value);
+      setDestinationSuggestions(suggestions);
+    } else {
+      setDestinationSuggestions([]);
     }
   };
 
-  // Handle destination selection from suggestions
   const handleDestinationSelect = (selectedDestination) => {
-    // Check if destination already exists
-    if (destinations.includes(selectedDestination)) {
-      setDestination('');
-      setDestinationSuggestions([]);
-      return;
+    if (!destinations.some(dest => 
+      dest.toLowerCase() === selectedDestination.toLowerCase()
+    )) {
+      setDestinations(prev => [...prev, selectedDestination]);
     }
-    
-    // Add to destinations array
-    setDestinations(prev => [...prev, selectedDestination]);
     setDestination('');
     setDestinationSuggestions([]);
-    
-    // Clear destination error when destination is added
-    if (touched.destination) {
-      setTouched(prev => ({ ...prev, destination: false }));
-    }
+    setTouched(prev => ({ ...prev, destination: false }));
   };
 
-  // Handle adding destination when Enter is pressed or Add button clicked
   const handleAddDestination = () => {
     const trimmedDestination = destination.trim();
-    if (trimmedDestination && !destinations.includes(trimmedDestination)) {
+    
+    if (trimmedDestination && !destinations.some(dest => 
+      dest.toLowerCase() === trimmedDestination.toLowerCase()
+    )) {
       setDestinations(prev => [...prev, trimmedDestination]);
       setDestination('');
       setDestinationSuggestions([]);
-      
-      // Clear destination error when destination is added
-      if (touched.destination) {
-        setTouched(prev => ({ ...prev, destination: false }));
-      }
+      setTouched(prev => ({ ...prev, destination: false }));
     }
   };
 
@@ -360,183 +338,251 @@ const CreateBlogPage = () => {
   };
 
   return (
-    <div className="create-blog-container">
-      <div className="create-blog-card">
-        <div className="post-header">
-          <img 
-            src={getImageUrl(user?.profile_image) || 'https://via.placeholder.com/40'} 
-            alt="Profile" 
-            className="profile-pic"
-          />
-          <div className="user-info">
-            <h3>{user?.username || 'User'}</h3>
-            <div className={`destination-input ${showError('destination') ? 'error' : ''}`}>
-              <span className="location-icon">📍</span>
-              <AutocompleteInput
-                value={destination}
-                onChange={handleDestinationChange}
-                onSelect={handleDestinationSelect}
-                suggestions={destinationSuggestions}
-                placeholder="Type destination and press Enter to add..."
-                className="destination-field"
-                onKeyDown={handleDestinationKeyDown}
-              />
-              {destination.trim() && (
-                <button
-                  type="button"
-                  className="add-destination-btn"
-                  onClick={handleAddDestination}
-                >
-                  Add
-                </button>
-              )}
+    <div className="modern-blog-container">
+      <div className="blog-header">
+        <h1 className="page-title">Create New Blog Post</h1>
+        <p className="page-subtitle">Share your travel experiences with the world</p>
+      </div>
+
+      <div className="blog-content">
+        <div className="blog-form-card">
+          {/* Author Section */}
+          <div className="author-section">
+            <div className="author-info">
+              <h3 className="author-name">{user?.username || 'User'}</h3>
+              <p className="author-subtitle">Writing a new blog post</p>
             </div>
-            
-            {destinations.length === 0 && (
-              <div className="destination-helper-text">
-                💡 You can add multiple destinations (e.g., Dhaka, Cox's Bazar, Sylhet)
+          </div>
+
+          <form onSubmit={handleSubmit} className="blog-form">
+            {/* Title Section */}
+            <div className="form-section">
+              <div className="section-header">
+                <h3 className="section-title">Title</h3>
+                <span className="required-indicator">*</span>
               </div>
-            )}
-            
-            <DestinationTags
-              destinations={destinations}
-              onRemove={handleRemoveDestination}
-            />
-            
-            {showError('destination') && destinations.length === 0 && (
-              <div className="error-message">At least one destination is required</div>
-            )}
-          </div>
-        </div>
+              <div className={`input-wrapper ${showError('title') ? 'error' : ''}`}>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  onBlur={() => handleBlur('title')}
+                  placeholder="Give your blog post an engaging title..."
+                  className="title-input"
+                />
+                {showError('title') && (
+                  <div className="error-text">{showError('title')}</div>
+                )}
+              </div>
+            </div>
 
-        <form onSubmit={handleSubmit} className="post-form">
-          <div className={`title-input-container ${showError('title') ? 'error' : ''}`}>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              onBlur={() => handleBlur('title')}
-              placeholder="Give your post a title *"
-              className="title-input"
-            />
-            {showError('title') && (
-              <span className="field-error">Title is required</span>
-            )}
-          </div>
-          
-          <div className={`content-input-container ${showError('content') ? 'error' : ''}`}>
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              onBlur={() => handleBlur('content')}
-              placeholder="What's on your mind? *"
-              className="content-input"
-            />
-            {showError('content') && (
-              <span className="field-error">Content is required</span>
-            )}
-          </div>
+            {/* Destinations Section */}
+            <div className="form-section">
+              <div className="section-header">
+                <h3 className="section-title">Destinations</h3>
+                <span className="required-indicator">*</span>
+              </div>
+              <div className={`input-wrapper ${showError('destination') ? 'error' : ''}`}>
+                <div className="destination-input-wrapper">
+                  <span className="input-icon">📍</span>
+                  <AutocompleteInput
+                    value={destination}
+                    onChange={handleDestinationChange}
+                    onSelect={handleDestinationSelect}
+                    suggestions={destinationSuggestions}
+                    placeholder="Type destination and press Enter to add..."
+                    className="destination-input"
+                    onKeyDown={handleDestinationKeyDown}
+                  />
+                  {destination.trim() && (
+                    <button
+                      type="button"
+                      className="add-destination-btn"
+                      onClick={handleAddDestination}
+                    >
+                      Add
+                    </button>
+                  )}
+                </div>
+                
+                {destinations.length === 0 && (
+                  <div className="helper-text">
+                    💡 Add destinations you visited (e.g., Dhaka, Cox's Bazar, Sylhet)
+                  </div>
+                )}
+                
+                <DestinationTags
+                  destinations={destinations}
+                  onRemove={handleRemoveDestination}
+                />
+                
+                {showError('destination') && destinations.length === 0 && (
+                  <div className="error-text">{showError('destination')}</div>
+                )}
+              </div>
+            </div>
 
-          {/* Thumbnail Upload Section */}
-          <div className="thumbnail-section">
-            <h4>Blog Thumbnail</h4>
-            <p className="thumbnail-description">Upload a cover image for your blog post</p>
-            
-            {thumbnailFile ? (
-              <div className="thumbnail-preview">
-                <img src={thumbnailFile.preview} alt="Thumbnail preview" className="thumbnail-image" />
+            {/* Content Section */}
+            <div className="form-section">
+              <div className="section-header">
+                <h3 className="section-title">Content</h3>
+                <span className="required-indicator">*</span>
+              </div>
+              <div className={`input-wrapper ${showError('content') ? 'error' : ''}`}>
+                <textarea
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  onBlur={() => handleBlur('content')}
+                  placeholder="Tell your story... What made this trip special? Share your experiences, tips, and memories!"
+                  className="content-textarea"
+                  rows="8"
+                />
+                {showError('content') && (
+                  <div className="error-text">{showError('content')}</div>
+                )}
+              </div>
+            </div>
+
+            {/* Thumbnail Section */}
+            <div className="form-section">
+              <div className="section-header">
+                <h3 className="section-title">Cover Photo</h3>
+                <span className="optional-indicator">(Optional)</span>
+              </div>
+              <div className="thumbnail-section">
+                <p className="section-description">Choose a cover image that represents your blog post</p>
+                
+                {thumbnailFile ? (
+                  <div className="thumbnail-preview">
+                    <img src={thumbnailFile.preview} alt="Cover preview" className="thumbnail-image" />
+                    <button 
+                      type="button" 
+                      className="remove-btn"
+                      onClick={removeThumbnail}
+                      title="Remove cover photo"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ) : (
+                  <div className="upload-area" onClick={() => thumbnailInputRef.current.click()}>
+                    <div className="upload-content">
+                      <div className="upload-icon">🖼️</div>
+                      <p className="upload-text">
+                        {thumbnailLoading ? 'Uploading...' : 'Click to upload cover photo'}
+                      </p>
+                      <p className="upload-subtext">Recommended: 1200×630 pixels</p>
+                    </div>
+                  </div>
+                )}
+                
+                <input
+                  ref={thumbnailInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleThumbnailUpload}
+                  style={{ display: 'none' }}
+                />
+              </div>
+            </div>
+
+            {/* Media Section */}
+            <div className="form-section">
+              <div className="section-header">
+                <h3 className="section-title">Photos & Videos</h3>
+                <span className="optional-indicator">(Optional)</span>
+              </div>
+              <div className="media-section">
+                <p className="section-description">Add photos and videos to make your blog more engaging</p>
+                
                 <button 
                   type="button" 
-                  className="remove-thumbnail-btn"
-                  onClick={removeThumbnail}
+                  className="media-upload-btn"
+                  onClick={() => fileInputRef.current.click()}
+                  disabled={mediaLoading}
                 >
-                  ×
+                  <span className="btn-icon">📸</span>
+                  {mediaLoading ? 'Processing...' : 'Add Photos/Videos'}
+                </button>
+                
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*,video/*"
+                  multiple
+                  onChange={handleMediaUpload}
+                  style={{ display: 'none' }}
+                />
+
+                {mediaFiles.length > 0 && (
+                  <div className="media-grid">
+                    {mediaFiles.map((media, index) => (
+                      <div key={index} className="media-item">
+                        {media.type === 'image' ? (
+                          <img src={media.preview} alt={`Media ${index + 1}`} className="media-preview" />
+                        ) : (
+                          <video src={media.preview} className="media-preview" controls />
+                        )}
+                        <button 
+                          type="button" 
+                          className="remove-btn"
+                          onClick={() => removeMedia(index)}
+                          title="Remove media"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {mediaFiles.length > 0 && (
+                  <div className="media-count">
+                    {mediaFiles.length} file{mediaFiles.length !== 1 ? 's' : ''} selected
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Submit Section */}
+            <div className="submit-section">
+              {error && <div className="error-message">{error}</div>}
+              {success && (
+                <div className="success-message">
+                  ✅ Blog post created successfully! Redirecting to your blogs...
+                </div>
+              )}
+
+              <div className="form-actions">
+                <button 
+                  type="button" 
+                  className="cancel-btn"
+                  onClick={() => navigate(-1)}
+                  disabled={loading}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="submit-btn"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <span className="spinner"></span>
+                      Publishing...
+                    </>
+                  ) : (
+                    <>
+                      <span className="btn-icon">🚀</span>
+                      Publish Blog
+                    </>
+                  )}
                 </button>
               </div>
-            ) : (
-              <button 
-                type="button" 
-                className="thumbnail-upload-btn"
-                onClick={() => thumbnailInputRef.current.click()}
-                disabled={thumbnailLoading}
-              >
-                <span className="upload-icon">🖼️</span>
-                {thumbnailLoading ? 'Uploading...' : 'Choose Thumbnail'}
-              </button>
-            )}
-            
-            <input
-              ref={thumbnailInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleThumbnailUpload}
-              style={{ display: 'none' }}
-            />
-          </div>
-
-          {mediaFiles.length > 0 && (
-            <div className="media-preview-grid">
-              {mediaFiles.map((media, index) => (
-                <div key={index} className="media-preview-container">
-                  {media.type === 'image' ? (
-                    <img src={media.preview} alt={`Preview ${index}`} className="media-preview" />
-                  ) : (
-                    <video src={media.preview} className="media-preview" controls />
-                  )}
-                  <button 
-                    type="button" 
-                    className="remove-media-btn"
-                    onClick={() => removeMedia(index)}
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
             </div>
-          )}
-
-          <div className="post-actions">
-            <div className="media-buttons">
-              <button 
-                type="button" 
-                className="media-btn"
-                onClick={() => fileInputRef.current.click()}
-                disabled={mediaLoading}
-              >
-                <span className="media-icon">🖼️</span>
-                {mediaLoading ? 'Processing...' : 'Photo/Video'}
-              </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*,video/*"
-                multiple
-                onChange={handleMediaUpload}
-                style={{ display: 'none' }}
-              />
-              {mediaFiles.length > 0 && (
-                <span className="media-count">
-                  {mediaFiles.length} file{mediaFiles.length !== 1 ? 's' : ''} selected
-                </span>
-              )}
-            </div>
-
-            {error && <div className="error-message">{error}</div>}
-            {success && (
-              <div className="success-message">
-                Post created successfully! Redirecting...
-              </div>
-            )}
-
-            <button 
-              type="submit" 
-              className="post-button"
-              disabled={loading}
-            >
-              {loading ? 'Posting...' : 'Post'}
-            </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );

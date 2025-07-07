@@ -87,4 +87,18 @@ public class BlogCreateRequest {
     public void setMedia(List<MediaRequest> media) {
         this.media = media;
     }
+
+    @Override
+    public String toString() {
+        return "BlogCreateRequest{" +
+                "userId=" + userId +
+                ", title='" + title + '\'' +
+                ", content='" + (content != null ? content.substring(0, Math.min(50, content.length())) + "..." : null) + '\'' +
+                ", thumbnailUrl='" + thumbnailUrl + '\'' +
+                ", status='" + status + '\'' +
+                ", destinationIds=" + destinationIds +
+                ", customDestinations=" + customDestinations +
+                ", mediaCount=" + (media != null ? media.size() : 0) +
+                '}';
+    }
 } 

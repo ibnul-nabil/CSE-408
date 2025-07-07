@@ -76,52 +76,77 @@ public class BlogController {
     @Transactional
     public ResponseEntity<?> createBlog(@RequestBody BlogCreateRequest request) {
         try {
+            System.out.println("Received blog creation request: " + request);
+            System.out.println("User ID: " + request.getUserId());
+            System.out.println("Title: " + request.getTitle());
+            System.out.println("Content length: " + (request.getContent() != null ? request.getContent().length() : 0));
+            System.out.println("Custom destinations: " + request.getCustomDestinations());
+            System.out.println("Media count: " + (request.getMedia() != null ? request.getMedia().size() : 0));
+            
             // Validate required fields
             if (request.getContent() == null || request.getContent().trim().isEmpty()) {
+                System.out.println("Error: Content is required");
                 return ResponseEntity.badRequest().body(Map.of("message", "Content is required"));
             }
             if (request.getUserId() == null) {
+                System.out.println("Error: User ID is required");
                 return ResponseEntity.badRequest().body(Map.of("message", "User ID is required"));
             }
 
             // Find the user
+            System.out.println("Looking for user with ID: " + request.getUserId());
             User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + request.getUserId()));
+            System.out.println("Found user: " + user.getUsername());
 
             // Create the blog
+            System.out.println("Creating blog entity...");
             Blog blog = new Blog(user, request.getTitle(), request.getContent());
             blog.setThumbnailUrl(request.getThumbnailUrl());
             blog.setStatus(request.getStatus() != null ? request.getStatus() : "published");
 
             // Save the blog first to get the ID
+            System.out.println("Saving blog to database...");
             Blog savedBlog = blogRepository.save(blog);
+            System.out.println("Blog saved with ID: " + savedBlog.getId());
 
-            // Add destinations
-            if (request.getDestinationIds() != null) {
+            // Add destinations (keeping original logic for destinationIds)
+            if (request.getDestinationIds() != null && !request.getDestinationIds().isEmpty()) {
+                System.out.println("Adding predefined destinations...");
                 for (Long destinationId : request.getDestinationIds()) {
                     Optional<Destination> destination = destinationRepository.findById(destinationId);
                     if (destination.isPresent()) {
                         BlogDestination blogDestination = new BlogDestination(savedBlog, destination.get());
                         blogDestinationRepository.save(blogDestination);
+                        System.out.println("Added destination: " + destination.get().getName());
+                    } else {
+                        System.out.println("Warning: Destination with ID " + destinationId + " not found");
                     }
                 }
             }
 
             // Add custom destinations
-            if (request.getCustomDestinations() != null) {
+            if (request.getCustomDestinations() != null && !request.getCustomDestinations().isEmpty()) {
+                System.out.println("Adding custom destinations...");
                 for (String customDestName : request.getCustomDestinations()) {
                     if (customDestName != null && !customDestName.trim().isEmpty()) {
                         BlogCustomDestination customDestination = new BlogCustomDestination(savedBlog, customDestName.trim());
                         blogCustomDestinationRepository.save(customDestination);
+                        System.out.println("Added custom destination: " + customDestName.trim());
                     }
                 }
             }
 
             // Add media
-            if (request.getMedia() != null) {
-                for (MediaRequest mediaReq : request.getMedia()) {
+            if (request.getMedia() != null && !request.getMedia().isEmpty()) {
+                System.out.println("Adding media files...");
+                for (int i = 0; i < request.getMedia().size(); i++) {
+                    MediaRequest mediaReq = request.getMedia().get(i);
+                    System.out.println("Processing media " + (i + 1) + ": " + mediaReq.getMediaUrl());
+                    
                     BlogMedia media = new BlogMedia(savedBlog, mediaReq.getMediaUrl(), 
-                                                  mediaReq.getMediaType(), mediaReq.getMediaOrder());
+                                                  mediaReq.getMediaType(), 
+                                                  mediaReq.getMediaOrder() != null ? mediaReq.getMediaOrder() : i);
                     media.setCaption(mediaReq.getCaption());
                     media.setFileSize(mediaReq.getFileSize());
                     media.setFileName(mediaReq.getFileName());
@@ -129,16 +154,27 @@ public class BlogController {
                     media.setWidth(mediaReq.getWidth());
                     media.setHeight(mediaReq.getHeight());
                     media.setDuration(mediaReq.getDuration());
-                    media.setIsThumbnail(mediaReq.getIsThumbnail());
+                    media.setIsThumbnail(mediaReq.getIsThumbnail() != null ? mediaReq.getIsThumbnail() : false);
+                    
                     blogMediaRepository.save(media);
+                    System.out.println("Saved media: " + media.getFileName());
                 }
             }
 
-            return ResponseEntity.ok(savedBlog);
+            System.out.println("Blog creation completed successfully!");
+            return ResponseEntity.ok(Map.of(
+                "message", "Blog created successfully",
+                "blogId", savedBlog.getId(),
+                "blog", savedBlog
+            ));
         } catch (RuntimeException e) {
+            System.err.println("RuntimeException in createBlog: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(Map.of("message", "An error occurred while creating the blog"));
+            System.err.println("Exception in createBlog: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body(Map.of("message", "An error occurred while creating the blog: " + e.getMessage()));
         }
     }
 

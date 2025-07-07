@@ -177,7 +177,7 @@ const BlogDetailPage = () => {
     <div className="blog-detail-container">
       <button className="back-btn" onClick={() => navigate(-1)}>← Back</button>
       <div className="blog-detail-card">
-        {blog.thumbnailUrl && (
+        {blog.thumbnailUrl && blog.thumbnailUrl.trim() !== '' && (
           <img 
             className="blog-detail-img" 
             src={blog.thumbnailUrl} 
@@ -220,6 +220,17 @@ const BlogDetailPage = () => {
           </div>
         )}
 
+        <div className="blog-content">
+          <p>{blog.content}</p>
+        </div>
+
+        {blogMedia.length > 0 && (
+          <div className="blog-media">
+            <h3>Photos & Videos ({blogMedia.length})</h3>
+            <MediaGallery media={blogMedia} apiUrl={API_URL} />
+          </div>
+        )}
+
         <div className="blog-engagement">
           <div className="blog-stats">
             <span>👍 {likesCount} likes</span>
@@ -233,17 +244,6 @@ const BlogDetailPage = () => {
             {liked ? '💖 Unlike' : '🤍 Like'}
           </button>
         </div>
-
-        <div className="blog-content">
-          <p>{blog.content}</p>
-        </div>
-
-        {blogMedia.length > 0 && (
-          <div className="blog-media">
-            <h3>Photos & Videos ({blogMedia.length})</h3>
-            <MediaGallery media={blogMedia} apiUrl={API_URL} />
-          </div>
-        )}
       </div>
     </div>
   );
