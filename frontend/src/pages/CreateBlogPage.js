@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './CreateBlogPage.css';
 
-const API_URL =  process.env.REACT_APP_URL; 
-
+const API_URL = process.env.REACT_APP_URL;
 
 const CreateBlogPage = () => {
   const navigate = useNavigate();
@@ -12,10 +11,20 @@ const CreateBlogPage = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [destination, setDestination] = useState('');
-  const [thumbnailUrl, setThumbnailUrl] = useState('');
+  const [mediaFiles, setMediaFiles] = useState([]);
+  const [thumbnailFile, setThumbnailFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [mediaLoading, setMediaLoading] = useState(false);
+  const [thumbnailLoading, setThumbnailLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [touched, setTouched] = useState({
+    title: false,
+    content: false,
+    destination: false
+  });
+  const fileInputRef = useRef(null);
+  const thumbnailInputRef = useRef(null);
 
   useEffect(() => {
     // Debug log to see user data
@@ -30,36 +39,129 @@ const CreateBlogPage = () => {
     }
   }, [user, navigate]);
 
+  const handleMediaUpload = (event) => {
+    const files = Array.from(event.target.files);
+    
+    if (files.length === 0) return;
+    
+    setMediaLoading(true);
+    setError('');
+    
+    const newMediaFiles = [];
+    
+    files.forEach(file => {
+      // Check file size (limit to 50MB)
+      if (file.size > 50 * 1024 * 1024) {
+        setError(`File ${file.name} is too large. Maximum size is 50MB.`);
+        return;
+      }
+      
+      const mediaFile = {
+        file,
+        type: file.type.startsWith('image/') ? 'image' : 'video',
+        preview: URL.createObjectURL(file),
+        fileName: file.name,
+        fileSize: file.size,
+        mimeType: file.type
+      };
+      newMediaFiles.push(mediaFile);
+    });
+    
+    setMediaFiles(prev => [...prev, ...newMediaFiles]);
+    setMediaLoading(false);
+  };
+
+  const handleThumbnailUpload = (event) => {
+    const file = event.target.files[0];
+    
+    if (!file) return;
+    
+    setThumbnailLoading(true);
+    setError('');
+    
+    // Check if it's an image
+    if (!file.type.startsWith('image/')) {
+      setError('Thumbnail must be an image file.');
+      setThumbnailLoading(false);
+      return;
+    }
+    
+    // Check file size (limit to 10MB for thumbnails)
+    if (file.size > 10 * 1024 * 1024) {
+      setError(`Thumbnail ${file.name} is too large. Maximum size is 10MB.`);
+      setThumbnailLoading(false);
+      return;
+    }
+    
+    const thumbnailData = {
+      file,
+      preview: URL.createObjectURL(file),
+      fileName: file.name,
+      fileSize: file.size,
+      mimeType: file.type
+    };
+    
+    setThumbnailFile(thumbnailData);
+    setThumbnailLoading(false);
+  };
+
+  const removeMedia = (index) => {
+    const newMediaFiles = [...mediaFiles];
+    URL.revokeObjectURL(newMediaFiles[index].preview);
+    newMediaFiles.splice(index, 1);
+    setMediaFiles(newMediaFiles);
+  };
+
+  const removeThumbnail = () => {
+    if (thumbnailFile && thumbnailFile.preview) {
+      URL.revokeObjectURL(thumbnailFile.preview);
+    }
+    setThumbnailFile(null);
+  };
+
+  const handleBlur = (field) => {
+    setTouched(prev => ({ ...prev, [field]: true }));
+  };
+
+  const validateForm = () => {
+    const errors = {
+      title: !title.trim() ? 'Title is required' : '',
+      content: !content.trim() ? 'Content is required' : '',
+      destination: !destination.trim() ? 'Destination is required' : ''
+    };
+
+    // Set all fields as touched when validating
+    setTouched({
+      title: true,
+      content: true,
+      destination: true
+    });
+
+    return errors;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const validationErrors = validateForm();
+    
+    if (Object.values(validationErrors).some(error => error)) {
+      setError('Please fill in all required fields');
+      return;
+    }
+
     setLoading(true);
     setError('');
     setSuccess(false);
 
-    // Get stored user data as backup
     const storedUser = JSON.parse(localStorage.getItem('user'));
     const userId = user?.id || storedUser?.id;
 
-    // Debug log
-    console.log('Submitting with user:', user);
-    console.log('Stored user:', storedUser);
-    console.log('Using user ID:', userId);
-
-    // Validate required fields
-    if (!title.trim() || !content.trim() || !destination.trim()) {
-      setError('Title, content, and destination are required fields');
-      setLoading(false);
-      return;
-    }
-
-    // Validate user ID
     if (!userId) {
       setError('User ID not found. Please log in again.');
       setLoading(false);
       return;
     }
 
-    // Get token from localStorage
     const token = localStorage.getItem('token');
     if (!token) {
       setError('Authentication token not found. Please log in again.');
@@ -68,17 +170,75 @@ const CreateBlogPage = () => {
     }
 
     try {
+      // First, upload thumbnail if provided
+      let thumbnailUrl = null;
+      
+      if (thumbnailFile) {
+        const thumbnailFormData = new FormData();
+        thumbnailFormData.append('file', thumbnailFile.file);
+        thumbnailFormData.append('userId', userId);
+
+        const thumbnailResponse = await fetch(`${API_URL}/api/upload/media`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: thumbnailFormData,
+        });
+
+        if (thumbnailResponse.ok) {
+          const thumbnailResult = await thumbnailResponse.json();
+          thumbnailUrl = thumbnailResult.url;
+        } else {
+          throw new Error('Failed to upload thumbnail');
+        }
+      }
+
+      // Upload media files if any
+      let uploadedMediaUrls = [];
+      
+      if (mediaFiles.length > 0) {
+        for (let i = 0; i < mediaFiles.length; i++) {
+          const mediaFile = mediaFiles[i];
+          const formData = new FormData();
+          formData.append('file', mediaFile.file);
+          formData.append('userId', userId);
+
+          const uploadResponse = await fetch(`${API_URL}/api/upload/media`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            },
+            body: formData,
+          });
+
+          if (uploadResponse.ok) {
+            const uploadResult = await uploadResponse.json();
+            uploadedMediaUrls.push({
+              mediaUrl: uploadResult.url,
+              mediaType: mediaFile.type,
+              fileName: mediaFile.fileName,
+              fileSize: mediaFile.fileSize,
+              mimeType: mediaFile.mimeType,
+              mediaOrder: i,
+              isThumbnail: false // No longer auto-set as thumbnail
+            });
+          } else {
+            throw new Error(`Failed to upload ${mediaFile.fileName}`);
+          }
+        }
+      }
+
+      // Create blog with uploaded media URLs
       const blogData = {
+        userId: userId,
         title: title.trim(),
         content: content.trim(),
-        destination: destination.trim(),
-        thumbnail_url: thumbnailUrl.trim() || null,
-        user: {
-          id: userId
-        }
+        customDestinations: [destination.trim()],
+        thumbnailUrl: thumbnailUrl,
+        media: uploadedMediaUrls,
+        status: "published"
       };
-
-      console.log('Sending blog data:', blogData);
 
       const response = await fetch(`${API_URL}/api/blogs`, {
         method: 'POST',
@@ -91,16 +251,14 @@ const CreateBlogPage = () => {
 
       if (response.ok) {
         setSuccess(true);
-        // Clear form
         setTitle('');
         setContent('');
         setDestination('');
-        setThumbnailUrl('');
-        // Redirect to profile after 2 seconds
+        setMediaFiles([]);
+        setThumbnailFile(null);
         setTimeout(() => navigate('/profile'), 2000);
       } else {
         const data = await response.json();
-        console.error('Server error:', data);
         setError(data.message || 'Failed to create blog post');
       }
     } catch (err) {
@@ -122,77 +280,165 @@ const CreateBlogPage = () => {
     );
   }
 
+  const showError = (field) => {
+    return touched[field] && !eval(field).trim();
+  };
+
   return (
     <div className="create-blog-container">
       <div className="create-blog-card">
-        <h1>Create New Blog Post</h1>
-        <p className="subtitle">Share your thoughts and experiences</p>
+        <div className="post-header">
+          <img 
+            src={user?.profile_image || 'https://via.placeholder.com/40'} 
+            alt="Profile" 
+            className="profile-pic"
+          />
+          <div className="user-info">
+            <h3>{user?.username || 'User'}</h3>
+            <div className={`destination-input ${showError('destination') ? 'error' : ''}`}>
+              <span className="location-icon">📍</span>
+              <input
+                type="text"
+                value={destination}
+                onChange={(e) => setDestination(e.target.value)}
+                onBlur={() => handleBlur('destination')}
+                placeholder="Where are you? *"
+                className="transparent-input"
+              />
+            </div>
+            {showError('destination') && (
+              <span className="field-error">Destination is required</span>
+            )}
+          </div>
+        </div>
 
-        <form onSubmit={handleSubmit} className="blog-form">
-          <div className="form-group">
-            <label htmlFor="title">Title *</label>
+        <form onSubmit={handleSubmit} className="post-form">
+          <div className={`title-input-container ${showError('title') ? 'error' : ''}`}>
             <input
               type="text"
-              id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter your blog title"
-              required
-              maxLength="255"
+              onBlur={() => handleBlur('title')}
+              placeholder="Give your post a title *"
+              className="title-input"
             />
+            {showError('title') && (
+              <span className="field-error">Title is required</span>
+            )}
           </div>
-
-          <div className="form-group">
-            <label htmlFor="destination">Destination *</label>
-            <input
-              type="text"
-              id="destination"
-              value={destination}
-              onChange={(e) => setDestination(e.target.value)}
-              placeholder="Enter the destination"
-              required
-              maxLength="100"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="thumbnailUrl">Thumbnail URL (optional)</label>
-            <input
-              type="url"
-              id="thumbnailUrl"
-              value={thumbnailUrl}
-              onChange={(e) => setThumbnailUrl(e.target.value)}
-              placeholder="Enter an image URL for your blog thumbnail"
-              maxLength="255"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="content">Content *</label>
+          
+          <div className={`content-input-container ${showError('content') ? 'error' : ''}`}>
             <textarea
-              id="content"
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Write your blog content here..."
-              required
-              rows="10"
+              onBlur={() => handleBlur('content')}
+              placeholder="What's on your mind? *"
+              className="content-input"
+            />
+            {showError('content') && (
+              <span className="field-error">Content is required</span>
+            )}
+          </div>
+
+          {/* Thumbnail Upload Section */}
+          <div className="thumbnail-section">
+            <h4>Blog Thumbnail</h4>
+            <p className="thumbnail-description">Upload a cover image for your blog post</p>
+            
+            {thumbnailFile ? (
+              <div className="thumbnail-preview">
+                <img src={thumbnailFile.preview} alt="Thumbnail preview" className="thumbnail-image" />
+                <button 
+                  type="button" 
+                  className="remove-thumbnail-btn"
+                  onClick={removeThumbnail}
+                >
+                  ×
+                </button>
+              </div>
+            ) : (
+              <button 
+                type="button" 
+                className="thumbnail-upload-btn"
+                onClick={() => thumbnailInputRef.current.click()}
+                disabled={thumbnailLoading}
+              >
+                <span className="upload-icon">🖼️</span>
+                {thumbnailLoading ? 'Uploading...' : 'Choose Thumbnail'}
+              </button>
+            )}
+            
+            <input
+              ref={thumbnailInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleThumbnailUpload}
+              style={{ display: 'none' }}
             />
           </div>
 
-          {error && <div className="error-message">{error}</div>}
-          {success && (
-            <div className="success-message">
-              Blog post created successfully! Redirecting...
+          {mediaFiles.length > 0 && (
+            <div className="media-preview-grid">
+              {mediaFiles.map((media, index) => (
+                <div key={index} className="media-preview-container">
+                  {media.type === 'image' ? (
+                    <img src={media.preview} alt={`Preview ${index}`} className="media-preview" />
+                  ) : (
+                    <video src={media.preview} className="media-preview" controls />
+                  )}
+                  <button 
+                    type="button" 
+                    className="remove-media-btn"
+                    onClick={() => removeMedia(index)}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
             </div>
           )}
 
-          <button 
-            type="submit" 
-            className="submit-button"
-            disabled={loading}
-          >
-            {loading ? 'Creating...' : 'Create Post'}
-          </button>
+          <div className="post-actions">
+            <div className="media-buttons">
+              <button 
+                type="button" 
+                className="media-btn"
+                onClick={() => fileInputRef.current.click()}
+                disabled={mediaLoading}
+              >
+                <span className="media-icon">🖼️</span>
+                {mediaLoading ? 'Processing...' : 'Photo/Video'}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*,video/*"
+                multiple
+                onChange={handleMediaUpload}
+                style={{ display: 'none' }}
+              />
+              {mediaFiles.length > 0 && (
+                <span className="media-count">
+                  {mediaFiles.length} file{mediaFiles.length !== 1 ? 's' : ''} selected
+                </span>
+              )}
+            </div>
+
+            {error && <div className="error-message">{error}</div>}
+            {success && (
+              <div className="success-message">
+                Post created successfully! Redirecting...
+              </div>
+            )}
+
+            <button 
+              type="submit" 
+              className="post-button"
+              disabled={loading}
+            >
+              {loading ? 'Posting...' : 'Post'}
+            </button>
+          </div>
         </form>
       </div>
     </div>

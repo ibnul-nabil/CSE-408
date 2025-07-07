@@ -35,13 +35,32 @@ const BlogListPage = () => {
     <div className="blog-list-container">
       <h1 className="blog-list-title">Blogs</h1>
       <div className="blog-card-grid">
-        {blogs.slice(0, 2).map(blog => (
+        {blogs.map(blog => (
           <div key={blog.id} className="blog-card" onClick={() => navigate(`/blogs/${blog.id}`)}>
-            <img className="blog-card-img" src={blog.thumbnail_url || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=250&fit=crop'} alt={blog.title} />
+            <img className="blog-card-img" src={blog.thumbnailUrl || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=250&fit=crop'} alt={blog.title} />
             <div className="blog-card-content">
               <h2>{blog.title}</h2>
               <p>{blog.content?.length > 100 ? blog.content.substring(0, 100) + '...' : blog.content}</p>
-              <span className="blog-card-destination">{blog.destination}</span>
+              <div className="blog-card-footer">
+                <span className="blog-card-destination">📍 {blog.destination}</span>
+                <span className="blog-card-date">
+                  {new Date(blog.createdAt).toLocaleDateString()}
+                </span>
+              </div>
+              <div className="blog-card-stats">
+                <span className="blog-card-likes">
+                  ❤️ {blog.likes || 0} likes
+                </span>
+              </div>
+              <button 
+                className="read-more-button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/blogs/${blog.id}`);
+                }}
+              >
+                Read More
+              </button>
             </div>
           </div>
         ))}

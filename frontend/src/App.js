@@ -10,6 +10,7 @@ import BlogListPage from './pages/BlogListPage';
 import BlogDetailPage from './pages/BlogDetailPage';
 import FinalizeRoutePage from './pages/FinalizeRoutePage';
 import CreateTourInfoPage from './pages/CreateTourInfoPage';
+import MyBlogsPage from './pages/MyBlogsPage';
 
 function App() {
   return (
@@ -24,14 +25,6 @@ function App() {
             element={
               <ProtectedRoute>
                 <ProfilePage />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/create-tour" 
-            element={
-              <ProtectedRoute>
-                <CreateTourPage />
               </ProtectedRoute>
             } 
           />
@@ -51,6 +44,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <CreateTourPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/my-blogs" 
+            element={
+              <ProtectedRoute>
+                <MyBlogsPage />
               </ProtectedRoute>
             } 
           />

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import './CreateTourPage.css';
 import { useNavigate, useLocation } from 'react-router-dom';
+import BlogSuggestions from '../components/BlogSuggestions';
 
-const API_URL =  process.env.REACT_APP_URL;
-
+const API_URL = process.env.REACT_APP_URL; // Add API URL configuration
 const CreateTourPage = () => {
   const location = useLocation();
   const { title, startDate, endDate } = location.state || {};
@@ -236,6 +236,11 @@ const CreateTourPage = () => {
                       )}
                     </div>
                   )}
+                  {/* Add BlogSuggestions component */}
+                  <BlogSuggestions 
+                    destinationId={destination.id} 
+                    destinationName={destination.name} 
+                  />
                 </div>
               </div>
             ))}

@@ -14,6 +14,15 @@ public class ProfileResponse {
 
     private List<BlogSummary> blogSummaries;
     private List<TourSummary> tours;
+    
+    // Profile statistics fields
+    private Long totalBlogs;
+    private Long publishedBlogs;
+    private Long draftBlogs;
+    private Long totalLikes;
+    private Long totalComments;
+    private Long totalTours;
+    
     public ProfileResponse(){}
 
     // Constructor
@@ -73,14 +82,61 @@ public class ProfileResponse {
         this.blogSummaries = blogSummaries;
     }
 
-
-
     public List<TourSummary> getTours() {
         return tours;
     }
 
     public void setTours(List<TourSummary> tours) {
         this.tours = tours;
+    }
+
+    // Profile statistics getters and setters
+    public Long getTotalBlogs() {
+        return totalBlogs;
+    }
+
+    public void setTotalBlogs(Long totalBlogs) {
+        this.totalBlogs = totalBlogs;
+    }
+
+    public Long getPublishedBlogs() {
+        return publishedBlogs;
+    }
+
+    public void setPublishedBlogs(Long publishedBlogs) {
+        this.publishedBlogs = publishedBlogs;
+    }
+
+    public Long getDraftBlogs() {
+        return draftBlogs;
+    }
+
+    public void setDraftBlogs(Long draftBlogs) {
+        this.draftBlogs = draftBlogs;
+    }
+
+    public Long getTotalLikes() {
+        return totalLikes;
+    }
+
+    public void setTotalLikes(Long totalLikes) {
+        this.totalLikes = totalLikes;
+    }
+
+    public Long getTotalComments() {
+        return totalComments;
+    }
+
+    public void setTotalComments(Long totalComments) {
+        this.totalComments = totalComments;
+    }
+
+    public Long getTotalTours() {
+        return totalTours;
+    }
+
+    public void setTotalTours(Long totalTours) {
+        this.totalTours = totalTours;
     }
 }
         
