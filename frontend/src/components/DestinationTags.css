@@ -1,0 +1,121 @@
+.destination-tags-container {
+  margin-top: 8px;
+}
+
+.destination-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.destination-tag {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(135deg, #1b74e4, #4a90e2);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(27, 116, 228, 0.2);
+  transition: all 0.2s ease;
+  max-width: 200px;
+}
+
+.destination-tag:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(27, 116, 228, 0.3);
+}
+
+.destination-tag.remaining-count {
+  background: #65676b;
+  cursor: default;
+}
+
+.destination-tag.remaining-count:hover {
+  transform: none;
+  box-shadow: 0 2px 4px rgba(101, 103, 107, 0.2);
+}
+
+.destination-icon {
+  margin-right: 6px;
+  font-size: 12px;
+}
+
+.destination-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+.remove-destination {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  margin-left: 8px;
+  padding: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+  line-height: 1;
+}
+
+.remove-destination:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.remove-destination:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 1px;
+}
+
+.destinations-summary {
+  font-size: 12px;
+  color: #65676b;
+  font-style: italic;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .destination-tag {
+    font-size: 13px;
+    padding: 5px 10px;
+    max-width: 150px;
+  }
+  
+  .destination-name {
+    max-width: 100px;
+  }
+  
+  .remove-destination {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* Animation for new tags */
+.destination-tag {
+  animation: slideInTag 0.3s ease-out;
+}
+
+@keyframes slideInTag {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+} 

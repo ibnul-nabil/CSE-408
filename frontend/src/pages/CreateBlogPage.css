@@ -46,21 +46,44 @@
 .destination-input {
   display: flex;
   align-items: center;
-  gap: 4px;
-  background-color: #f0f2f5;
-  padding: 4px 8px;
-  border-radius: 4px;
-  border: 2px solid transparent;
-  transition: all 0.2s ease;
+  background: white;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  padding: 0 16px;
+  transition: border-color 0.2s;
+  position: relative;
+}
+
+.destination-input .location-icon {
+  margin-right: 12px;
+  font-size: 18px;
+  color: #65676b;
+  flex-shrink: 0;
+}
+
+.destination-input .autocomplete-container {
+  flex: 1;
+}
+
+.destination-input .autocomplete-input {
+  border: none;
+  padding: 12px 0;
+  background: transparent;
+  font-size: 16px;
+}
+
+.destination-input .autocomplete-input:focus {
+  box-shadow: none;
+  border: none;
+}
+
+.destination-input:focus-within {
+  border-color: #1b74e4;
+  box-shadow: 0 0 0 3px rgba(27, 116, 228, 0.1);
 }
 
 .destination-input.error {
-  border-color: #ff4d4f;
-  background-color: #fff2f0;
-}
-
-.location-icon {
-  font-size: 14px;
+  border-color: #e74c3c;
 }
 
 .transparent-input {
@@ -351,6 +374,38 @@
 
 .remove-thumbnail-btn:hover {
   background: #ff3838;
+}
+
+.add-destination-btn {
+  background: #1b74e4;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: background-color 0.2s;
+  flex-shrink: 0;
+}
+
+.add-destination-btn:hover {
+  background: #1967d2;
+}
+
+.add-destination-btn:active {
+  transform: translateY(1px);
+}
+
+.destination-helper-text {
+  font-size: 13px;
+  color: #65676b;
+  margin-top: 8px;
+  padding: 8px;
+  background: #f0f2f5;
+  border-radius: 6px;
+  border-left: 3px solid #1b74e4;
 }
 
 @media (max-width: 768px) {

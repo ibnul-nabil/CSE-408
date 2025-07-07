@@ -1,0 +1,127 @@
+.autocomplete-container {
+  position: relative;
+  width: 100%;
+}
+
+.autocomplete-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  font-size: 16px;
+  background-color: white;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.autocomplete-input:focus {
+  border-color: #1b74e4;
+  box-shadow: 0 0 0 3px rgba(27, 116, 228, 0.1);
+}
+
+.autocomplete-input:disabled {
+  background-color: #f5f6f7;
+  color: #65676b;
+  cursor: not-allowed;
+}
+
+.autocomplete-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: white;
+  border: 1px solid #e1e5e9;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 4px;
+}
+
+.autocomplete-suggestion {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.autocomplete-suggestion:last-child {
+  border-bottom: none;
+}
+
+.autocomplete-suggestion:hover,
+.autocomplete-suggestion.focused {
+  background-color: #f0f2f5;
+}
+
+.autocomplete-suggestion.focused {
+  background-color: #e3f2fd;
+}
+
+.suggestion-icon {
+  margin-right: 8px;
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.suggestion-text {
+  flex: 1;
+  font-size: 15px;
+  color: #1c1e21;
+}
+
+/* Custom scrollbar for suggestions */
+.autocomplete-suggestions::-webkit-scrollbar {
+  width: 6px;
+}
+
+.autocomplete-suggestions::-webkit-scrollbar-track {
+  background: #f0f2f5;
+  border-radius: 3px;
+}
+
+.autocomplete-suggestions::-webkit-scrollbar-thumb {
+  background: #bcc0c4;
+  border-radius: 3px;
+}
+
+.autocomplete-suggestions::-webkit-scrollbar-thumb:hover {
+  background: #8a8d91;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .autocomplete-input {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 14px 16px;
+  }
+  
+  .autocomplete-suggestion {
+    padding: 14px 16px;
+  }
+  
+  .suggestion-text {
+    font-size: 16px;
+  }
+}
+
+/* Animation for suggestions appearing */
+.autocomplete-suggestions {
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+} 

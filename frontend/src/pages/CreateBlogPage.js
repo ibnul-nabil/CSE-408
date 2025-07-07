@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import AutocompleteInput from '../components/AutocompleteInput';
+import DestinationTags from '../components/DestinationTags';
+import { filterDestinations } from '../data/destinations';
 import './CreateBlogPage.css';
 
 const API_URL = process.env.REACT_APP_URL;
@@ -11,6 +14,8 @@ const CreateBlogPage = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [destination, setDestination] = useState('');
+  const [destinations, setDestinations] = useState([]);
+  const [destinationSuggestions, setDestinationSuggestions] = useState([]);
   const [mediaFiles, setMediaFiles] = useState([]);
   const [thumbnailFile, setThumbnailFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -127,7 +132,7 @@ const CreateBlogPage = () => {
     const errors = {
       title: !title.trim() ? 'Title is required' : '',
       content: !content.trim() ? 'Content is required' : '',
-      destination: !destination.trim() ? 'Destination is required' : ''
+      destination: destinations.length === 0 ? 'At least one destination is required' : ''
     };
 
     // Set all fields as touched when validating
@@ -234,7 +239,7 @@ const CreateBlogPage = () => {
         userId: userId,
         title: title.trim(),
         content: content.trim(),
-        customDestinations: [destination.trim()],
+        customDestinations: destinations,
         thumbnailUrl: thumbnailUrl,
         media: uploadedMediaUrls,
         status: "published"
@@ -253,9 +258,15 @@ const CreateBlogPage = () => {
         setSuccess(true);
         setTitle('');
         setContent('');
-        setDestination('');
+        setDestinations([]);
         setMediaFiles([]);
         setThumbnailFile(null);
+        // Reset touched state to prevent red error styling on cleared fields
+        setTouched({
+          title: false,
+          content: false,
+          destination: false
+        });
         setTimeout(() => navigate('/profile'), 2000);
       } else {
         const data = await response.json();
@@ -281,7 +292,70 @@ const CreateBlogPage = () => {
   }
 
   const showError = (field) => {
+    if (field === 'destination') {
+      return touched[field] && destinations.length === 0;
+    }
     return touched[field] && !eval(field).trim();
+  };
+
+  // Handle destination input changes and generate suggestions
+  const handleDestinationChange = (value) => {
+    setDestination(value);
+    const suggestions = filterDestinations(value, 8);
+    setDestinationSuggestions(suggestions);
+    
+    // Clear destination error when user starts typing
+    if (touched.destination) {
+      setTouched(prev => ({ ...prev, destination: false }));
+    }
+  };
+
+  // Handle destination selection from suggestions
+  const handleDestinationSelect = (selectedDestination) => {
+    // Check if destination already exists
+    if (destinations.includes(selectedDestination)) {
+      setDestination('');
+      setDestinationSuggestions([]);
+      return;
+    }
+    
+    // Add to destinations array
+    setDestinations(prev => [...prev, selectedDestination]);
+    setDestination('');
+    setDestinationSuggestions([]);
+    
+    // Clear destination error when destination is added
+    if (touched.destination) {
+      setTouched(prev => ({ ...prev, destination: false }));
+    }
+  };
+
+  // Handle adding destination when Enter is pressed or Add button clicked
+  const handleAddDestination = () => {
+    const trimmedDestination = destination.trim();
+    if (trimmedDestination && !destinations.includes(trimmedDestination)) {
+      setDestinations(prev => [...prev, trimmedDestination]);
+      setDestination('');
+      setDestinationSuggestions([]);
+      
+      // Clear destination error when destination is added
+      if (touched.destination) {
+        setTouched(prev => ({ ...prev, destination: false }));
+      }
+    }
+  };
+
+  // Handle removing a destination
+  const handleRemoveDestination = (indexToRemove) => {
+    setDestinations(prev => prev.filter((_, index) => index !== indexToRemove));
+  };
+
+  // Handle Enter key in destination input
+  const handleDestinationKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddDestination();
+    }
   };
 
   return (
@@ -297,17 +371,39 @@ const CreateBlogPage = () => {
             <h3>{user?.username || 'User'}</h3>
             <div className={`destination-input ${showError('destination') ? 'error' : ''}`}>
               <span className="location-icon">📍</span>
-              <input
-                type="text"
+              <AutocompleteInput
                 value={destination}
-                onChange={(e) => setDestination(e.target.value)}
-                onBlur={() => handleBlur('destination')}
-                placeholder="Where are you? *"
-                className="transparent-input"
+                onChange={handleDestinationChange}
+                onSelect={handleDestinationSelect}
+                suggestions={destinationSuggestions}
+                placeholder="Type destination and press Enter to add..."
+                className="destination-field"
+                onKeyDown={handleDestinationKeyDown}
               />
+              {destination.trim() && (
+                <button
+                  type="button"
+                  className="add-destination-btn"
+                  onClick={handleAddDestination}
+                >
+                  Add
+                </button>
+              )}
             </div>
-            {showError('destination') && (
-              <span className="field-error">Destination is required</span>
+            
+            {destinations.length === 0 && (
+              <div className="destination-helper-text">
+                💡 You can add multiple destinations (e.g., Dhaka, Cox's Bazar, Sylhet)
+              </div>
+            )}
+            
+            <DestinationTags
+              destinations={destinations}
+              onRemove={handleRemoveDestination}
+            />
+            
+            {showError('destination') && destinations.length === 0 && (
+              <div className="error-message">At least one destination is required</div>
             )}
           </div>
         </div>
