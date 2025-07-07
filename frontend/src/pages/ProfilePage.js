@@ -17,9 +17,6 @@ const ProfilePage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalPhotoType, setModalPhotoType] = useState('profile'); // 'profile' or 'cover'
 
-  // Sample interests - this should come from your backend
-  const interests = ['Adventure Travel', 'Photography', 'Food & Culture', 'Backpacking'];
-
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -48,8 +45,6 @@ const ProfilePage = () => {
   const handlePhotoClick = (photoType) => {
     setModalPhotoType(photoType);
     setModalOpen(true);
-    
-
   };
 
   const handlePhotoUpdate = (newPhotoUrl) => {
@@ -81,7 +76,7 @@ const ProfilePage = () => {
   if (!user) return null;
 
   return (
-    <div className="profile-container">
+    <div className="facebook-profile-container">
       {/* Sidebar Navigation */}
       <div className="profile-sidebar">
         <div className="nav-header">Tourify</div>
@@ -120,128 +115,140 @@ const ProfilePage = () => {
       </div>
 
       {/* Main Content Area */}
-      <div className="profile-main-content">
+      <div className="facebook-main-content">
         {/* Cover Photo Section */}
-        <div className="profile-cover-section">
-          <div className="cover-photo-container">
+        <div className="facebook-cover-section">
+          <div className="facebook-cover-photo-container">
             <img
               src={getImageUrl(user.coverPhoto) || "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800"}
               alt="Cover"
-              className="profile-cover-photo"
+              className="facebook-cover-photo"
               onClick={() => handlePhotoClick('cover')}
             />
             <button 
-              className="photo-edit-btn cover-edit-btn"
+              className="facebook-photo-edit-btn facebook-cover-edit-btn"
               onClick={() => handlePhotoClick('cover')}
-              title="Update cover photo"
+              title="Edit cover photo"
             >
-              📷
+              📷 Edit cover photo
             </button>
           </div>
         </div>
 
-        {/* Profile Info Section */}
-        <div className="profile-info-section">
-          <div className="profile-avatar-container">
-            <img
-              src={getImageUrl(user.profileImage || user.profile_image) || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d'}
-              alt="Profile"
-              className="profile-avatar"
-              onClick={() => handlePhotoClick('profile')}
-            />
-            <button 
-              className="photo-edit-btn profile-edit-btn"
-              onClick={() => handlePhotoClick('profile')}
-              title="Update profile picture"
-            >
-              📷
-            </button>
-          </div>
-
-          <div className="profile-header">
-            <h1 className="profile-name">{user.username}</h1>
-            <p className="profile-bio">Digital nomad exploring the world one city at a time ✈️</p>
-            <div className="profile-location">
-              <span className="location-icon">📍</span>
-              Based in Barcelona, Spain
+        {/* Profile Content Container */}
+        <div className="facebook-profile-content">
+          {/* Profile Info Section */}
+          <div className="facebook-profile-info">
+            <div className="facebook-profile-avatar-container">
+              <img
+                src={getImageUrl(user.profileImage || user.profile_image) || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d'}
+                alt="Profile"
+                className="facebook-profile-avatar"
+                onClick={() => handlePhotoClick('profile')}
+              />
+              <button 
+                className="facebook-photo-edit-btn facebook-profile-edit-btn"
+                onClick={() => handlePhotoClick('profile')}
+                title="Update profile picture"
+              >
+                📷
+              </button>
             </div>
-
-            <div className="interests-list">
-              {interests.map((interest, index) => (
-                <span key={index} className="interest-tag">{interest}</span>
-              ))}
+            
+            <div className="facebook-profile-details">
+              <h1 className="facebook-profile-name">{user.username}</h1>
+              <p className="facebook-friends-count">{user.tours?.length || 0} tours created</p>
             </div>
           </div>
         </div>
 
-        {/* Recent Tours Section */}
-        <div className="content-section">
-          <h2 className="section-title">Recent Tours</h2>
-          <div className="content-grid">
-            {user.tours?.slice(0, 4).map(tour => (
-              <div key={tour.id} className="content-card">
-                <img
-                  src="https://images.unsplash.com/photo-1488646953014-85cb44e25828"
-                  alt={tour.title}
-                  className="card-image"
-                />
-                <div className="card-content">
-                  <h3 className="card-title">{tour.title}</h3>
-                  <p className="card-description">
-                    Status: {tour.status} • {tour.startDate ? `From ${tour.startDate}` : 'No dates'}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Recent Blogs Section */}
-        <div className="content-section">
-          <h2 className="section-title">Recent Blogs</h2>
-          <div className="content-grid">
-            {user.blogSummaries?.slice(0, 4).map(blog => {
-              // Combine all destinations for display
-              const allDestinations = blog.destinations || [];
-              const destinationText = allDestinations.length > 0 
-                ? allDestinations.slice(0, 2).join(', ') + (allDestinations.length > 2 ? '...' : '')
-                : 'No destination';
-              
-              return (
-                <div key={blog.id} className="content-card" onClick={() => navigate(`/blogs/${blog.id}`)}>
-                  <img
-                    src={getImageUrl(blog.thumbnailUrl || blog.firstMediaUrl) || "https://images.unsplash.com/photo-1488646953014-85cb44e25828"}
-                    alt={blog.title || 'Blog post'}
-                    className="card-image"
-                  />
-                  <div className="card-content">
-                    <h3 className="card-title">{blog.title || 'Untitled Blog'}</h3>
-                    <div className="card-description">
-                      <p className="blog-destinations">📍 {destinationText}</p>
-                      <p className="blog-stats">
-                        👍 {blog.likes || 0} • 💬 {blog.commentsCount || 0} • 📷 {blog.mediaCount || 0}
-                      </p>
+        {/* Content Sections */}
+        <div className="facebook-content-container">
+          {/* Recent Blogs Section */}
+          <div className="facebook-content-section">
+            <h2 className="facebook-section-title">Recent Blogs</h2>
+            <div className="facebook-content-grid">
+              {user.blogSummaries?.slice(0, 6).map(blog => {
+                const allDestinations = blog.destinations || [];
+                const destinationText = allDestinations.length > 0 
+                  ? allDestinations.slice(0, 2).join(', ') + (allDestinations.length > 2 ? '...' : '')
+                  : 'No destination';
+                
+                return (
+                  <div key={blog.id} className="facebook-content-card" onClick={() => navigate(`/blogs/${blog.id}`)}>
+                    <img
+                      src={getImageUrl(blog.thumbnailUrl || blog.firstMediaUrl) || "https://images.unsplash.com/photo-1488646953014-85cb44e25828"}
+                      alt={blog.title || 'Blog post'}
+                      className="facebook-card-image"
+                    />
+                    <div className="facebook-card-content">
+                      <h3 className="facebook-card-title">{blog.title}</h3>
+                      <p className="facebook-card-description">{destinationText}</p>
+                      <div className="facebook-card-stats">
+                        <span>❤️ {blog.likeCount || 0}</span>
+                        <span>💬 {blog.commentCount || 0}</span>
+                      </div>
                     </div>
                   </div>
+                );
+              })}
+            </div>
+            {(!user.blogSummaries || user.blogSummaries.length === 0) && (
+              <div className="facebook-empty-state">
+                <p>No blogs yet. Start writing your travel stories!</p>
+                <button className="facebook-create-btn" onClick={() => navigate('/create-blog')}>
+                  Write Your First Blog
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Recent Tours Section */}
+          <div className="facebook-content-section">
+            <h2 className="facebook-section-title">Tours Created</h2>
+            <div className="facebook-content-grid">
+              {user.tours?.slice(0, 6).map(tour => (
+                <div key={tour.id} className="facebook-content-card">
+                  <img
+                    src="https://images.unsplash.com/photo-1488646953014-85cb44e25828"
+                    alt={tour.title}
+                    className="facebook-card-image"
+                  />
+                  <div className="facebook-card-content">
+                    <h3 className="facebook-card-title">{tour.title}</h3>
+                    <p className="facebook-card-description">
+                      Status: {tour.status}
+                    </p>
+                    <p className="facebook-card-date">
+                      {tour.startDate ? `From ${tour.startDate}` : 'No dates set'}
+                    </p>
+                  </div>
                 </div>
-              );
-            })}
+              ))}
+            </div>
+            {(!user.tours || user.tours.length === 0) && (
+              <div className="facebook-empty-state">
+                <p>No tours created yet. Plan your first adventure!</p>
+                <button className="facebook-create-btn" onClick={() => navigate('/create-tour-info')}>
+                  Create Your First Tour
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* Photo Upload Modal */}
-      <PhotoUploadModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        currentPhoto={modalPhotoType === 'profile' 
-          ? getImageUrl(user.profileImage || user.profile_image)
-          : getImageUrl(user.coverPhoto || user.cover_photo)
-        }
-        photoType={modalPhotoType}
-        userId={user.id}
-        onPhotoUpdate={handlePhotoUpdate}
-      />
+      {modalOpen && (
+        <PhotoUploadModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          photoType={modalPhotoType}
+          currentPhoto={modalPhotoType === 'profile' ? user.profileImage || user.profile_image : user.coverPhoto}
+          userId={authUser.id}
+          onPhotoUpdate={handlePhotoUpdate}
+        />
+      )}
     </div>
   );
 };

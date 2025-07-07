@@ -1,632 +1,16 @@
-/* Modern Profile Page Styles */
+/* Facebook-style Profile Page with Sidebar */
 
-:root {
-  --primary-bg: #ffffff;
-  --secondary-bg: #f3f4f6;
-  --text-primary: #1f2937;
-  --text-secondary: #6b7280;
-  --accent-blue: #3b82f6;
-  --border-color: #e5e7eb;
-}
-
-.profile-main-container {
-  max-width: 900px;
-  margin: 2rem auto;
-  padding: 2rem 1rem;
-  background: #fff;
-  border-radius: 1.5rem;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-/* User Info Card */
-.profile-user-card {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-  margin-bottom: 2rem;
-}
-.profile-avatar {
-  width: 110px;
-  height: 110px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 4px solid #3b82f6;
-  box-shadow: 0 2px 8px rgba(59,130,246,0.08);
-}
-.profile-user-details h2 {
-  font-size: 2rem;
-  font-weight: 700;
-  margin: 0 0 0.25rem 0;
-}
-.profile-email {
-  color: #6b7280;
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-}
-.profile-bio {
-  color: #374151;
-  font-size: 1.05rem;
-  margin-top: 0.5rem;
-}
-
-/* Quick Stats Bar */
-.profile-stats-bar {
-  display: flex;
-  justify-content: space-around;
-  background: #f3f4f6;
-  border-radius: 1rem;
-  padding: 1rem 0;
-  margin-bottom: 2rem;
-}
-.profile-stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.profile-stat-icon {
-  font-size: 1.5rem;
-  margin-bottom: 0.25rem;
-}
-.profile-stat-value {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #2563eb;
-}
-.profile-stat-label {
-  color: #6b7280;
-  font-size: 0.95rem;
-}
-
-/* Create Buttons */
-.profile-create-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-bottom: 2.5rem;
-}
-
-.profile-create-btn {
-  background: linear-gradient(90deg, #3b82f6 0%, #7c3aed 100%);
-  color: #fff;
-  font-weight: 600;
-  font-size: 1.1rem;
-  padding: 0.9rem 2.2rem;
-  border: none;
-  border-radius: 0.75rem;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(59,130,246,0.08);
-  transition: background 0.2s, transform 0.2s;
-}
-
-.profile-create-btn:hover {
-  transform: translateY(-2px) scale(1.03);
-}
-
-.profile-create-btn.tour {
-  background: linear-gradient(90deg, #3b82f6 0%, #7c3aed 100%);
-}
-
-.profile-create-btn.tour:hover {
-  background: linear-gradient(90deg, #2563eb 0%, #7c3aed 100%);
-}
-
-.profile-create-btn.blog {
-  background: linear-gradient(90deg, #10b981 0%, #3b82f6 100%);
-}
-
-.profile-create-btn.blog:hover {
-  background: linear-gradient(90deg, #059669 0%, #3b82f6 100%);
-}
-
-/* Recent Activity */
-.profile-recent-activity {
-  margin-bottom: 2.5rem;
-}
-.profile-recent-activity h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: #1f2937;
-}
-.profile-recent-cards {
-  display: flex;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-}
-.profile-recent-card {
-  background: #f9fafb;
-  border-radius: 1rem;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-  padding: 1rem;
-  flex: 1 1 220px;
-  min-width: 220px;
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-.profile-recent-img-wrap {
-  width: 70px;
-  height: 70px;
-  border-radius: 0.75rem;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-.profile-recent-img-wrap img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.profile-recent-empty {
-  color: #9ca3af;
-  font-size: 1rem;
-  padding: 1.2rem 0;
-}
-
-/* Tabs */
-.profile-tabs {
-  display: flex;
-  justify-content: center;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-.profile-tab-btn {
-  background: none;
-  border: none;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #6b7280;
-  padding: 0.7rem 1.5rem;
-  border-radius: 0.5rem 0.5rem 0 0;
-  cursor: pointer;
-  transition: color 0.2s, background 0.2s;
-}
-.profile-tab-btn.active, .profile-tab-btn:hover {
-  color: #3b82f6;
-  background: #f3f4f6;
-}
-
-/* Tab Content */
-.profile-tab-content {
-  background: #f9fafb;
-  border-radius: 0 0 1rem 1rem;
-  padding: 2rem 1.5rem;
-  min-height: 180px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-}
-.profile-list {
-  list-style: none;
-  padding: 0;
+* {
   margin: 0;
-}
-.profile-list-item {
-  padding: 1rem 0;
-  border-bottom: 1px solid #e5e7eb;
-}
-.profile-list-item:last-child {
-  border-bottom: none;
-}
-.profile-empty {
-  color: #9ca3af;
-  text-align: center;
-  font-size: 1.1rem;
-  padding: 2rem 0;
-}
-
-/* Loading & Error */
-.profile-loading, .profile-error {
-  min-height: 60vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #6b7280;
-}
-.profile-spinner {
-  border: 4px solid #e0e7ef;
-  border-top: 4px solid #3b82f6;
-  border-radius: 50%;
-  width: 3rem;
-  height: 3rem;
-  animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
-}
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Responsive */
-@media (max-width: 700px) {
-  .profile-main-container {
-    padding: 1rem 0.2rem;
-  }
-  .profile-user-card {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
-  }
-  .profile-stats-bar {
-    flex-direction: column;
-    gap: 1rem;
-  }
-  .profile-recent-cards {
-    flex-direction: column;
-    gap: 1rem;
-  }
-  .profile-tab-content {
-    padding: 1rem 0.5rem;
-  }
-  .profile-create-buttons {
-    flex-direction: column;
-    padding: 0 1rem;
-  }
-  .profile-create-btn {
-    width: 100%;
-  }
-}
-
-.read-more-btn {
-  background: none;
-  border: none;
-  color: #3b82f6;
-  font-weight: 600;
-  cursor: pointer;
-  font-size: 1rem;
-  margin-top: 0.5rem;
   padding: 0;
-  transition: color 0.2s;
-}
-.read-more-btn:hover {
-  color: #2563eb;
-  text-decoration: underline;
+  box-sizing: border-box;
 }
 
-.blog-modal-overlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(31, 41, 55, 0.45);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.blog-modal {
-  background: #fff;
-  border-radius: 1rem;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-  max-width: 500px;
-  width: 90vw;
-  padding: 2rem 1.5rem 1.5rem 1.5rem;
-  position: relative;
-  animation: modalIn 0.2s;
-}
-@keyframes modalIn {
-  from { transform: translateY(40px) scale(0.98); opacity: 0; }
-  to { transform: translateY(0) scale(1); opacity: 1; }
-}
-.blog-modal-close {
-  position: absolute;
-  top: 1rem;
-  right: 1.2rem;
-  background: none;
-  border: none;
-  font-size: 2rem;
-  color: #6b7280;
-  cursor: pointer;
-  transition: color 0.2s;
-}
-.blog-modal-close:hover {
-  color: #ef4444;
-}
-.blog-modal h2 {
-  margin-top: 0;
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #1f2937;
-}
-.blog-modal p {
-  color: #374151;
-  font-size: 1.05rem;
-  margin-top: 1rem;
-  white-space: pre-line;
-}
-
-.logout-btn {
-  background: linear-gradient(90deg, #ef4444 0%, #f59e42 100%);
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  margin-top: 0.5rem;
-}
-
-.logout-btn:hover {
-  background: linear-gradient(90deg, #dc2626 0%, #f59e42 100%);
-  transform: translateY(-1px);
-}
-
-.profile-blog-card-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 32px;
-  justify-content: center;
-  margin-top: 24px;
-}
-.profile-blog-card {
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-  overflow: hidden;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  width: 350px;
-  display: flex;
-  flex-direction: column;
-}
-.profile-blog-card:hover {
-  transform: translateY(-6px) scale(1.03);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.16);
-}
-.profile-blog-card-img {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-}
-.profile-blog-card-content {
-  padding: 20px;
-}
-.profile-blog-card-content h4 {
-  margin: 0 0 12px 0;
-  font-size: 1.2rem;
-  font-weight: 600;
-}
-.profile-blog-card-content p {
-  color: #444;
-  margin-bottom: 10px;
-}
-.profile-blog-card-destination {
-  display: inline-block;
-  background: #e0f7fa;
-  color: #00796b;
-  padding: 4px 12px;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  margin-top: 8px;
-}
-
-/* Tour Card Vertical List Styles */
-.profile-tour-card-vertical-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  margin-top: 1.5rem;
-}
-
-.profile-tour-card-vertical {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  padding: 1.5rem 2rem;
-  transition: box-shadow 0.2s, transform 0.2s;
-  border: 1px solid #e0e0e0;
-  cursor: pointer;
-}
-
-.profile-tour-card-vertical .profile-tour-card-content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.profile-tour-card-vertical .profile-tour-status {
-  font-weight: 500;
-  color: #1976d2;
-}
-
-.hoverable:hover {
-  box-shadow: 0 6px 24px rgba(25, 118, 210, 0.18), 0 1.5px 6px rgba(0,0,0,0.08);
-  transform: translateY(-2px) scale(1.02);
-  border-color: #1976d2;
-}
-
-.profile-container {
+.facebook-profile-container {
   min-height: 100vh;
-  background-color: var(--secondary-bg);
+  background-color: #f0f2f5;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   display: flex;
-}
-
-/* Cover Photo Section */
-.profile-cover-section {
-  position: relative;
-  width: 100%;
-  height: 300px;
-  background-color: var(--secondary-bg);
-  overflow: hidden;
-}
-
-.cover-photo-container {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.profile-cover-photo {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.profile-cover-photo:hover {
-  opacity: 0.9;
-}
-
-/* Profile Info Section */
-.profile-info-section {
-  position: relative;
-  padding: 0 48px;
-  margin-top: -80px;
-  margin-bottom: 24px;
-}
-
-.profile-avatar-container {
-  position: relative;
-  width: 168px;
-  height: 168px;
-  border-radius: 50%;
-  border: 4px solid var(--primary-bg);
-  background-color: var(--primary-bg);
-  overflow: hidden;
-  margin-bottom: 16px;
-}
-
-.profile-avatar {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.profile-avatar:hover {
-  opacity: 0.9;
-}
-
-.profile-header {
-  margin-top: 16px;
-}
-
-.profile-name {
-  font-size: 32px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 8px;
-}
-
-.profile-bio {
-  font-size: 16px;
-  color: var(--text-secondary);
-  margin-bottom: 16px;
-}
-
-.profile-location {
-  display: flex;
-  align-items: center;
-  color: var(--text-secondary);
-  font-size: 14px;
-  margin-bottom: 16px;
-}
-
-.location-icon {
-  margin-right: 8px;
-}
-
-/* Interests/Tags Section */
-.interests-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 24px;
-}
-
-.interest-tag {
-  background-color: var(--secondary-bg);
-  color: var(--accent-blue);
-  padding: 6px 16px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-/* Edit Profile Button */
-.edit-profile-button {
-  position: absolute;
-  top: 24px;
-  right: 48px;
-  padding: 8px 24px;
-  background-color: var(--accent-blue);
-  color: white;
-  border: none;
-  border-radius: 20px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.edit-profile-button:hover {
-  background-color: #3b68d9;
-}
-
-/* Content Sections */
-.content-section {
-  padding: 24px 48px;
-}
-
-.section-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 24px;
-}
-
-.content-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
-}
-
-.content-card {
-  background: var(--primary-bg);
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s;
-}
-
-.content-card:hover {
-  transform: translateY(-2px);
-}
-
-.card-image {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
-}
-
-.card-content {
-  padding: 1rem;
-}
-
-.card-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin: 0 0 0.5rem;
-  color: #333;
-  line-height: 1.4;
-}
-
-.card-description {
-  color: #666;
-  font-size: 0.9rem;
-  line-height: 1.4;
-}
-
-.blog-destinations {
-  margin: 0 0 0.5rem;
-  color: #2563eb;
-  font-weight: 500;
-}
-
-.blog-stats {
-  margin: 0;
-  color: #888;
-  font-size: 0.85rem;
 }
 
 /* Sidebar Navigation */
@@ -636,17 +20,20 @@
   position: fixed;
   left: 0;
   top: 0;
-  background-color: var(--primary-bg);
+  background: linear-gradient(180deg, #1877f2 0%, #0ea5e9 100%);
   padding: 24px 16px;
-  border-right: 1px solid var(--border-color);
+  border-right: 1px solid #dadde1;
+  box-shadow: 2px 0 10px rgba(24, 119, 242, 0.2);
+  z-index: 1000;
 }
 
 .nav-header {
   font-size: 24px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: white;
   margin-bottom: 32px;
   padding: 0 12px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .nav-item {
@@ -656,18 +43,22 @@
   margin: 4px 0;
   border-radius: 8px;
   cursor: pointer;
-  color: var(--text-primary);
+  color: rgba(255, 255, 255, 0.9);
   text-decoration: none;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
+  font-weight: 500;
 }
 
 .nav-item:hover {
-  background-color: var(--secondary-bg);
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  transform: translateX(4px);
 }
 
 .nav-item.active {
-  background-color: var(--secondary-bg);
-  color: var(--accent-blue);
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .nav-item-icon {
@@ -678,55 +69,462 @@
 .nav-section-title {
   font-size: 12px;
   text-transform: uppercase;
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.7);
   margin: 24px 12px 8px;
   letter-spacing: 0.5px;
+  font-weight: 600;
 }
 
 /* Main Content Area */
-.profile-main-content {
+.facebook-main-content {
   margin-left: 260px;
   width: calc(100% - 260px);
   min-height: 100vh;
 }
 
-/* Photo Edit Buttons */
-.photo-edit-btn {
+/* Cover Photo Section */
+.facebook-cover-section {
+  position: relative;
+  width: 100%;
+  background: #fff;
+}
+
+.facebook-cover-photo-container {
+  position: relative;
+  width: 100%;
+  max-width: 1250px;
+  margin: 0 auto;
+  height: 400px;
+  border-radius: 0 0 8px 8px;
+  overflow: hidden;
+}
+
+.facebook-cover-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: filter 0.2s ease;
+}
+
+.facebook-cover-photo:hover {
+  filter: brightness(0.9);
+}
+
+.facebook-cover-edit-btn {
   position: absolute;
-  background-color: rgba(0, 0, 0, 0.7);
-  color: white;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.9);
   border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  font-size: 18px;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 15px;
+  color: #1c1e21;
   cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  opacity: 0;
+  gap: 8px;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
 }
 
-.photo-edit-btn:hover {
-  background-color: rgba(0, 0, 0, 0.8);
-  transform: scale(1.1);
+.facebook-cover-edit-btn:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-1px);
 }
 
-.cover-photo-container:hover .cover-edit-btn,
-.profile-avatar-container:hover .profile-edit-btn {
-  opacity: 1;
+/* Profile Content Container */
+.facebook-profile-content {
+  background: #fff;
+  max-width: 1250px;
+  margin: 0 auto;
+  position: relative;
+  padding: 0 20px;
 }
 
-.cover-edit-btn {
-  top: 16px;
-  right: 16px;
+/* Profile Info Section */
+.facebook-profile-info {
+  display: flex;
+  align-items: flex-end;
+  padding: 0 0 16px 0;
+  border-bottom: 1px solid #dadde1;
+  position: relative;
 }
 
-.profile-edit-btn {
-  bottom: 8px;
-  right: 8px;
+.facebook-profile-avatar-container {
+  position: relative;
+  margin-top: -42px;
+  margin-right: 16px;
+}
+
+.facebook-profile-avatar {
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  object-fit: cover;
+  cursor: pointer;
+  transition: filter 0.2s ease;
+  background: #f0f2f5;
+}
+
+.facebook-profile-avatar:hover {
+  filter: brightness(0.95);
+}
+
+.facebook-profile-edit-btn {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: #e4e6ea;
+  border: 2px solid #fff;
   width: 36px;
   height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
   font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.facebook-profile-edit-btn:hover {
+  background: #d8dadf;
+  transform: scale(1.05);
+}
+
+.facebook-profile-details {
+  flex: 1;
+  padding-bottom: 10px;
+}
+
+.facebook-profile-name {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1c1e21;
+  margin-bottom: 4px;
+  line-height: 1.1875;
+}
+
+.facebook-friends-count {
+  font-size: 15px;
+  color: #65676b;
+  font-weight: 400;
+}
+
+/* Navigation Tabs */
+.facebook-profile-nav {
+  padding: 0;
+  border-bottom: 1px solid #dadde1;
+}
+
+.facebook-nav-tabs {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+}
+
+.facebook-nav-tab {
+  background: none;
+  border: none;
+  padding: 16px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #65676b;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  border-radius: 0;
+}
+
+.facebook-nav-tab:hover {
+  background: #f2f3f5;
+  color: #1c1e21;
+}
+
+.facebook-nav-tab.active {
+  color: #1877f2;
+}
+
+.facebook-nav-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #1877f2;
+  border-radius: 2px 2px 0 0;
+}
+
+/* Content Container */
+.facebook-content-container {
+  max-width: 1250px;
+  margin: 0 auto;
+  padding: 20px;
+  display: grid;
+  gap: 20px;
+}
+
+.facebook-content-section {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.facebook-section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1c1e21;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #dadde1;
+}
+
+/* Content Grid */
+.facebook-content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.facebook-content-card {
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #dadde1;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.facebook-content-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.facebook-card-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  background: #f0f2f5;
+}
+
+.facebook-card-content {
+  padding: 16px;
+}
+
+.facebook-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1c1e21;
+  margin-bottom: 8px;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.facebook-card-description {
+  font-size: 14px;
+  color: #65676b;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.facebook-card-date {
+  font-size: 13px;
+  color: #8a8d91;
+  margin-bottom: 8px;
+}
+
+.facebook-card-stats {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: #65676b;
+}
+
+/* Empty State */
+.facebook-empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #65676b;
+}
+
+.facebook-empty-state p {
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+
+.facebook-create-btn {
+  background: #1877f2;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.facebook-create-btn:hover {
+  background: #166fe5;
+}
+
+/* Photo Edit Button Styles */
+.facebook-photo-edit-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+/* Loading and Error States */
+.profile-loading, .profile-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  text-align: center;
+  color: #65676b;
+}
+
+.profile-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #1877f2;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.profile-error button {
+  background: #1877f2;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 12px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .profile-sidebar {
+    width: 60px;
+    padding: 16px 8px;
+  }
+  
+  .nav-header {
+    font-size: 16px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .nav-item {
+    padding: 12px 8px;
+    flex-direction: column;
+    text-align: center;
+    font-size: 12px;
+  }
+  
+  .nav-item-icon {
+    margin-right: 0;
+    margin-bottom: 4px;
+    font-size: 18px;
+  }
+  
+  .nav-section-title {
+    display: none;
+  }
+  
+  .facebook-main-content {
+    margin-left: 60px;
+    width: calc(100% - 60px);
+  }
+  
+  .facebook-cover-photo-container {
+    height: 300px;
+  }
+  
+  .facebook-profile-info {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 20px 0;
+  }
+  
+  .facebook-profile-avatar-container {
+    margin-top: -70px;
+    margin-right: 0;
+    margin-bottom: 16px;
+  }
+  
+  .facebook-profile-avatar {
+    width: 140px;
+    height: 140px;
+  }
+  
+  .facebook-profile-name {
+    font-size: 28px;
+  }
+  
+  .facebook-content-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .facebook-content-container {
+    padding: 16px;
+  }
+  
+  .facebook-cover-edit-btn {
+    bottom: 12px;
+    right: 12px;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-sidebar {
+    display: none;
+  }
+  
+  .facebook-main-content {
+    margin-left: 0;
+    width: 100%;
+  }
+  
+  .facebook-cover-photo-container {
+    height: 250px;
+  }
+  
+  .facebook-profile-avatar {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .facebook-profile-name {
+    font-size: 24px;
+  }
+  
+  .facebook-card-content {
+    padding: 12px;
+  }
 }
