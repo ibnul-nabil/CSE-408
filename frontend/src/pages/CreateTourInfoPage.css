@@ -1,70 +1,370 @@
-/* Create Tour Info Page Styles */
-.create-tour-info-container {
-  max-width: 420px;
-  margin: 3rem auto;
-  background: #fff;
-  border-radius: 1.25rem;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.10);
-  padding: 2.5rem 2rem 2rem 2rem;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+/* Tour Page Layout */
+.tour-page-container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f0f4f8 0%, #ffffff 100%);
+  padding: 2rem 1rem;
 }
-.create-tour-info-form {
+
+.tour-page-wrapper {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.tour-page-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.tour-page-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  margin-bottom: 0.75rem;
+}
+
+.tour-page-subtitle {
+  font-size: 1.125rem;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 0;
+}
+
+/* Card Styling */
+.card {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid hsl(var(--border));
+  margin-bottom: 2rem;
+}
+
+.card-header {
+  padding: 2rem 2rem 1rem 2rem;
+  border-bottom: 1px solid hsl(var(--border));
+  margin-bottom: 2rem;
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  margin-bottom: 0.75rem;
+}
+
+.title-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: hsl(var(--primary));
+}
+
+.card-description {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.95rem;
+  margin-bottom: 0;
+}
+
+.card-content {
+  padding: 0 2rem 2rem 2rem;
+}
+
+/* Form Styling */
+.tour-form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 2rem;
 }
-.create-tour-info-form .form-group {
+
+.form-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
-.create-tour-info-form label {
-  font-size: 1.08rem;
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.label {
   font-weight: 500;
-  color: #1976d2;
-  margin-bottom: 0.2rem;
+  color: hsl(var(--foreground));
+  font-size: 0.875rem;
 }
-.create-tour-info-form input[type="text"],
-.create-tour-info-form input[type="date"] {
-  padding: 0.7rem 1rem;
-  border: 1.5px solid #e0e7ef;
-  border-radius: 0.6rem;
-  font-size: 1.08rem;
-  transition: border 0.2s, box-shadow 0.2s;
-  background: #f9fafb;
+
+.input {
+  padding: 0.75rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  transition: all 0.2s;
+  background: hsl(var(--background));
 }
-.create-tour-info-form input:focus {
-  border-color: #1976d2;
+
+.input:focus {
   outline: none;
-  box-shadow: 0 2px 8px rgba(25,118,210,0.08);
+  border-color: hsl(var(--ring));
+  box-shadow: 0 0 0 2px hsl(var(--ring) / 0.2);
 }
-.form-error {
-  color: #e53935;
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-  text-align: center;
-}
-.submit-btn {
-  margin-top: 1.2rem;
-  padding: 1rem 0;
-  font-size: 1.18rem;
-  font-weight: 700;
-  background: linear-gradient(90deg, #1976d2 0%, #10b981 100%);
-  color: #fff;
-  border: none;
-  border-radius: 0.7rem;
-  box-shadow: 0 2px 8px rgba(25,118,210,0.10);
+
+/* Date Input Styling */
+.date-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 2.75rem;
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  padding: 0.75rem;
   cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
+  transition: all 0.2s;
 }
-.submit-btn:hover {
-  background: linear-gradient(90deg, #10b981 0%, #1976d2 100%);
-  transform: translateY(-2px) scale(1.03);
+
+.date-input-container:hover {
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.1);
 }
-.create-tour-info-container h1 {
-  text-align: center;
-  color: #1976d2;
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 2rem;
+
+.date-input-container:focus-within {
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.2);
+}
+
+.date-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  color: hsl(var(--muted-foreground));
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+  pointer-events: none;
+  z-index: 1;
+  transition: color 0.2s;
+}
+
+.date-input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 3;
+  font-size: 0.875rem;
+  border: none;
+  background: transparent;
+}
+
+.date-input::-webkit-calendar-picker-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: auto;
+  height: auto;
+  color: transparent;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.date-input::-webkit-datetime-edit {
+  display: none;
+}
+
+.date-input::-webkit-datetime-edit-fields-wrapper {
+  display: none;
+}
+
+.date-input::-webkit-datetime-edit-text {
+  display: none;
+}
+
+.date-input::-webkit-datetime-edit-month-field {
+  display: none;
+}
+
+.date-input::-webkit-datetime-edit-day-field {
+  display: none;
+}
+
+.date-input::-webkit-datetime-edit-year-field {
+  display: none;
+}
+
+.date-display {
+  flex: 1;
+  font-size: 0.875rem;
+  color: hsl(var(--foreground));
+  pointer-events: none;
+  z-index: 2;
+  position: relative;
+  transition: color 0.2s;
+}
+
+.date-input-container:has(.date-input[value=""]) .date-display {
+  color: hsl(var(--muted-foreground));
+}
+
+/* Special styling for start date when selected */
+.form-row .form-group:first-child .date-input-container:has(.date-input:not([value=""])) {
+  background: linear-gradient(135deg, #ff9500 0%, #ffb347 100%);
+  border-color: #ff9500;
+}
+
+.form-row .form-group:first-child .date-input-container:has(.date-input:not([value=""])) .date-display {
+  color: white;
+  font-weight: 500;
+}
+
+.form-row .form-group:first-child .date-input-container:has(.date-input:not([value=""])) .date-icon {
+  color: white;
+}
+
+/* Hover effects for selected start date */
+.form-row .form-group:first-child .date-input-container:has(.date-input:not([value=""])):hover {
+  background: linear-gradient(135deg, #e6850e 0%, #ff9500 100%);
+  border-color: #e6850e;
+}
+
+.form-row .form-group:first-child .date-input-container:has(.date-input:not([value=""])):hover .date-display,
+.form-row .form-group:first-child .date-input-container:has(.date-input:not([value=""])):hover .date-icon {
+  color: white;
+}
+
+/* End date styling when selected */
+.form-row .form-group:last-child .date-input-container:has(.date-input:not([value=""])) {
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+  border-color: #3b82f6;
+}
+
+.form-row .form-group:last-child .date-input-container:has(.date-input:not([value=""])) .date-display {
+  color: white;
+  font-weight: 500;
+}
+
+.form-row .form-group:last-child .date-input-container:has(.date-input:not([value=""])) .date-icon {
+  color: white;
+}
+
+/* Hover effects for selected end date */
+.form-row .form-group:last-child .date-input-container:has(.date-input:not([value=""])):hover {
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+  border-color: #2563eb;
+}
+
+.form-row .form-group:last-child .date-input-container:has(.date-input:not([value=""])):hover .date-display,
+.form-row .form-group:last-child .date-input-container:has(.date-input:not([value=""])):hover .date-icon {
+  color: white;
+}
+
+/* Form Error */
+.form-error {
+  color: hsl(var(--destructive));
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background: hsl(var(--destructive) / 0.1);
+  border: 1px solid hsl(var(--destructive) / 0.2);
+  border-radius: var(--radius);
+}
+
+/* Navigation Buttons */
+.form-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid hsl(var(--border));
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 2rem;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  border: 1px solid transparent;
+  min-width: 120px;
+  justify-content: center;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  border-color: #3b82f6;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  border-color: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.btn-outline {
+  background: white;
+  color: hsl(var(--muted-foreground));
+  border-color: hsl(var(--border));
+}
+
+.btn-outline:hover:not(:disabled) {
+  background: hsl(var(--muted) / 0.1);
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--muted-foreground));
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .tour-page-container {
+    padding: 1rem 0.5rem;
+  }
+  
+  .tour-page-title {
+    font-size: 2rem;
+  }
+  
+  .card-header,
+  .card-content {
+    padding: 1.5rem;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .form-navigation {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .btn {
+    width: 100%;
+  }
 } 

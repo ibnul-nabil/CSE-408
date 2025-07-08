@@ -1,6 +1,7 @@
 // App.js
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { TourProvider } from "./context/TourContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProfilePage from "./pages/ProfilePage";
 import CreateTourPage from "./pages/CreateTourPage";
@@ -15,48 +16,50 @@ import MyBlogsPage from './pages/MyBlogsPage';
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/create-blog" element={<CreateBlogPage />} />
-          <Route 
-            path="/profile" 
-            element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            } 
-          />
-          <Route path="/blogs" element={<BlogListPage />} />
-          <Route path="/blogs/:id" element={<BlogDetailPage />} />
-          <Route path="/finalize-route" element={<FinalizeRoutePage />} />
-          <Route 
-            path="/create-tour-info" 
-            element={
-              <ProtectedRoute>
-                <CreateTourInfoPage />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/select-places" 
-            element={
-              <ProtectedRoute>
-                <CreateTourPage />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/my-blogs" 
-            element={
-              <ProtectedRoute>
-                <MyBlogsPage />
-              </ProtectedRoute>
-            } 
-          />
-        </Routes>
-      </Router>
+      <TourProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/create-blog" element={<CreateBlogPage />} />
+            <Route 
+              path="/profile" 
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route path="/blogs" element={<BlogListPage />} />
+            <Route path="/blogs/:id" element={<BlogDetailPage />} />
+            <Route path="/finalize-route" element={<FinalizeRoutePage />} />
+            <Route 
+              path="/create-tour-info" 
+              element={
+                <ProtectedRoute>
+                  <CreateTourInfoPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/select-places" 
+              element={
+                <ProtectedRoute>
+                  <CreateTourPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/my-blogs" 
+              element={
+                <ProtectedRoute>
+                  <MyBlogsPage />
+                </ProtectedRoute>
+              } 
+            />
+          </Routes>
+        </Router>
+      </TourProvider>
     </AuthProvider>
   );
 }
