@@ -1,8 +1,10 @@
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\config\CorssConfig.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\config\SchedulingConfig.java
+D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\config\WebConfig.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\controller\AuthController.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\controller\BlogController.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\controller\DestinationController.java
+D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\controller\FileUploadController.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\controller\ProfileController.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\controller\SubPlaceController.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\controller\TestController.java
@@ -13,6 +15,7 @@ D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\dto\BlogSummary.jav
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\dto\CommentRequest.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\dto\ErrorResponse.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\dto\LoginRequest.java
+D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\dto\MediaRequest.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\dto\ProfileResponse.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\dto\RouteDTO.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\dto\SignupRequest.java

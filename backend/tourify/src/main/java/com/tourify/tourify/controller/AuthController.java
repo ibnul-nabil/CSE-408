@@ -24,6 +24,14 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
+            // Validate required fields
+            if (loginRequest.getUsername() == null || loginRequest.getUsername().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(new ErrorResponse("Username is required"));
+            }
+            if (loginRequest.getPassword() == null || loginRequest.getPassword().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(new ErrorResponse("Password is required"));
+            }
+            
             AuthResponse response = authService.login(loginRequest.getUsername(), loginRequest.getPassword());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -34,6 +42,17 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignupRequest signupRequest) {
         try {
+            // Validate required fields
+            if (signupRequest.getUsername() == null || signupRequest.getUsername().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(new ErrorResponse("Username is required"));
+            }
+            if (signupRequest.getPassword() == null || signupRequest.getPassword().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(new ErrorResponse("Password is required"));
+            }
+            if (signupRequest.getEmail() == null || signupRequest.getEmail().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(new ErrorResponse("Email is required"));
+            }
+            
             User user = authService.signup(signupRequest.getUsername(), signupRequest.getPassword(), signupRequest.getEmail());
             // Optionally, return a DTO instead of the entity
             return ResponseEntity.ok(new ProfileResponse(

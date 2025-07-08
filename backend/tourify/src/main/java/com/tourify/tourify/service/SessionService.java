@@ -90,7 +90,7 @@ public class SessionService {
         sessionRepository.deleteAllSessionsByUserId(userId);
     }
 
-    private void extendSession(Session session) {
+    protected void extendSession(Session session) {
         session.setExpiresAt(LocalDateTime.now().plusMinutes(SESSION_DURATION_MINUTES));
         sessionRepository.save(session);
     }

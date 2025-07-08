@@ -15,7 +15,7 @@ const ProtectedRoute = ({ children }) => {
         fontSize: '1.2rem',
         color: '#666'
       }}>
-        Loading...
+        <span aria-live="polite">Loading...</span>
       </div>
     );
   }

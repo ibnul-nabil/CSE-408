@@ -1,1 +1,4 @@
+com\tourify\tourify\controller\AuthControllerTest.class
+com\tourify\tourify\service\SessionServiceTest.class
+com\tourify\tourify\service\AuthServiceTest.class
 com\tourify\tourify\TourifyApplicationTests.class

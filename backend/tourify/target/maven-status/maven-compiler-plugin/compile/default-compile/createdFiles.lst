@@ -1,3 +1,4 @@
+com\tourify\tourify\dto\MediaRequest.class
 com\tourify\tourify\dto\TourCreationRequest$RouteDTO.class
 com\tourify\tourify\dto\TourResponseDTO.class
 com\tourify\tourify\repository\SubPlaceRepository.class
@@ -15,6 +16,7 @@ com\tourify\tourify\entity\BlogComment.class
 com\tourify\tourify\entity\BlogMedia.class
 com\tourify\tourify\dto\TourSummary.class
 com\tourify\tourify\controller\TourController.class
+com\tourify\tourify\config\WebConfig.class
 com\tourify\tourify\dto\AuthResponse.class
 com\tourify\tourify\dto\BlogCreateRequest.class
 com\tourify\tourify\repository\TourRepository.class
@@ -22,6 +24,7 @@ com\tourify\tourify\repository\TourRouteRepository.class
 com\tourify\tourify\dto\RouteDTO.class
 com\tourify\tourify\entity\Tour$TourStatus.class
 com\tourify\tourify\dto\CommentRequest.class
+com\tourify\tourify\controller\FileUploadController.class
 com\tourify\tourify\repository\BlogDestinationRepository.class
 com\tourify\tourify\repository\BlogCommentRepository.class
 com\tourify\tourify\service\SubPlaceService.class
@@ -49,7 +52,6 @@ com\tourify\tourify\entity\TourRoute.class
 com\tourify\tourify\controller\SubPlaceController.class
 com\tourify\tourify\dto\ProfileResponse.class
 com\tourify\tourify\entity\Session.class
-com\tourify\tourify\dto\BlogCreateRequest$MediaRequest.class
 com\tourify\tourify\repository\CommentLikeRepository.class
 com\tourify\tourify\repository\RouteStopRepository.class
 com\tourify\tourify\controller\BlogController.class
