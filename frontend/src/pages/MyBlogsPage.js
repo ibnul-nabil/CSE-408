@@ -9,6 +9,7 @@ const MyBlogsPage = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(null); // Track which blog is being deleted
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -46,6 +47,49 @@ const MyBlogsPage = () => {
 
     fetchUserBlogs();
   }, [user]);
+
+  const deleteBlog = async (blogId, blogTitle) => {
+    // Show confirmation dialog
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete "${blogTitle || 'this blog'}"? This action cannot be undone.`
+    );
+    
+    if (!confirmDelete) return;
+
+    try {
+      setDeleteLoading(blogId);
+      const storedUser = JSON.parse(localStorage.getItem('user'));
+      const userId = user?.id || storedUser?.id;
+      const token = localStorage.getItem('token');
+
+      if (!userId || !token) {
+        throw new Error('Authentication required. Please log in again.');
+      }
+
+      const response = await fetch(`${API_URL}/api/blogs/${blogId}?userId=${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete blog');
+      }
+
+      // Remove the blog from the state
+      setBlogs(prevBlogs => prevBlogs.filter(blog => blog.id !== blogId));
+      
+      // Show success message
+      alert('Blog deleted successfully!');
+    } catch (err) {
+      console.error('Error deleting blog:', err);
+      alert(`Error deleting blog: ${err.message}`);
+    } finally {
+      setDeleteLoading(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -106,52 +150,67 @@ const MyBlogsPage = () => {
               : 'No destination';
 
             return (
-              <div key={blog.id} className="blog-card" onClick={() => navigate(`/blogs/${blog.id}`)}>
-                <img 
-                  className="blog-card-img" 
-                  src={blog.thumbnailUrl || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=250&fit=crop'} 
-                  alt={blog.title || 'Blog post'} 
-                />
-                <div className="blog-card-content">
-                  <h2>{blog.title || 'Untitled Blog'}</h2>
-                  <p>{blog.content?.length > 100 ? blog.content.substring(0, 100) + '...' : blog.content}</p>
-                  
-                  <div className="blog-card-destinations">
-                    <span className="blog-card-destination">📍 {destinationText}</span>
-                  </div>
-                  
-                  <div className="blog-card-meta">
-                    <div className="blog-card-author">
-                      {blog.authorProfileImage && (
-                        <img 
-                          src={blog.authorProfileImage} 
-                          alt={blog.authorUsername} 
-                          className="blog-card-author-avatar"
-                        />
-                      )}
-                      <span>By {blog.authorUsername}</span>
-                    </div>
-                    <span className="blog-card-date">
-                      {new Date(blog.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  
-                  <div className="blog-card-stats">
-                    <span className="blog-card-likes">❤️ {blog.likes || 0}</span>
-                    <span className="blog-card-comments">💬 {blog.commentsCount || 0}</span>
-                    <span className="blog-card-media">📷 {blog.mediaCount || 0}</span>
-                    <span className="blog-card-status">{blog.status || 'published'}</span>
-                  </div>
-                  
+              <div key={blog.id} className="blog-card">
+                <div className="blog-card-header">
                   <button 
-                    className="read-more-button"
+                    className="delete-blog-button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigate(`/blogs/${blog.id}`);
+                      deleteBlog(blog.id, blog.title);
                     }}
+                    disabled={deleteLoading === blog.id}
+                    title="Delete blog"
                   >
-                    Read More
+                    {deleteLoading === blog.id ? '⏳' : '🗑️'}
                   </button>
+                </div>
+                <div onClick={() => navigate(`/blogs/${blog.id}`)}>
+                  <img 
+                    className="blog-card-img" 
+                    src={blog.thumbnailUrl || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=250&fit=crop'} 
+                    alt={blog.title || 'Blog post'} 
+                  />
+                  <div className="blog-card-content">
+                    <h2>{blog.title || 'Untitled Blog'}</h2>
+                    <p>{blog.content?.length > 100 ? blog.content.substring(0, 100) + '...' : blog.content}</p>
+                    
+                    <div className="blog-card-destinations">
+                      <span className="blog-card-destination">📍 {destinationText}</span>
+                    </div>
+                    
+                    <div className="blog-card-meta">
+                      <div className="blog-card-author">
+                        {blog.authorProfileImage && (
+                          <img 
+                            src={blog.authorProfileImage} 
+                            alt={blog.authorUsername} 
+                            className="blog-card-author-avatar"
+                          />
+                        )}
+                        <span>By {blog.authorUsername}</span>
+                      </div>
+                      <span className="blog-card-date">
+                        {new Date(blog.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    
+                    <div className="blog-card-stats">
+                      <span className="blog-card-likes">❤️ {blog.likes || 0}</span>
+                      <span className="blog-card-comments">💬 {blog.commentsCount || 0}</span>
+                      <span className="blog-card-media">📷 {blog.mediaCount || 0}</span>
+                      <span className="blog-card-status">{blog.status || 'published'}</span>
+                    </div>
+                    
+                    <button 
+                      className="read-more-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/blogs/${blog.id}`);
+                      }}
+                    >
+                      Read More
+                    </button>
+                  </div>
                 </div>
               </div>
             );

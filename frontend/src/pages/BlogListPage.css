@@ -53,11 +53,50 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s, box-shadow 0.2s;
   cursor: pointer;
+  position: relative;
 }
 
 .blog-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.blog-card-header {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+}
+
+.delete-blog-button {
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.delete-blog-button:hover {
+  background: rgba(255, 59, 48, 0.9);
+  transform: scale(1.1);
+}
+
+.delete-blog-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.delete-blog-button:disabled:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: none;
 }
 
 .blog-card-img {
