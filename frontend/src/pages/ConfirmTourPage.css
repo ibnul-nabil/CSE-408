@@ -1,0 +1,240 @@
+/* Confirm Tour Page Styles */
+.tour-confirmation-summary {
+  margin-bottom: 2rem;
+}
+
+.confirmation-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 1rem;
+  border: 1px solid #bae6fd;
+}
+
+.confirmation-icon {
+  width: 3rem;
+  height: 3rem;
+  color: #22c55e;
+  margin: 0 auto 1rem;
+}
+
+.confirmation-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  margin-bottom: 0.5rem;
+}
+
+.confirmation-subtitle {
+  color: hsl(var(--muted-foreground));
+  font-size: 1rem;
+  margin-bottom: 0;
+}
+
+.tour-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.tour-detail-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  transition: all 0.2s;
+}
+
+.tour-detail-card:hover {
+  border-color: hsl(var(--primary));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.detail-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: hsl(var(--primary));
+  margin-top: 0.25rem;
+  flex-shrink: 0;
+}
+
+.detail-content {
+  flex: 1;
+}
+
+.detail-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  margin-bottom: 0.5rem;
+}
+
+.detail-value {
+  font-size: 0.875rem;
+  color: hsl(var(--foreground));
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+}
+
+.detail-subtitle {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 0;
+}
+
+.tour-title-display {
+  text-align: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+  border-radius: 1rem;
+  border: 1px solid #fbbf24;
+}
+
+.tour-final-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #92400e;
+  margin-bottom: 0;
+  font-style: italic;
+}
+
+.places-confirmation-list {
+  margin-top: 2rem;
+}
+
+.places-list-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  margin-bottom: 1rem;
+}
+
+.places-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.place-confirmation-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  transition: all 0.2s;
+}
+
+.place-confirmation-card:hover {
+  border-color: hsl(var(--primary));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.place-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  background: hsl(var(--primary));
+  color: white;
+  border-radius: 50%;
+  font-weight: 600;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.place-info {
+  flex: 1;
+}
+
+.place-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  margin-bottom: 0.25rem;
+}
+
+.place-type {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.subplaces-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.subplace-tag {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  background: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Status Messages */
+.error-message {
+  background: hsl(var(--destructive) / 0.1);
+  color: hsl(var(--destructive));
+  padding: 1rem;
+  border-radius: var(--radius);
+  border: 1px solid hsl(var(--destructive) / 0.2);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.success-message {
+  background: #dcfce7;
+  color: #166534;
+  padding: 1rem;
+  border-radius: var(--radius);
+  border: 1px solid #bbf7d0;
+  margin-bottom: 1rem;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .tour-details-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .confirmation-header {
+    padding: 1.5rem;
+  }
+  
+  .confirmation-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  
+  .confirmation-title {
+    font-size: 1.25rem;
+  }
+  
+  .tour-final-title {
+    font-size: 1.5rem;
+  }
+  
+  .tour-title-display {
+    padding: 1.5rem;
+  }
+  
+  .tour-detail-card {
+    padding: 1rem;
+  }
+} 

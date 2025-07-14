@@ -30,12 +30,20 @@ buildNumber.properties
 # Spring Boot
 spring-boot-starter-*.jar
 
-# Node.js
+# Node.js and npm
 node_modules/
+*/node_modules/
+**/node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+.npm
+.yarn-integrity
+.pnp
+.pnp.js
+package-lock.json
+yarn.lock
 
 # React build
 frontend/build/

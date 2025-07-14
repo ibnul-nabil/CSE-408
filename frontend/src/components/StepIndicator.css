@@ -1,0 +1,92 @@
+/* Step Indicator Component Styles */
+.step-indicator {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 0 1rem;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  max-width: 200px;
+}
+
+.step-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 2px solid hsl(var(--border));
+  color: hsl(var(--muted-foreground));
+  transition: all 0.2s;
+}
+
+.step-icon.active {
+  background: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.step-icon-svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.step-content {
+  margin-left: 0.75rem;
+}
+
+.step-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+  margin: 0;
+  transition: color 0.2s;
+}
+
+.step-title.active {
+  color: hsl(var(--primary));
+}
+
+.step-chevron {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: hsl(var(--muted-foreground));
+  margin-left: 1rem;
+  flex-shrink: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .step-indicator {
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .step-item {
+    justify-content: center;
+    max-width: none;
+  }
+
+  .step-chevron {
+    transform: rotate(90deg);
+    margin-left: 0;
+    margin-top: 0.5rem;
+  }
+
+  .step-content {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .step-indicator {
+    padding: 0 0.5rem;
+  }
+} 
