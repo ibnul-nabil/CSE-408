@@ -248,3 +248,6 @@ VALUES (
      escaping the rush of life and reconnecting with nature.',
     'https://example.com/images/coxbazar1.jpg'
 );
+
+
+ALTER TABLE users ADD COLUMN cover_photo VARCHAR(255);
