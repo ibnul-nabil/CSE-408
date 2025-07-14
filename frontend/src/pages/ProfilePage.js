@@ -85,7 +85,7 @@ const ProfilePage = () => {
             <span className="nav-item-icon">👤</span>
             Profile
           </div>
-          <div className={`nav-item ${activeNav === 'trips' ? 'active' : ''}`} onClick={() => setActiveNav('trips')}>
+          <div className={`nav-item ${activeNav === 'trips' ? 'active' : ''}`} onClick={() => navigate('/my-trips')}>
             <span className="nav-item-icon">✈️</span>
             My Trips
           </div>

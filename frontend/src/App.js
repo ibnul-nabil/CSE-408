@@ -10,8 +10,12 @@ import CreateBlogPage from './pages/CreateBlogPage';
 import BlogListPage from './pages/BlogListPage';
 import BlogDetailPage from './pages/BlogDetailPage';
 import FinalizeRoutePage from './pages/FinalizeRoutePage';
+import ConfirmTourPage from './pages/ConfirmTourPage';
 import CreateTourInfoPage from './pages/CreateTourInfoPage';
 import MyBlogsPage from './pages/MyBlogsPage';
+import MyTripsPage from './pages/MyTripsPage';
+import TourDetailsPage from './pages/TourDetailsPage';
+import EditTourPage from './pages/EditTourPage';
 
 function App() {
   return (
@@ -34,6 +38,14 @@ function App() {
             <Route path="/blogs/:id" element={<BlogDetailPage />} />
             <Route path="/finalize-route" element={<FinalizeRoutePage />} />
             <Route 
+              path="/confirm-tour" 
+              element={
+                <ProtectedRoute>
+                  <ConfirmTourPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
               path="/create-tour-info" 
               element={
                 <ProtectedRoute>
@@ -54,6 +66,30 @@ function App() {
               element={
                 <ProtectedRoute>
                   <MyBlogsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/my-trips" 
+              element={
+                <ProtectedRoute>
+                  <MyTripsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/tour-details/:id" 
+              element={
+                <ProtectedRoute>
+                  <TourDetailsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/edit-tour/:id" 
+              element={
+                <ProtectedRoute>
+                  <EditTourPage />
                 </ProtectedRoute>
               } 
             />

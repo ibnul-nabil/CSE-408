@@ -6,15 +6,9 @@ import { RouteIcon, ArrowLeft } from 'lucide-react';
 import StepIndicator from '../components/StepIndicator';
 import './FinalizeRoutePage.css';
 
-const API_URL = process.env.REACT_APP_URL;
-
 const FinalizeRoutePage = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { tourData, resetTour } = useTour();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
+  const { tourData } = useTour();
 
   // Format date to readable format (July 7th, 2025)
   const formatDateDisplay = (dateString) => {
@@ -38,82 +32,8 @@ const FinalizeRoutePage = () => {
     return `${month} ${day}${getOrdinalSuffix(day)}, ${year}`;
   };
 
-  const handleConfirmTour = async () => {
-    setLoading(true);
-    setError("");
-    setSuccess(false);
-
-    // Get userId from context or localStorage (as in CreateBlogPage)
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    const userId = user?.id || storedUser?.id;
-    const token = localStorage.getItem("token");
-
-    if (!userId) {
-      setError("User not found. Please log in again.");
-      setLoading(false);
-      return;
-    }
-    if (!tourData.places || tourData.places.length === 0) {
-      setError("No route selected.");
-      setLoading(false);
-      return;
-    }
-
-    // Prepare request body for backend
-    let stopOrder = 1;
-    const stops = [];
-    tourData.places.forEach(({ destination, subplaces }) => {
-      stops.push({
-        placeType: "Destination",
-        placeId: destination.id,
-        stopOrder: stopOrder++
-      });
-      subplaces.forEach(sub => {
-        stops.push({
-          placeType: "SubPlace",
-          placeId: sub.id,
-          stopOrder: stopOrder++
-        });
-      });
-    });
-    const reqBody = {
-      userId,
-      title: tourData.title || "New Tour",
-      startDate: tourData.startDate,
-      endDate: tourData.endDate,
-      estimatedCost: 0, // You can update this if you collect cost
-      route: {
-        routeSource: "user",
-        stops
-      }
-    };
-
-    try {
-      const res = await fetch(`${API_URL}/api/tours`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify(reqBody)
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        setError(data.message || "Failed to create tour.");
-        setLoading(false);
-        return;
-      }
-
-      setSuccess(true);
-      // Reset tour data after successful creation
-      resetTour();
-      setTimeout(() => navigate("/profile"), 1500);
-    } catch (err) {
-      setError("Network error.");
-    } finally {
-      setLoading(false);
-    }
+  const handleNext = () => {
+    navigate('/confirm-tour');
   };
 
   const handlePrevious = () => {
@@ -204,10 +124,6 @@ const FinalizeRoutePage = () => {
           </div>
         </div>
         
-        {/* Status Messages */}
-        {error && <div className="error-message">{error}</div>}
-        {success && <div className="success-message">Tour created! Redirecting...</div>}
-        
         {/* Navigation Buttons */}
         <div className="form-navigation">
           <button
@@ -215,14 +131,13 @@ const FinalizeRoutePage = () => {
             onClick={handlePrevious}
           >
             <ArrowLeft className="btn-icon" />
-            Previous
+            <span>Previous</span>
           </button>
           <button
             className="btn btn-primary"
-            onClick={handleConfirmTour}
-            disabled={loading}
+            onClick={handleNext}
           >
-            {loading ? "Creating Tour..." : "Confirm Tour"}
+            <span>Next</span>
           </button>
         </div>
       </div>

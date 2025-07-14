@@ -263,6 +263,74 @@
   color: white;
 }
 
+/* Invalid date styling */
+.date-input-container.invalid-date {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%) !important;
+  border-color: #ef4444 !important;
+  animation: shake 0.5s ease-in-out;
+}
+
+.date-input-container.invalid-date .date-display {
+  color: #dc2626 !important;
+  font-weight: 500;
+}
+
+.date-input-container.invalid-date .date-icon {
+  color: #dc2626 !important;
+}
+
+.date-input-container.invalid-date:hover {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%) !important;
+  border-color: #dc2626 !important;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+/* Date hint messages */
+.date-hint {
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.date-hint.error {
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.date-hint.error::before {
+  content: '⚠️';
+  font-size: 0.75rem;
+}
+
+/* Date info hint */
+.date-info-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 1px solid #bae6fd;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  color: #0369a1;
+}
+
+.hint-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
 /* Form Error */
 .form-error {
   color: hsl(var(--destructive));

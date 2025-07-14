@@ -1,13 +1,13 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { CalendarIcon } from "lucide-react";
 import { useTour } from '../context/TourContext';
 import StepIndicator from '../components/StepIndicator';
 import './CreateTourInfoPage.css';
 
-const CreateTourInfoPage = () => {
+const CreateTourInfoPage = ({ isEditMode = false, onNext }) => {
   const navigate = useNavigate();
-  const { tourData, setTourInfo, updateField } = useTour();
+  const { tourData, setTourInfo, updateField, resetTour } = useTour();
   const [title, setTitle] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -15,12 +15,35 @@ const CreateTourInfoPage = () => {
   const startDateRef = useRef(null);
   const endDateRef = useRef(null);
 
-  // Initialize form with existing tour data
+    // Initialize form with existing tour data or reset for new tour
   useEffect(() => {
-    if (tourData.title) setTitle(tourData.title);
-    if (tourData.startDate) setStartDate(tourData.startDate);
-    if (tourData.endDate) setEndDate(tourData.endDate);
-  }, [tourData]);
+    console.log('🔄 CreateTourInfoPage useEffect triggered');
+    console.log('📝 isEditMode:', isEditMode);
+    console.log('🎯 tourData:', tourData);
+    
+    if (!isEditMode) {
+      // Reset context for new tour creation
+      console.log('🆕 Resetting tour for new creation');
+      resetTour();
+      // Don't reset local state here - let user type
+    } else {
+      // Load existing tour data for editing
+      console.log('✏️ Loading existing tour data for editing');
+      if (tourData.title) setTitle(tourData.title);
+      if (tourData.startDate) setStartDate(tourData.startDate);
+      if (tourData.endDate) setEndDate(tourData.endDate);
+    }
+  }, [isEditMode, resetTour]); // Remove tourData dependency to avoid infinite loop
+
+  // Initialize local state only once when component mounts
+  useEffect(() => {
+    console.log('🏁 Initializing local state');
+    if (!isEditMode) {
+      setTitle('');
+      setStartDate('');
+      setEndDate('');
+    }
+  }, []); // Run only once on mount
 
   // Format date to readable format (July 7th, 2025)
   const formatDateDisplay = (dateString) => {
@@ -44,7 +67,7 @@ const CreateTourInfoPage = () => {
     return `${month} ${day}${getOrdinalSuffix(day)}, ${year}`;
   };
 
-  const handleDateContainerClick = (inputRef) => {
+  const handleDateContainerClick = useCallback((inputRef) => {
     if (inputRef.current) {
       // Try to use showPicker if available
       if (inputRef.current.showPicker) {
@@ -61,29 +84,44 @@ const CreateTourInfoPage = () => {
         inputRef.current.click();
       }
     }
-  };
+  }, []);
 
-  const handleTitleChange = (e) => {
+  const handleTitleChange = useCallback((e) => {
     const newTitle = e.target.value;
+    console.log('Title changed:', newTitle);
     setTitle(newTitle);
     updateField('title', newTitle);
-  };
+  }, [updateField]);
 
-  const handleStartDateChange = (e) => {
+  const handleStartDateChange = useCallback((e) => {
     const newStartDate = e.target.value;
+    console.log('Start date changed:', newStartDate);
     setStartDate(newStartDate);
     updateField('startDate', newStartDate);
-  };
+  }, [updateField]);
 
-  const handleEndDateChange = (e) => {
+  const handleEndDateChange = useCallback((e) => {
     const newEndDate = e.target.value;
+    console.log('End date changed:', newEndDate);
     setEndDate(newEndDate);
     updateField('endDate', newEndDate);
+  }, [updateField]);
+
+  // Get today's date in YYYY-MM-DD format for min attribute
+  const getTodayDate = () => {
+    return new Date().toISOString().split('T')[0];
+  };
+
+  // Check if a date is in the past
+  const isDateInPast = (dateString) => {
+    if (!dateString) return false;
+    return dateString < getTodayDate();
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
+    
     if (!title.trim()) {
       setError("Tour title is required.");
       return;
@@ -96,7 +134,17 @@ const CreateTourInfoPage = () => {
       setError("End date is required.");
       return;
     }
-    // Optionally: validate that endDate >= startDate
+    
+    // Get today's date in YYYY-MM-DD format
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Validate that start date is not in the past
+    if (startDate < today) {
+      setError("Start date cannot be in the past. Please select a future date.");
+      return;
+    }
+    
+    // Validate that end date is not before start date
     if (endDate < startDate) {
       setError("End date cannot be before start date.");
       return;
@@ -106,15 +154,19 @@ const CreateTourInfoPage = () => {
     setTourInfo(title, startDate, endDate);
     
     // Navigate to place selection
-    navigate("/select-places");
+    if (isEditMode && onNext) {
+      onNext(); // Use callback for edit mode
+    } else {
+      navigate("/select-places"); // Use navigation for normal mode
+    }
   };
 
   return (
     <div className="tour-page-container">
       <div className="tour-page-wrapper">
         <div className="tour-page-header">
-          <h1 className="tour-page-title">Tour Planner</h1>
-          <p className="tour-page-subtitle">Plan your perfect adventure</p>
+          <h1 className="tour-page-title">{isEditMode ? 'Edit Tour' : 'Tour Planner'}</h1>
+          <p className="tour-page-subtitle">{isEditMode ? 'Update your adventure details' : 'Plan your perfect adventure'}</p>
         </div>
         
         <StepIndicator currentStep={1} />
@@ -149,7 +201,7 @@ const CreateTourInfoPage = () => {
                 <div className="form-group">
                   <label className="label" htmlFor="startDate">Start Date</label>
                   <div 
-                    className="date-input-container"
+                    className={`date-input-container ${isDateInPast(startDate) ? 'invalid-date' : ''}`}
                     onClick={() => handleDateContainerClick(startDateRef)}
                   >
                     <CalendarIcon className="date-icon" />
@@ -159,6 +211,7 @@ const CreateTourInfoPage = () => {
                       type="date"
                       value={startDate}
                       onChange={handleStartDateChange}
+                      min={getTodayDate()}
                       required
                       className="date-input"
                     />
@@ -166,11 +219,16 @@ const CreateTourInfoPage = () => {
                       {startDate ? formatDateDisplay(startDate) : "Pick start date"}
                     </div>
                   </div>
+                  {isDateInPast(startDate) && (
+                    <div className="date-hint error">
+                      Start date cannot be in the past
+                    </div>
+                  )}
                 </div>
                 <div className="form-group">
                   <label className="label" htmlFor="endDate">End Date</label>
                   <div 
-                    className="date-input-container"
+                    className={`date-input-container ${isDateInPast(endDate) || (endDate && startDate && endDate < startDate) ? 'invalid-date' : ''}`}
                     onClick={() => handleDateContainerClick(endDateRef)}
                   >
                     <CalendarIcon className="date-icon" />
@@ -180,6 +238,7 @@ const CreateTourInfoPage = () => {
                       type="date"
                       value={endDate}
                       onChange={handleEndDateChange}
+                      min={startDate || getTodayDate()}
                       required
                       className="date-input"
                     />
@@ -187,17 +246,32 @@ const CreateTourInfoPage = () => {
                       {endDate ? formatDateDisplay(endDate) : "Pick end date"}
                     </div>
                   </div>
+                  {isDateInPast(endDate) && (
+                    <div className="date-hint error">
+                      End date cannot be in the past
+                    </div>
+                  )}
+                  {endDate && startDate && endDate < startDate && (
+                    <div className="date-hint error">
+                      End date cannot be before start date
+                    </div>
+                  )}
                 </div>
+              </div>
+              
+              <div className="date-info-hint">
+                <span className="hint-icon">💡</span>
+                <span>Tours can only be scheduled for future dates. Past dates are not selectable.</span>
               </div>
               
               {error && <div className="form-error">{error}</div>}
               
               <div className="form-navigation">
                 <button type="button" className="btn btn-outline" disabled>
-                  Previous
+                  <span>Previous</span>
                 </button>
                 <button type="submit" className="btn btn-primary">
-                  Next
+                  <span>Next</span>
                 </button>
               </div>
             </form>

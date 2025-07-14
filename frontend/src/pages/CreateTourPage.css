@@ -1,39 +1,72 @@
-/* Modern Create Tour Page Styles */
+/* Tour Page Layout */
 .tour-page-container {
   min-height: 100vh;
   background: linear-gradient(180deg, #f0f4f8 0%, #ffffff 100%);
-  padding: 1rem;
+  padding: 2rem 1rem;
 }
 
 .tour-page-wrapper {
-  max-width: 64rem;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
 .tour-page-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
 }
 
 .tour-page-title {
-  font-size: 1.875rem;
+  font-size: 2.5rem;
   font-weight: 700;
   color: hsl(var(--foreground));
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .tour-page-subtitle {
+  font-size: 1.125rem;
   color: hsl(var(--muted-foreground));
-  font-size: 1rem;
-  margin: 0;
+  margin-bottom: 0;
 }
 
+/* Card Styling */
+.card {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid hsl(var(--border));
+  margin-bottom: 2rem;
+}
 
+.card-header {
+  padding: 2rem 2rem 1rem 2rem;
+  border-bottom: 1px solid hsl(var(--border));
+  margin-bottom: 2rem;
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  margin-bottom: 0.75rem;
+}
 
 .title-icon {
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 1.5rem;
+  height: 1.5rem;
   color: hsl(var(--primary));
+}
+
+.card-description {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.95rem;
+  margin-bottom: 0;
+}
+
+.card-content {
+  padding: 0 2rem 2rem 2rem;
 }
 
 /* Search Section */
@@ -45,215 +78,232 @@
   position: relative;
   display: flex;
   align-items: center;
+  width: 100%;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.75rem 3rem 0.75rem 1rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  transition: all 0.2s;
+  background: hsl(var(--background));
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.2);
 }
 
 .search-icon {
   position: absolute;
-  left: 0.75rem;
-  width: 1rem;
-  height: 1rem;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.25rem;
+  height: 1.25rem;
   color: hsl(var(--muted-foreground));
+  pointer-events: none;
   z-index: 1;
-}
-
-.search-input {
-  padding-left: 2.5rem;
-  width: 100%;
 }
 
 .loading-spinner {
   position: absolute;
   right: 0.75rem;
-  color: hsl(var(--muted-foreground));
+  top: 50%;
+  transform: translateY(-50%);
   font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
 }
 
 .error-message {
   color: hsl(var(--destructive));
   font-size: 0.875rem;
   margin-top: 0.5rem;
-  padding: 0.5rem;
+  padding: 0.75rem;
   background: hsl(var(--destructive) / 0.1);
+  border: 1px solid hsl(var(--destructive) / 0.2);
   border-radius: var(--radius);
-  border: 1px solid hsl(var(--destructive) / 0.3);
 }
 
-/* Results */
-.destinations-results {
+/* District Selection */
+.district-selection-section {
   margin-bottom: 2rem;
 }
 
-.results-title {
-  font-size: 1.125rem;
+.section-title {
+  font-size: 1.25rem;
   font-weight: 600;
   color: hsl(var(--foreground));
   margin-bottom: 1rem;
 }
 
-.destinations-grid {
+.district-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
 }
 
-.destination-card {
-  background: hsl(var(--card));
-  border-radius: var(--radius);
+.district-card {
+  background: hsl(var(--background));
   border: 1px solid hsl(var(--border));
-  overflow: hidden;
+  border-radius: var(--radius);
+  padding: 1.5rem;
   transition: all 0.2s;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  cursor: pointer;
 }
 
-.destination-card:hover {
+.district-card:hover {
+  border-color: hsl(var(--primary));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
 }
 
-.destination-card.selected {
+.district-card.selected {
   border-color: hsl(var(--primary));
   background: hsl(var(--primary) / 0.05);
 }
 
-.destination-image {
+.district-image {
   width: 100%;
-  height: 12rem;
+  height: 200px;
+  border-radius: var(--radius);
   overflow: hidden;
+  margin-bottom: 1rem;
 }
 
-.destination-image img {
+.district-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.2s;
 }
 
-.destination-card:hover .destination-image img {
-  transform: scale(1.05);
-}
-
-.destination-info {
-  padding: 1.5rem;
-}
-
-.destination-info h4 {
+.district-info h4 {
   font-size: 1.125rem;
   font-weight: 600;
   color: hsl(var(--foreground));
-  margin: 0 0 0.5rem 0;
+  margin-bottom: 0.5rem;
 }
 
-.destination-type {
+.district-type {
+  font-size: 0.75rem;
   color: hsl(var(--muted-foreground));
-  font-size: 0.875rem;
-  margin-bottom: 0.75rem;
-  text-transform: capitalize;
+  text-transform: uppercase;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
 }
 
-.destination-description {
-  color: hsl(var(--muted-foreground));
+.district-description {
   font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
   line-height: 1.5;
   margin-bottom: 1rem;
 }
 
-.button-group {
+/* Selected Districts Section */
+.selected-districts-section {
+  margin-bottom: 2rem;
+}
+
+.selected-districts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 2rem;
+}
+
+.selected-district-card {
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--primary));
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  position: relative;
+}
+
+.district-header {
   display: flex;
-  gap: 0.5rem;
+  justify-content: between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.district-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  flex: 1;
+}
+
+.remove-district-btn {
+  background: hsl(var(--destructive));
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.remove-district-btn:hover {
+  background: hsl(var(--destructive) / 0.9);
+}
+
+/* Sub-places Section */
+.subplaces-section {
+  margin-top: 1rem;
+}
+
+.subplaces-search {
   margin-bottom: 1rem;
 }
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius);
-  transition: all 0.2s;
-  cursor: pointer;
-  border: 1px solid transparent;
-  text-decoration: none;
+.subplaces-search .search-input {
+  padding: 0.5rem 2.5rem 0.5rem 0.75rem;
+  font-size: 0.8rem;
 }
 
-.btn-icon {
+.subplaces-search .search-icon {
+  right: 0.5rem;
   width: 1rem;
   height: 1rem;
 }
 
-.btn-sm {
-  padding: 0.375rem 0.75rem;
-  font-size: 0.8125rem;
-}
-
-.btn-primary {
-  background: hsl(var(--primary));
-  color: hsl(var(--primary-foreground));
-}
-
-.btn-primary:hover {
-  background: hsl(var(--primary) / 0.9);
-}
-
-.btn-destructive {
-  background: hsl(var(--destructive));
-  color: hsl(var(--destructive-foreground));
-}
-
-.btn-destructive:hover {
-  background: hsl(var(--destructive) / 0.9);
-}
-
-.btn-outline {
-  border: 1px solid hsl(var(--border));
-  background: transparent;
-  color: hsl(var(--foreground));
-}
-
-.btn-outline:hover {
-  background: hsl(var(--secondary));
-}
-
-/* Subplaces Section */
-.subplaces-section {
-  margin-top: 1rem;
-  padding: 1rem;
-  background: hsl(var(--secondary));
-  border-radius: var(--radius);
-  border-left: 4px solid hsl(var(--primary));
-}
-
 .subplaces-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 1rem;
-  margin-bottom: 1rem;
+  max-height: 400px;
+  overflow-y: auto;
 }
 
 .subplace-card {
-  background: hsl(var(--card));
-  border-radius: var(--radius);
+  background: white;
   border: 1px solid hsl(var(--border));
-  overflow: hidden;
+  border-radius: var(--radius);
+  padding: 1rem;
   transition: all 0.2s;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  cursor: pointer;
 }
 
 .subplace-card:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px -1px rgb(0 0 0 / 0.1);
+  border-color: hsl(var(--primary));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .subplace-card.selected {
-  border-color: hsl(var(--accent));
-  background: hsl(var(--accent) / 0.05);
+  border-color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.05);
 }
 
 .subplace-image {
   width: 100%;
-  height: 8rem;
+  height: 120px;
+  border-radius: var(--radius);
   overflow: hidden;
+  margin-bottom: 0.75rem;
 }
 
 .subplace-image img {
@@ -262,55 +312,55 @@
   object-fit: cover;
 }
 
-.subplace-info {
-  padding: 1rem;
-}
-
 .subplace-info h5 {
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: hsl(var(--foreground));
-  margin: 0 0 0.5rem 0;
+  margin-bottom: 0.25rem;
 }
 
 .subplace-type {
+  font-size: 0.75rem;
   color: hsl(var(--muted-foreground));
-  font-size: 0.8125rem;
+  text-transform: uppercase;
+  font-weight: 500;
   margin-bottom: 0.5rem;
-  text-transform: capitalize;
 }
 
 .subplace-description {
+  font-size: 0.75rem;
   color: hsl(var(--muted-foreground));
-  font-size: 0.8125rem;
   line-height: 1.4;
-  margin-bottom: 0.75rem;
 }
 
-.selected-subplaces-list {
+.selected-subplaces-summary {
   margin-top: 1rem;
   padding: 1rem;
-  background: hsl(var(--card));
+  background: hsl(var(--secondary) / 0.1);
   border-radius: var(--radius);
-  border: 1px solid hsl(var(--border));
 }
 
-.selected-subplaces-list h5 {
+.selected-subplaces-summary h5 {
   font-size: 0.875rem;
   font-weight: 600;
-  color: hsl(var(--accent));
-  margin: 0 0 0.5rem 0;
+  color: hsl(var(--foreground));
+  margin-bottom: 0.5rem;
 }
 
-.selected-subplaces-list ul {
-  margin: 0;
-  padding-left: 1.5rem;
-  color: hsl(var(--muted-foreground));
-  font-size: 0.8125rem;
+.subplace-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
-.your-tour-section {
-  margin-top: 2rem;
+.subplace-tag {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  background: hsl(var(--primary));
+  color: white;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
 }
 
 /* Navigation Buttons */
@@ -319,54 +369,102 @@
   justify-content: space-between;
   align-items: center;
   margin-top: 2rem;
-  padding: 0 1rem;
-  gap: 1rem;
+  padding-top: 2rem;
+  border-top: 1px solid hsl(var(--border));
 }
 
-.form-navigation .btn {
-  flex: 1;
-  max-width: 150px;
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  height: auto;
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 2rem;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  border: 1px solid transparent;
+  min-width: 120px;
+  justify-content: center;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  border-color: #3b82f6;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  border-color: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.btn-outline {
+  background: white;
+  color: hsl(var(--muted-foreground));
+  border-color: hsl(var(--border));
+}
+
+.btn-outline:hover:not(:disabled) {
+  background: hsl(var(--muted) / 0.1);
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--muted-foreground));
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-icon {
+  width: 1rem;
+  height: 1rem;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
   .tour-page-container {
-    padding: 0.5rem;
+    padding: 1rem 0.5rem;
   }
-
-  .destinations-grid {
+  
+  .tour-page-wrapper {
+    max-width: 100%;
+  }
+  
+  .tour-page-title {
+    font-size: 2rem;
+  }
+  
+  .card-header,
+  .card-content {
+    padding: 1.5rem;
+  }
+  
+  .district-grid {
     grid-template-columns: 1fr;
   }
-
+  
+  .selected-districts-grid {
+    grid-template-columns: 1fr;
+  }
+  
   .subplaces-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
-
+  
   .form-navigation {
     flex-direction: column;
     gap: 1rem;
   }
-
-  .form-navigation .btn {
-    max-width: none;
+  
+  .btn {
     width: 100%;
-  }
-}
-
-@media (max-width: 640px) {
-  .tour-page-title {
-    font-size: 1.5rem;
-  }
-
-  .tour-page-subtitle {
-    font-size: 0.875rem;
-  }
-
-  .button-group {
-    flex-direction: column;
   }
 }

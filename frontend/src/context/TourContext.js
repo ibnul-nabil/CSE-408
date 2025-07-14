@@ -7,6 +7,9 @@ const initialState = {
   endDate: '',
   places: [],
   route: [],
+  isEditing: false,
+  editingTourId: null,
+  estimatedCost: null,
   // Add more fields as needed
 };
 
@@ -16,7 +19,8 @@ const TOUR_ACTIONS = {
   SET_PLACES: 'SET_PLACES',
   SET_ROUTE: 'SET_ROUTE',
   RESET_TOUR: 'RESET_TOUR',
-  UPDATE_FIELD: 'UPDATE_FIELD'
+  UPDATE_FIELD: 'UPDATE_FIELD',
+  SET_EDIT_MODE: 'SET_EDIT_MODE'
 };
 
 // Reducer function
@@ -27,7 +31,8 @@ const tourReducer = (state, action) => {
         ...state,
         title: action.payload.title,
         startDate: action.payload.startDate,
-        endDate: action.payload.endDate
+        endDate: action.payload.endDate,
+        estimatedCost: action.payload.estimatedCost
       };
     case TOUR_ACTIONS.SET_PLACES:
       return {
@@ -44,6 +49,12 @@ const tourReducer = (state, action) => {
         ...state,
         [action.payload.field]: action.payload.value
       };
+    case TOUR_ACTIONS.SET_EDIT_MODE:
+      return {
+        ...state,
+        isEditing: action.payload.isEditing,
+        editingTourId: action.payload.editingTourId
+      };
     case TOUR_ACTIONS.RESET_TOUR:
       return initialState;
     default:
@@ -59,10 +70,10 @@ export const TourProvider = ({ children }) => {
   const [tourData, dispatch] = useReducer(tourReducer, initialState);
 
   // Action creators
-  const setTourInfo = (title, startDate, endDate) => {
+  const setTourInfo = (title, startDate, endDate, estimatedCost = null) => {
     dispatch({
       type: TOUR_ACTIONS.SET_TOUR_INFO,
-      payload: { title, startDate, endDate }
+      payload: { title, startDate, endDate, estimatedCost }
     });
   };
 
@@ -81,13 +92,22 @@ export const TourProvider = ({ children }) => {
   };
 
   const updateField = (field, value) => {
+    console.log('🔄 TourContext updateField called:', field, '=', value);
     dispatch({
       type: TOUR_ACTIONS.UPDATE_FIELD,
       payload: { field, value }
     });
   };
 
+  const setEditMode = (isEditing, editingTourId = null) => {
+    dispatch({
+      type: TOUR_ACTIONS.SET_EDIT_MODE,
+      payload: { isEditing, editingTourId }
+    });
+  };
+
   const resetTour = () => {
+    console.log('🔄 TourContext resetTour called');
     dispatch({
       type: TOUR_ACTIONS.RESET_TOUR
     });
@@ -99,6 +119,7 @@ export const TourProvider = ({ children }) => {
     setPlaces,
     setRoute,
     updateField,
+    setEditMode,
     resetTour
   };
 
