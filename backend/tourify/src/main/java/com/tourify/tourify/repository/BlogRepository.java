@@ -39,6 +39,12 @@ public interface BlogRepository extends JpaRepository<Blog, Long> {
     List<Blog> findPublishedBlogsByCustomDestination(@Param("destinationName") String destinationName);
     
     @Query("SELECT DISTINCT b FROM Blog b " +
+           "JOIN b.blogCustomDestinations bcd " +
+           "WHERE LOWER(bcd.destinationName) LIKE LOWER(CONCAT('%', :destinationName, '%')) AND b.status = 'published' " +
+           "ORDER BY b.createdAt DESC")
+    List<Blog> findPublishedBlogsByCustomDestinationContaining(@Param("destinationName") String destinationName);
+    
+    @Query("SELECT DISTINCT b FROM Blog b " +
            "LEFT JOIN b.blogDestinations bd " +
            "LEFT JOIN b.blogCustomDestinations bcd " +
            "WHERE (bd.destination.id = :destinationId OR LOWER(bcd.destinationName) = LOWER(:customDestinationName)) " +

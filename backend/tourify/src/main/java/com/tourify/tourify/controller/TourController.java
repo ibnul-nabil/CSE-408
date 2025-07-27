@@ -41,6 +41,8 @@ public class TourController {
     private DestinationRepository destinationRepository;
     @Autowired
     private SubPlaceRepository subPlaceRepository;
+    @Autowired
+    private BlogRepository blogRepository;
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -951,6 +953,107 @@ public class TourController {
         } catch (Exception e) {
             System.out.println("❌ Error parsing coordinates '" + coordinatesStr + "': " + e.getMessage());
             return null;
+        }
+    }
+
+    // Blog suggestions endpoint
+    @GetMapping("/blog-suggestions/{destinationId}")
+    public ResponseEntity<?> getBlogSuggestions(@PathVariable Long destinationId) {
+        try {
+            System.out.println("📚 Getting blog suggestions for destination ID: " + destinationId);
+            
+            List<Blog> allBlogs = new ArrayList<>();
+            
+            // Step 1: Get destination name from destination ID
+            Optional<Destination> destination = destinationRepository.findById(destinationId);
+            if (destination.isPresent()) {
+                String destinationName = destination.get().getName();
+                System.out.println("📍 Found destination name: " + destinationName);
+                
+                // Step 2: Get blogs linked to this destination ID (regular destinations)
+                List<Blog> regularDestinationBlogs = blogRepository.findPublishedBlogsByDestinationId(destinationId);
+                allBlogs.addAll(regularDestinationBlogs);
+                System.out.println("📖 Found " + regularDestinationBlogs.size() + " blogs from regular destinations");
+                
+                // Step 3: Get blogs from custom destinations table using the destination name
+                List<Blog> customDestinationBlogs = blogRepository.findPublishedBlogsByCustomDestination(destinationName);
+                allBlogs.addAll(customDestinationBlogs);
+                System.out.println("📖 Found " + customDestinationBlogs.size() + " blogs from exact custom destination match");
+                
+                // Step 4: Get blogs from custom destinations table using partial name matching
+                List<Blog> partialCustomDestinationBlogs = blogRepository.findPublishedBlogsByCustomDestinationContaining(destinationName);
+                allBlogs.addAll(partialCustomDestinationBlogs);
+                System.out.println("📖 Found " + partialCustomDestinationBlogs.size() + " blogs from partial custom destination match");
+                
+            } else {
+                System.out.println("⚠️ Destination not found for ID: " + destinationId);
+            }
+            
+            // Step 5: Remove duplicates and limit to top 5 most recent blogs
+            List<Blog> uniqueBlogs = allBlogs.stream()
+                    .distinct()
+                    .limit(5)
+                    .collect(Collectors.toList());
+            
+            System.out.println("📖 Total unique blog suggestions found: " + uniqueBlogs.size());
+            
+            // Log some details about found blogs for debugging
+            if (!uniqueBlogs.isEmpty()) {
+                System.out.println("📋 Sample blog titles found:");
+                uniqueBlogs.stream().limit(3).forEach(blog -> {
+                    System.out.println("   - " + (blog.getTitle() != null ? blog.getTitle() : "Untitled"));
+                });
+            }
+            
+            return ResponseEntity.ok(uniqueBlogs);
+            
+        } catch (Exception e) {
+            System.out.println("❌ Error getting blog suggestions: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Failed to get blog suggestions");
+        }
+    }
+
+    @GetMapping("/blog-suggestions/search/{destinationName}")
+    public ResponseEntity<?> getBlogSuggestionsByName(@PathVariable String destinationName) {
+        try {
+            System.out.println("📚 Getting blog suggestions for destination name: " + destinationName);
+            
+            List<Blog> blogs = new ArrayList<>();
+            
+            // 1. Try to find destination by exact name in destinations table
+            Optional<Destination> destination = destinationRepository.findByNameIgnoreCase(destinationName);
+            if (destination.isPresent()) {
+                System.out.println("📍 Found exact destination match: " + destination.get().getName());
+                // Get blogs linked to this destination
+                List<Blog> destinationBlogs = blogRepository.findPublishedBlogsByDestinationId(destination.get().getId());
+                blogs.addAll(destinationBlogs);
+                System.out.println("📖 Found " + destinationBlogs.size() + " blogs for exact destination match");
+            }
+            
+            // 2. Search for exact matches in custom destinations table
+            List<Blog> exactCustomDestinationBlogs = blogRepository.findPublishedBlogsByCustomDestination(destinationName);
+            blogs.addAll(exactCustomDestinationBlogs);
+            System.out.println("📖 Found " + exactCustomDestinationBlogs.size() + " blogs for exact custom destination match");
+            
+            // 3. Search for partial matches in custom destinations table (more flexible)
+            List<Blog> partialCustomDestinationBlogs = blogRepository.findPublishedBlogsByCustomDestinationContaining(destinationName);
+            blogs.addAll(partialCustomDestinationBlogs);
+            System.out.println("📖 Found " + partialCustomDestinationBlogs.size() + " blogs for partial custom destination match");
+            
+            // Remove duplicates and limit to top 5
+            List<Blog> uniqueBlogs = blogs.stream()
+                    .distinct()
+                    .limit(5)
+                    .collect(Collectors.toList());
+            
+            System.out.println("📖 Total unique blog suggestions found: " + uniqueBlogs.size() + " for " + destinationName);
+            
+            return ResponseEntity.ok(uniqueBlogs);
+            
+        } catch (Exception e) {
+            System.out.println("❌ Error getting blog suggestions by name: " + e.getMessage());
+            return ResponseEntity.status(500).body("Failed to get blog suggestions");
         }
     }
 }

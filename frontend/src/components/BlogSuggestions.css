@@ -106,4 +106,79 @@
     color: #e74c3c;
     background-color: #fde8e7;
     border-radius: 8px;
+}
+
+/* Compact styles for blog suggestions in tour creation */
+.selected-district-card .blog-suggestions {
+    margin: 16px 0 0 0;
+    padding: 16px;
+    background-color: #f0f8ff;
+    border: 1px solid #e3f2fd;
+    border-radius: 6px;
+}
+
+.selected-district-card .blog-suggestions h3 {
+    margin-bottom: 12px;
+    color: #1976d2;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.selected-district-card .blog-suggestions h3::before {
+    content: "📚";
+    font-size: 1rem;
+}
+
+.selected-district-card .blog-suggestions-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.selected-district-card .blog-suggestion-card {
+    display: flex;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.selected-district-card .blog-image {
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+}
+
+.selected-district-card .blog-info {
+    padding: 12px;
+    flex: 1;
+}
+
+.selected-district-card .blog-info h4 {
+    font-size: 1rem;
+    margin-bottom: 4px;
+}
+
+.selected-district-card .blog-author {
+    font-size: 0.8rem;
+    margin-bottom: 6px;
+}
+
+.selected-district-card .blog-preview {
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.selected-district-card .blog-stats {
+    gap: 12px;
+    margin-bottom: 8px;
+    font-size: 0.8rem;
+}
+
+.selected-district-card .read-blog-btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
 } 

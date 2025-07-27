@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { MapIcon, X, Search } from 'lucide-react';
 import { useTour } from '../context/TourContext';
 import StepIndicator from '../components/StepIndicator';
+import BlogSuggestions from '../components/BlogSuggestions';
 
 const API_URL = process.env.REACT_APP_URL;
 
@@ -477,6 +478,12 @@ const CreateTourPage = ({ isEditMode = false, onPrevious }) => {
                                 </div>
                               </div>
                             )}
+
+                            {/* Blog suggestions for this destination */}
+                            <BlogSuggestions 
+                              destinationId={district.id}
+                              destinationName={district.name}
+                            />
                           </>
                         )}
                       </div>

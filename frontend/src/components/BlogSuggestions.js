@@ -10,16 +10,35 @@ const BlogSuggestions = ({ destinationId, destinationName }) => {
 
     useEffect(() => {
         const fetchBlogs = async () => {
-            if (!destinationId) return;
+            if (!destinationId && !destinationName) return;
             
             setLoading(true);
             setError(null);
             try {
-                const response = await fetch(`${API_URL}/api/blogs/destination/${destinationId}`);
-                if (!response.ok) throw new Error('Failed to fetch blogs');
+                let response;
+                if (destinationId) {
+                    // Use destination ID if available
+                    response = await fetch(`${API_URL}/api/tours/blog-suggestions/${destinationId}`);
+                } else if (destinationName) {
+                    // Try the general search first, then fallback to custom destination search
+                    try {
+                        response = await fetch(`${API_URL}/api/tours/blog-suggestions/search/${encodeURIComponent(destinationName)}`);
+                        if (!response.ok) {
+                            // If general search fails, try custom destination search
+                            response = await fetch(`${API_URL}/api/tours/blog-suggestions/custom/${encodeURIComponent(destinationName)}`);
+                        }
+                    } catch (err) {
+                        // Fallback to custom destination search
+                        response = await fetch(`${API_URL}/api/tours/blog-suggestions/custom/${encodeURIComponent(destinationName)}`);
+                    }
+                }
+                
+                if (!response.ok) throw new Error('Failed to fetch blog suggestions');
                 const data = await response.json();
                 setBlogs(data);
+                console.log('📚 Fetched blog suggestions:', data);
             } catch (err) {
+                console.error('❌ Error fetching blog suggestions:', err);
                 setError(err.message);
             } finally {
                 setLoading(false);
@@ -27,7 +46,7 @@ const BlogSuggestions = ({ destinationId, destinationName }) => {
         };
 
         fetchBlogs();
-    }, [destinationId]);
+    }, [destinationId, destinationName]);
 
     if (loading) return <div className="blog-suggestions-loading">Loading blogs...</div>;
     if (error) return <div className="blog-suggestions-error">{error}</div>;
