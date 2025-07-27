@@ -2,7 +2,9 @@ package com.tourify.tourify.controller;
 
 import com.tourify.tourify.dto.BlogCreateRequest;
 import com.tourify.tourify.dto.CommentRequest;
+import com.tourify.tourify.dto.CommentResponse;
 import com.tourify.tourify.dto.MediaRequest;
+import com.tourify.tourify.dto.BlogDetailResponse;
 import com.tourify.tourify.entity.*;
 import com.tourify.tourify.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/blogs")
@@ -246,14 +249,10 @@ public class BlogController {
                 return ResponseEntity.notFound().build();
             }
             
-            // Manually initialize lazy collections to ensure they're loaded
-            blog.getBlogDestinations().size(); // Force loading
-            blog.getBlogCustomDestinations().size(); // Force loading
-            blog.getComments().size(); // Force loading
-            blog.getBlogMedia().size(); // Force loading
-            blog.getBlogLikes().size(); // Force loading
+            // Convert to response DTO to avoid circular references
+            BlogDetailResponse response = convertToBlogDetailResponse(blog);
             
-            return ResponseEntity.ok(blog);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
                 .body(Map.of("message", "Error loading blog: " + e.getMessage()));
@@ -268,14 +267,29 @@ public class BlogController {
 
     // Get comments for a blog
     @GetMapping("/{id}/comments")
-    public List<BlogComment> getBlogComments(@PathVariable Long id) {
-        return blogCommentRepository.findTopLevelCommentsByBlogId(id);
+    public List<CommentResponse> getBlogComments(@PathVariable Long id) {
+        List<BlogComment> comments = blogCommentRepository.findTopLevelCommentsByBlogId(id);
+        return comments.stream()
+                .map(comment -> {
+                    CommentResponse response = convertToCommentResponse(comment);
+                    // Fetch replies for this comment
+                    List<BlogComment> replies = blogCommentRepository.findRepliesByParentCommentId(comment.getId());
+                    List<CommentResponse> replyResponses = replies.stream()
+                            .map(this::convertToCommentResponse)
+                            .collect(Collectors.toList());
+                    response.setReplies(replyResponses);
+                    return response;
+                })
+                .collect(Collectors.toList());
     }
 
     // Get replies for a comment
     @GetMapping("/comments/{commentId}/replies")
-    public List<BlogComment> getCommentReplies(@PathVariable Long commentId) {
-        return blogCommentRepository.findRepliesByParentCommentId(commentId);
+    public List<CommentResponse> getCommentReplies(@PathVariable Long commentId) {
+        List<BlogComment> replies = blogCommentRepository.findRepliesByParentCommentId(commentId);
+        return replies.stream()
+                .map(this::convertToCommentResponse)
+                .collect(Collectors.toList());
     }
 
     // Add a comment to a blog
@@ -308,7 +322,9 @@ public class BlogController {
             BlogComment comment = new BlogComment(blog, user, request.getContent(), parentComment);
             BlogComment savedComment = blogCommentRepository.save(comment);
 
-            return ResponseEntity.ok(savedComment);
+            // Convert to response DTO to avoid circular references
+            CommentResponse response = convertToCommentResponse(savedComment);
+            return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         } catch (Exception e) {
@@ -463,6 +479,63 @@ public class BlogController {
             return ResponseEntity.internalServerError()
                 .body(Map.of("message", "An error occurred while checking like status"));
         }
+    }
+
+    // Helper method to convert BlogComment to CommentResponse
+    private CommentResponse convertToCommentResponse(BlogComment comment) {
+        CommentResponse response = new CommentResponse();
+        response.setId(comment.getId());
+        response.setContent(comment.getContent());
+        response.setCreatedAt(comment.getCreatedAt());
+        response.setUpdatedAt(comment.getUpdatedAt());
+        response.setLikes(comment.getLikes());
+        
+        // Set user info (flattened to avoid circular references)
+        if (comment.getUser() != null) {
+            response.setUserId(comment.getUser().getId());
+            response.setUsername(comment.getUser().getUsername());
+            response.setUserProfileImage(comment.getUser().getProfileImage());
+        }
+        
+        // Set parent comment info if this is a reply
+        if (comment.getParentComment() != null) {
+            response.setParentCommentId(comment.getParentComment().getId());
+        }
+        
+        // Set user liked status (default to false, will be updated by frontend if needed)
+        response.setUserLiked(false);
+        
+        return response;
+    }
+
+    // Helper method to convert Blog to BlogDetailResponse
+    private BlogDetailResponse convertToBlogDetailResponse(Blog blog) {
+        BlogDetailResponse response = new BlogDetailResponse();
+        response.setId(blog.getId());
+        response.setTitle(blog.getTitle());
+        response.setContent(blog.getContent());
+        response.setThumbnailUrl(blog.getThumbnailUrl());
+        response.setLikes(blog.getLikes());
+        response.setStatus(blog.getStatus());
+        response.setCreatedAt(blog.getCreatedAt());
+        response.setUpdatedAt(blog.getUpdatedAt());
+        
+        // Set author info (flattened to avoid circular references)
+        if (blog.getUser() != null) {
+            response.setAuthorUsername(blog.getUser().getUsername());
+            response.setAuthorProfileImage(blog.getUser().getProfileImage());
+        }
+        
+        // Set destinations (flattened)
+        response.setDestinations(blog.getDestinations());
+        response.setCustomDestinations(blog.getCustomDestinations());
+        
+        // Set counts
+        response.setCommentsCount(blog.getCommentsCount());
+        response.setMediaCount(blog.getMediaCount());
+        response.setHasMedia(blog.getHasMedia());
+        
+        return response;
     }
 
     // Delete a blog (only by owner)

@@ -1,8 +1,145 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import './CommentsSection.css';
 
 const API_URL = process.env.REACT_APP_URL;
+
+// Move CommentItem outside as a separate memoized component
+const CommentItem = React.memo(({ 
+  comment, 
+  isReply = false, 
+  expandedReplies,
+  onLikeComment,
+  onUnlikeComment,
+  onToggleReplies,
+  onSetReplyingTo,
+  replyingTo,
+  replyText,
+  onReplyTextChange,
+  onReplySubmit,
+  onCancelReply,
+  submittingReplies,
+  currentUser
+}) => {
+  const canInteract = currentUser.id;
+
+  const formatTimeAgo = useCallback((dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+
+    if (diffInSeconds < 60) return 'Just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+    
+    return date.toLocaleDateString();
+  }, []);
+
+  return (
+    <div className={`comment-item ${isReply ? 'reply' : ''}`}>
+      <div className="comment-header">
+        <img 
+          src={comment.userProfileImage || 'https://via.placeholder.com/32'} 
+          alt="User" 
+          className="comment-avatar"
+        />
+        <div className="comment-meta">
+          <span className="comment-author">
+            {comment.username || 'Anonymous'}
+          </span>
+          <span className="comment-time">
+            {formatTimeAgo(comment.createdAt)}
+          </span>
+        </div>
+      </div>
+
+      <div className="comment-content">
+        {comment.content}
+      </div>
+
+      <div className="comment-actions">
+        <button
+          className={`comment-like-btn ${comment.userLiked ? 'liked' : ''}`}
+          onClick={() => comment.userLiked ? onUnlikeComment(comment.id) : onLikeComment(comment.id)}
+          disabled={!canInteract}
+        >
+          {comment.userLiked ? '❤️' : '🤍'} {comment.likes || 0}
+        </button>
+
+        {!isReply && canInteract && (
+          <button
+            className="comment-reply-btn"
+            onClick={() => onSetReplyingTo(comment.id)}
+          >
+            💬 Reply
+          </button>
+        )}
+
+        {!isReply && comment.replies && comment.replies.length > 0 && (
+          <button
+            className="toggle-replies-btn"
+            onClick={() => onToggleReplies(comment.id)}
+          >
+            {expandedReplies.has(comment.id) 
+              ? `Hide ${comment.replies.length} replies` 
+              : `Show ${comment.replies.length} replies`}
+          </button>
+        )}
+      </div>
+
+      {replyingTo === comment.id && (
+        <div className="reply-form">
+          <textarea
+            value={replyText}
+            onChange={onReplyTextChange}
+            placeholder="Write a reply..."
+            className="reply-textarea"
+          />
+          <div className="reply-form-actions">
+            <button
+              onClick={() => onReplySubmit(comment.id)}
+              disabled={!replyText.trim() || submittingReplies.has(comment.id)}
+              className="reply-submit-btn"
+            >
+              {submittingReplies.has(comment.id) ? 'Posting...' : 'Reply'}
+            </button>
+            <button
+              onClick={onCancelReply}
+              className="reply-cancel-btn"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {!isReply && expandedReplies.has(comment.id) && comment.replies && (
+        <div className="replies-container">
+          {comment.replies.map(reply => (
+            <CommentItem 
+              key={reply.id} 
+              comment={reply} 
+              isReply={true}
+              expandedReplies={expandedReplies}
+              onLikeComment={onLikeComment}
+              onUnlikeComment={onUnlikeComment}
+              onToggleReplies={onToggleReplies}
+              onSetReplyingTo={onSetReplyingTo}
+              replyingTo={replyingTo}
+              replyText={replyText}
+              onReplyTextChange={onReplyTextChange}
+              onReplySubmit={onReplySubmit}
+              onCancelReply={onCancelReply}
+              submittingReplies={submittingReplies}
+              currentUser={currentUser}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+});
 
 const CommentsSection = ({ blogId, className = '' }) => {
   const { user } = useAuth();
@@ -14,14 +151,33 @@ const CommentsSection = ({ blogId, className = '' }) => {
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyText, setReplyText] = useState('');
   const [expandedReplies, setExpandedReplies] = useState(new Set());
+  const [submittingReplies, setSubmittingReplies] = useState(new Set());
 
-  useEffect(() => {
-    if (blogId) {
-      fetchComments();
-    }
-  }, [blogId]);
+  // Memoize current user to prevent unnecessary re-calculations
+  const currentUser = useMemo(() => {
+    return user || JSON.parse(localStorage.getItem('user') || '{}');
+  }, [user]);
 
-  const fetchComments = async () => {
+  // Memoized handlers to prevent unnecessary re-renders
+  const handleReplyTextChange = useCallback((e) => {
+    setReplyText(e.target.value);
+  }, []);
+
+  const handleNewCommentChange = useCallback((e) => {
+    setNewComment(e.target.value);
+  }, []);
+
+  // Stable callbacks that won't change on every render
+  const handleSetReplyingTo = useCallback((commentId) => {
+    setReplyingTo(prev => prev === commentId ? null : commentId);
+  }, []);
+
+  const handleCancelReply = useCallback(() => {
+    setReplyingTo(null);
+    setReplyText('');
+  }, []);
+
+  const fetchComments = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`${API_URL}/api/blogs/${blogId}/comments`);
@@ -37,33 +193,15 @@ const CommentsSection = ({ blogId, className = '' }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [blogId]);
 
-  const fetchReplies = async (commentId) => {
-    try {
-      const response = await fetch(`${API_URL}/api/blogs/comments/${commentId}/replies`);
-      if (response.ok) {
-        const replies = await response.json();
-        setComments(prevComments => 
-          prevComments.map(comment => 
-            comment.id === commentId 
-              ? { ...comment, replies: replies }
-              : comment
-          )
-        );
-        setExpandedReplies(prev => new Set([...prev, commentId]));
-      }
-    } catch (err) {
-      console.error('Error fetching replies:', err);
+  useEffect(() => {
+    if (blogId) {
+      fetchComments();
     }
-  };
+  }, [blogId, fetchComments]);
 
-  const getCurrentUser = () => {
-    return user || JSON.parse(localStorage.getItem('user') || '{}');
-  };
-
-  const submitComment = async (content, parentCommentId = null) => {
-    const currentUser = getCurrentUser();
+  const submitComment = useCallback(async (content, parentCommentId = null) => {
     if (!currentUser.id) {
       setError('Please log in to comment');
       return false;
@@ -116,9 +254,9 @@ const CommentsSection = ({ blogId, className = '' }) => {
       console.error('Error submitting comment:', err);
       return false;
     }
-  };
+  }, [currentUser.id, blogId]);
 
-  const handleCommentSubmit = async (e) => {
+  const handleCommentSubmit = useCallback(async (e) => {
     e.preventDefault();
     if (!newComment.trim()) return;
 
@@ -130,24 +268,9 @@ const CommentsSection = ({ blogId, className = '' }) => {
       setNewComment('');
     }
     setSubmitting(false);
-  };
+  }, [newComment, submitComment]);
 
-  const handleReplySubmit = async (commentId) => {
-    if (!replyText.trim()) return;
-
-    setSubmitting(true);
-    setError('');
-
-    const success = await submitComment(replyText, commentId);
-    if (success) {
-      setReplyText('');
-      setReplyingTo(null);
-    }
-    setSubmitting(false);
-  };
-
-  const likeComment = async (commentId) => {
-    const currentUser = getCurrentUser();
+  const likeComment = useCallback(async (commentId) => {
     if (!currentUser.id) {
       setError('Please log in to like comments');
       return;
@@ -171,10 +294,9 @@ const CommentsSection = ({ blogId, className = '' }) => {
     } catch (err) {
       console.error('Error liking comment:', err);
     }
-  };
+  }, [currentUser.id]);
 
-  const unlikeComment = async (commentId) => {
-    const currentUser = getCurrentUser();
+  const unlikeComment = useCallback(async (commentId) => {
     if (!currentUser.id) return;
 
     try {
@@ -195,9 +317,9 @@ const CommentsSection = ({ blogId, className = '' }) => {
     } catch (err) {
       console.error('Error unliking comment:', err);
     }
-  };
+  }, [currentUser.id]);
 
-  const updateCommentLikes = (commentId, newLikesCount, userLiked) => {
+  const updateCommentLikes = useCallback((commentId, newLikesCount, userLiked) => {
     setComments(prevComments => 
       prevComments.map(comment => {
         if (comment.id === commentId) {
@@ -216,128 +338,40 @@ const CommentsSection = ({ blogId, className = '' }) => {
         return comment;
       })
     );
-  };
+  }, []);
 
-  const toggleReplies = (commentId) => {
-    if (expandedReplies.has(commentId)) {
-      setExpandedReplies(prev => {
-        const newSet = new Set(prev);
+  const toggleReplies = useCallback((commentId) => {
+    setExpandedReplies(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(commentId)) {
         newSet.delete(commentId);
-        return newSet;
-      });
-    } else {
-      fetchReplies(commentId);
+      } else {
+        newSet.add(commentId);
+      }
+      return newSet;
+    });
+  }, []);
+
+  const handleReplySubmit = useCallback(async (commentId) => {
+    if (!replyText.trim()) return;
+
+    setSubmittingReplies(prev => new Set([...prev, commentId]));
+    setError('');
+
+    const success = await submitComment(replyText, commentId);
+    if (success) {
+      setReplyText('');
+      setReplyingTo(null);
+      
+      // Refresh all comments to get the updated replies
+      await fetchComments();
     }
-  };
-
-  const formatTimeAgo = (dateString) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInSeconds = Math.floor((now - date) / 1000);
-
-    if (diffInSeconds < 60) return 'Just now';
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
-    
-    return date.toLocaleDateString();
-  };
-
-  const CommentItem = ({ comment, isReply = false }) => {
-    const currentUser = getCurrentUser();
-    const canInteract = currentUser.id;
-
-    return (
-      <div className={`comment-item ${isReply ? 'reply' : ''}`}>
-        <div className="comment-header">
-          <img 
-            src={comment.user?.profileImage || 'https://via.placeholder.com/32'} 
-            alt="User" 
-            className="comment-avatar"
-          />
-          <div className="comment-meta">
-            <span className="comment-author">
-              {comment.user?.username || 'Anonymous'}
-            </span>
-            <span className="comment-time">
-              {formatTimeAgo(comment.createdAt)}
-            </span>
-          </div>
-        </div>
-
-        <div className="comment-content">
-          {comment.content}
-        </div>
-
-        <div className="comment-actions">
-          <button
-            className={`comment-like-btn ${comment.userLiked ? 'liked' : ''}`}
-            onClick={() => comment.userLiked ? unlikeComment(comment.id) : likeComment(comment.id)}
-            disabled={!canInteract}
-          >
-            {comment.userLiked ? '❤️' : '🤍'} {comment.likes || 0}
-          </button>
-
-          {!isReply && canInteract && (
-            <button
-              className="comment-reply-btn"
-              onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
-            >
-              💬 Reply
-            </button>
-          )}
-
-          {!isReply && comment.replies && comment.replies.length > 0 && (
-            <button
-              className="toggle-replies-btn"
-              onClick={() => toggleReplies(comment.id)}
-            >
-              {expandedReplies.has(comment.id) 
-                ? `Hide ${comment.replies.length} replies` 
-                : `Show ${comment.replies.length} replies`}
-            </button>
-          )}
-        </div>
-
-        {replyingTo === comment.id && (
-          <div className="reply-form">
-            <textarea
-              value={replyText}
-              onChange={(e) => setReplyText(e.target.value)}
-              placeholder="Write a reply..."
-              className="reply-textarea"
-            />
-            <div className="reply-form-actions">
-              <button
-                onClick={() => handleReplySubmit(comment.id)}
-                disabled={!replyText.trim() || submitting}
-                className="reply-submit-btn"
-              >
-                {submitting ? 'Posting...' : 'Reply'}
-              </button>
-              <button
-                onClick={() => {
-                  setReplyingTo(null);
-                  setReplyText('');
-                }}
-                className="reply-cancel-btn"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        )}
-
-        {!isReply && expandedReplies.has(comment.id) && comment.replies && (
-          <div className="replies-container">
-            {comment.replies.map(reply => (
-              <CommentItem key={reply.id} comment={reply} isReply={true} />
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  };
+    setSubmittingReplies(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(commentId);
+      return newSet;
+    });
+  }, [replyText, submitComment, fetchComments]);
 
   if (loading) {
     return <div className="comments-loading">Loading comments...</div>;
@@ -355,21 +389,21 @@ const CommentsSection = ({ blogId, className = '' }) => {
         </div>
       )}
 
-      {getCurrentUser().id ? (
+      {currentUser.id ? (
         <form onSubmit={handleCommentSubmit} className="comment-form">
           <div className="comment-form-header">
             <img 
-              src={getCurrentUser().profileImage || 'https://via.placeholder.com/40'} 
+              src={currentUser.profileImage || 'https://via.placeholder.com/40'} 
               alt="Your avatar" 
               className="comment-form-avatar"
             />
             <span className="comment-form-username">
-              {getCurrentUser().username || 'You'}
+              {currentUser.username || 'You'}
             </span>
           </div>
           <textarea
             value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
+            onChange={handleNewCommentChange}
             placeholder="Write a comment..."
             className="comment-textarea"
             rows={3}
@@ -393,7 +427,22 @@ const CommentsSection = ({ blogId, className = '' }) => {
       <div className="comments-list">
         {comments.length > 0 ? (
           comments.map(comment => (
-            <CommentItem key={comment.id} comment={comment} />
+            <CommentItem 
+              key={comment.id} 
+              comment={comment}
+              expandedReplies={expandedReplies}
+              onLikeComment={likeComment}
+              onUnlikeComment={unlikeComment}
+              onToggleReplies={toggleReplies}
+              onSetReplyingTo={handleSetReplyingTo}
+              replyingTo={replyingTo}
+              replyText={replyText}
+              onReplyTextChange={handleReplyTextChange}
+              onReplySubmit={handleReplySubmit}
+              onCancelReply={handleCancelReply}
+              submittingReplies={submittingReplies}
+              currentUser={currentUser}
+            />
           ))
         ) : (
           <div className="no-comments">
@@ -405,4 +454,4 @@ const CommentsSection = ({ blogId, className = '' }) => {
   );
 };
 
-export default CommentsSection; 
+export default CommentsSection;

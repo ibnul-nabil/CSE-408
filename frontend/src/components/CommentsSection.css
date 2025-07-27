@@ -398,22 +398,4 @@
   outline-offset: 2px;
 }
 
-/* Loading state for buttons */
-.comment-submit-btn:disabled::after,
-.reply-submit-btn:disabled::after {
-  content: '';
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  border: 2px solid transparent;
-  border-top: 2px solid currentColor;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-left: 8px;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-} 
+ 

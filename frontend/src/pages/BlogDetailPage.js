@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import CommentsSection from '../components/CommentsSection';
 import './BlogDetailPage.css';
 
 const API_URL = process.env.REACT_APP_URL;
@@ -244,6 +245,9 @@ const BlogDetailPage = () => {
             {liked ? '💖 Unlike' : '🤍 Like'}
           </button>
         </div>
+
+        {/* Comments Section */}
+        <CommentsSection blogId={blog.id} />
       </div>
     </div>
   );

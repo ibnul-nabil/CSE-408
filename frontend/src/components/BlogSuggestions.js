@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './BlogSuggestions.css';
 
 const API_URL = process.env.REACT_APP_URL;
 
 const BlogSuggestions = ({ destinationId, destinationName }) => {
+    const navigate = useNavigate();
     const [blogs, setBlogs] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -20,17 +22,8 @@ const BlogSuggestions = ({ destinationId, destinationName }) => {
                     // Use destination ID if available
                     response = await fetch(`${API_URL}/api/tours/blog-suggestions/${destinationId}`);
                 } else if (destinationName) {
-                    // Try the general search first, then fallback to custom destination search
-                    try {
-                        response = await fetch(`${API_URL}/api/tours/blog-suggestions/search/${encodeURIComponent(destinationName)}`);
-                        if (!response.ok) {
-                            // If general search fails, try custom destination search
-                            response = await fetch(`${API_URL}/api/tours/blog-suggestions/custom/${encodeURIComponent(destinationName)}`);
-                        }
-                    } catch (err) {
-                        // Fallback to custom destination search
-                        response = await fetch(`${API_URL}/api/tours/blog-suggestions/custom/${encodeURIComponent(destinationName)}`);
-                    }
+                    // Use the search endpoint for destination names
+                    response = await fetch(`${API_URL}/api/tours/blog-suggestions/search/${encodeURIComponent(destinationName)}`);
                 }
                 
                 if (!response.ok) throw new Error('Failed to fetch blog suggestions');
@@ -76,14 +69,12 @@ const BlogSuggestions = ({ destinationId, destinationName }) => {
                                 <span>💬 {blog.commentsCount || 0}</span>
                                 <span>📷 {blog.mediaCount || 0}</span>
                             </div>
-                            <a 
-                                href={`/blogs/${blog.id}`} 
-                                target="_blank" 
-                                rel="noopener noreferrer" 
+                            <button 
+                                onClick={() => navigate(`/blogs/${blog.id}`)}
                                 className="read-blog-btn"
                             >
                                 Read Blog
-                            </a>
+                            </button>
                         </div>
                     </div>
                 ))}

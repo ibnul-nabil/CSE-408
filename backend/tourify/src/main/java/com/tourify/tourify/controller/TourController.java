@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import java.util.Optional;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tourify.tourify.dto.BlogSuggestionResponse;
 
 @RestController
 @RequestMapping("/api/tours")
@@ -997,15 +998,20 @@ public class TourController {
             
             System.out.println("📖 Total unique blog suggestions found: " + uniqueBlogs.size());
             
+            // Step 6: Convert to response DTOs to avoid circular references
+            List<BlogSuggestionResponse> responseBlogs = uniqueBlogs.stream()
+                    .map(this::convertToBlogSuggestionResponse)
+                    .collect(Collectors.toList());
+            
             // Log some details about found blogs for debugging
-            if (!uniqueBlogs.isEmpty()) {
+            if (!responseBlogs.isEmpty()) {
                 System.out.println("📋 Sample blog titles found:");
-                uniqueBlogs.stream().limit(3).forEach(blog -> {
+                responseBlogs.stream().limit(3).forEach(blog -> {
                     System.out.println("   - " + (blog.getTitle() != null ? blog.getTitle() : "Untitled"));
                 });
             }
             
-            return ResponseEntity.ok(uniqueBlogs);
+            return ResponseEntity.ok(responseBlogs);
             
         } catch (Exception e) {
             System.out.println("❌ Error getting blog suggestions: " + e.getMessage());
@@ -1049,11 +1055,46 @@ public class TourController {
             
             System.out.println("📖 Total unique blog suggestions found: " + uniqueBlogs.size() + " for " + destinationName);
             
-            return ResponseEntity.ok(uniqueBlogs);
+            // Convert to response DTOs to avoid circular references
+            List<BlogSuggestionResponse> responseBlogs = uniqueBlogs.stream()
+                    .map(this::convertToBlogSuggestionResponse)
+                    .collect(Collectors.toList());
+            
+            return ResponseEntity.ok(responseBlogs);
             
         } catch (Exception e) {
             System.out.println("❌ Error getting blog suggestions by name: " + e.getMessage());
             return ResponseEntity.status(500).body("Failed to get blog suggestions");
         }
+    }
+
+    // Helper method to convert Blog to BlogSuggestionResponse
+    private BlogSuggestionResponse convertToBlogSuggestionResponse(Blog blog) {
+        BlogSuggestionResponse response = new BlogSuggestionResponse();
+        response.setId(blog.getId());
+        response.setTitle(blog.getTitle());
+        response.setContent(blog.getContent());
+        response.setThumbnailUrl(blog.getThumbnailUrl());
+        response.setLikes(blog.getLikes());
+        response.setStatus(blog.getStatus());
+        response.setCreatedAt(blog.getCreatedAt());
+        response.setUpdatedAt(blog.getUpdatedAt());
+        
+        // Set author info (flattened to avoid circular references)
+        if (blog.getUser() != null) {
+            response.setAuthorUsername(blog.getUser().getUsername());
+            response.setAuthorProfileImage(blog.getUser().getProfileImage());
+        }
+        
+        // Set destinations (flattened)
+        response.setDestinations(blog.getDestinations());
+        response.setCustomDestinations(blog.getCustomDestinations());
+        
+        // Set counts
+        response.setCommentsCount(blog.getCommentsCount());
+        response.setMediaCount(blog.getMediaCount());
+        response.setHasMedia(blog.getHasMedia());
+        
+        return response;
     }
 }
