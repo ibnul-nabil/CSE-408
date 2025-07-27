@@ -7,6 +7,9 @@ const initialState = {
   endDate: '',
   places: [],
   route: [],
+  optimizedRoute: null,
+  totalDistance: null,
+  isRouteOptimized: false,
   isEditing: false,
   editingTourId: null,
   estimatedCost: null,
@@ -18,6 +21,7 @@ const TOUR_ACTIONS = {
   SET_TOUR_INFO: 'SET_TOUR_INFO',
   SET_PLACES: 'SET_PLACES',
   SET_ROUTE: 'SET_ROUTE',
+  SET_OPTIMIZED_ROUTE: 'SET_OPTIMIZED_ROUTE',
   RESET_TOUR: 'RESET_TOUR',
   UPDATE_FIELD: 'UPDATE_FIELD',
   SET_EDIT_MODE: 'SET_EDIT_MODE'
@@ -37,12 +41,22 @@ const tourReducer = (state, action) => {
     case TOUR_ACTIONS.SET_PLACES:
       return {
         ...state,
-        places: action.payload
+        places: action.payload,
+        optimizedRoute: null,
+        totalDistance: null,
+        isRouteOptimized: false
       };
     case TOUR_ACTIONS.SET_ROUTE:
       return {
         ...state,
         route: action.payload
+      };
+    case TOUR_ACTIONS.SET_OPTIMIZED_ROUTE:
+      return {
+        ...state,
+        optimizedRoute: action.payload.optimizedRoute,
+        totalDistance: action.payload.totalDistance,
+        isRouteOptimized: true
       };
     case TOUR_ACTIONS.UPDATE_FIELD:
       return {
@@ -91,6 +105,13 @@ export const TourProvider = ({ children }) => {
     });
   };
 
+  const setOptimizedRoute = (optimizedRoute, totalDistance) => {
+    dispatch({
+      type: TOUR_ACTIONS.SET_OPTIMIZED_ROUTE,
+      payload: { optimizedRoute, totalDistance }
+    });
+  };
+
   const updateField = (field, value) => {
     console.log('🔄 TourContext updateField called:', field, '=', value);
     dispatch({
@@ -118,6 +139,7 @@ export const TourProvider = ({ children }) => {
     setTourInfo,
     setPlaces,
     setRoute,
+    setOptimizedRoute,
     updateField,
     setEditMode,
     resetTour

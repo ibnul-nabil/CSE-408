@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "../context/AuthContext";
 import { useTour } from "../context/TourContext";
-import { CheckCircle, ArrowLeft, Calendar, MapPin, Clock } from 'lucide-react';
+import { CheckCircle, ArrowLeft, Calendar, MapPin, Clock, Navigation } from 'lucide-react';
 import StepIndicator from '../components/StepIndicator';
 import './ConfirmTourPage.css';
 
@@ -94,9 +94,13 @@ const ConfirmTourPage = () => {
       estimatedCost: 0, // You can update this if you collect cost
       route: {
         routeSource: "user",
-        stops
+        stops,
+        totalDistance: tourData.totalDistance || 0 // Include the calculated distance
       }
     };
+
+    console.log("📏 Tour data distance:", tourData.totalDistance);
+    console.log("🚀 Sending tour creation request with distance:", reqBody.route.totalDistance);
 
     try {
       const res = await fetch(`${API_URL}/api/tours`, {
@@ -158,6 +162,19 @@ const ConfirmTourPage = () => {
             </p>
           </div>
         </div>
+        
+        {tourData.totalDistance && (
+          <div className="tour-detail-card">
+            <Navigation className="detail-icon" />
+            <div className="detail-content">
+              <h4 className="detail-title">Route Distance</h4>
+              <p className="detail-value">{tourData.totalDistance} km</p>
+              <p className="detail-subtitle">
+                {tourData.isRouteOptimized ? 'Optimized route' : 'Direct route'}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
       
       <div className="tour-title-display">

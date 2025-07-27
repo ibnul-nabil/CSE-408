@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './MyTripsPage.css';
-import { Calendar, MapPin, Clock, Users, ArrowRight, Plus, ArrowLeft, Edit, ChevronDown, ChevronUp, Plane, Archive } from 'lucide-react';
+import { Calendar, MapPin, Clock, Users, ArrowRight, Plus, ArrowLeft, Edit, ChevronDown, ChevronUp, Plane, Archive, Route } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const API_URL = process.env.REACT_APP_URL;
@@ -56,42 +56,67 @@ const MyTripsPage = () => {
   const TOURS_PER_PAGE = 6;
 
   useEffect(() => {
+    console.log('🚀 MyTripsPage useEffect triggered with location.state:', location.state);
+    
     const shouldSkipLoading = location.state?.skipLoading;
     const returnState = location.state?.returnState;
     
-    fetchTours(shouldSkipLoading);
+    console.log('📝 shouldSkipLoading:', shouldSkipLoading);
+    console.log('📝 returnState:', returnState);
     
-    // Show success message if redirected from tour creation
-    if (shouldSkipLoading) {
-      setShowSuccessMessage(true);
-      setTimeout(() => setShowSuccessMessage(false), 3000);
-    }
-
-    // Restore navigation state if returning from tour details
-    if (returnState) {
-      console.log('🔄 Restoring navigation state:', returnState);
-      setExpandedSections(returnState.expandedSections);
-      setHighlightedTour(returnState.highlightedTour);
+    const initializePage = async () => {
+      // Always ensure loading state is set to false initially when skipLoading is true
+      if (shouldSkipLoading) {
+        console.log('⚡ Setting loading to false immediately due to skipLoading');
+        setLoading(false);
+      }
       
-      // Scroll to the highlighted tour card after state is restored
-      setTimeout(() => {
-        const tourElement = document.querySelector(`[data-tour-id="${returnState.highlightedTour}"]`);
-        if (tourElement) {
-          console.log('📍 Scrolling to tour card:', returnState.highlightedTour);
-          tourElement.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'center',
-            inline: 'nearest'
-          });
+      try {
+        // Fetch tours
+        await fetchTours(shouldSkipLoading);
+        
+        // Show success message if redirected from tour creation
+        if (shouldSkipLoading) {
+          setShowSuccessMessage(true);
+          setTimeout(() => setShowSuccessMessage(false), 3000);
         }
-      }, 100); // Small delay to ensure DOM is updated
-      
-      // Clear highlight after animation
-      setTimeout(() => {
-        console.log('✨ Clearing highlight for tour:', returnState.highlightedTour);
-        setHighlightedTour(null);
-      }, 3000);
-    }
+
+        // Restore navigation state if returning from tour details
+        if (returnState) {
+          console.log('🔄 Restoring navigation state:', returnState);
+          setExpandedSections(returnState.expandedSections);
+          setHighlightedTour(returnState.highlightedTour);
+          
+          // Scroll to the highlighted tour card after state is restored
+          setTimeout(() => {
+            const tourElement = document.querySelector(`[data-tour-id="${returnState.highlightedTour}"]`);
+            if (tourElement) {
+              console.log('📍 Scrolling to tour card:', returnState.highlightedTour);
+              tourElement.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center',
+                inline: 'nearest'
+              });
+            }
+          }, 100); // Small delay to ensure DOM is updated
+          
+          // Clear highlight after animation
+          setTimeout(() => {
+            console.log('✨ Clearing highlight for tour:', returnState.highlightedTour);
+            setHighlightedTour(null);
+          }, 3000);
+        }
+      } catch (error) {
+        console.error('❌ Error initializing page:', error);
+        setError('Failed to load tours');
+      } finally {
+        // Safety net: ensure loading is always set to false
+        console.log('🔒 Safety net: ensuring loading is false');
+        setLoading(false);
+      }
+    };
+    
+    initializePage();
   }, [location.state]);
 
   const fetchTours = async (skipLoadingState = false) => {
@@ -134,9 +159,8 @@ const MyTripsPage = () => {
       console.error('Error fetching tours:', err);
       setError(err.message);
     } finally {
-      if (!skipLoadingState) {
-        setLoading(false);
-      }
+      // Always set loading to false, regardless of skipLoadingState
+      setLoading(false);
     }
   };
 
@@ -356,6 +380,13 @@ const MyTripsPage = () => {
             <MapPin className="detail-icon" />
             <span>{tour.places?.length || 0} destination{(tour.places?.length || 0) !== 1 ? 's' : ''}</span>
           </div>
+          
+          {tour.totalDistance && (
+            <div className="tour-detail-item">
+              <Route className="detail-icon" />
+              <span>{tour.totalDistance} km total distance</span>
+            </div>
+          )}
         </div>
 
         {tour.places && tour.places.length > 0 && (

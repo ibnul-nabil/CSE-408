@@ -1,6 +1,7 @@
 # Images and uploads
 images/
 backend/tourify/images/
+backend/tourify/target/
 frontend/public/images/
 uploads/
 

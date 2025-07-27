@@ -22,10 +22,12 @@ com\tourify\tourify\dto\BlogCreateRequest.class
 com\tourify\tourify\repository\TourRepository.class
 com\tourify\tourify\repository\TourRouteRepository.class
 com\tourify\tourify\dto\RouteDTO.class
+com\tourify\tourify\dto\TourResponseDTO$PlaceInfo.class
 com\tourify\tourify\entity\Tour$TourStatus.class
 com\tourify\tourify\dto\CommentRequest.class
 com\tourify\tourify\controller\FileUploadController.class
 com\tourify\tourify\repository\BlogDestinationRepository.class
+com\tourify\tourify\dto\TourResponseDTO$SubPlaceInfo.class
 com\tourify\tourify\repository\BlogCommentRepository.class
 com\tourify\tourify\service\SubPlaceService.class
 com\tourify\tourify\entity\Tour.class

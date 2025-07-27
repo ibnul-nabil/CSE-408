@@ -14,6 +14,7 @@ public class TourResponseDTO {
     private BigDecimal estimatedCost;
     private ZonedDateTime createdAt;
     private List<PlaceInfo> places;
+    private Integer totalDistance; // Distance in kilometers
     
     public TourResponseDTO(Long id, String title, String status) {
         this.id = id;
@@ -37,6 +38,8 @@ public class TourResponseDTO {
     public void setCreatedAt(ZonedDateTime createdAt) { this.createdAt = createdAt; }
     public List<PlaceInfo> getPlaces() { return places; }
     public void setPlaces(List<PlaceInfo> places) { this.places = places; }
+    public Integer getTotalDistance() { return totalDistance; }
+    public void setTotalDistance(Integer totalDistance) { this.totalDistance = totalDistance; }
     
     // Inner class for place information
     public static class PlaceInfo {

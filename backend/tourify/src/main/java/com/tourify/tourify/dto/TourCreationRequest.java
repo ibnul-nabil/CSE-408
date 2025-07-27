@@ -65,9 +65,13 @@ public class TourCreationRequest {
     public static class RouteDTO {
         private String routeSource;
         private List<StopDTO> stops;
+        private Double totalDistance;
+        
         public String getRouteSource() { return routeSource; }
         public void setRouteSource(String routeSource) { this.routeSource = routeSource; }
         public List<StopDTO> getStops() { return stops; }
         public void setStops(List<StopDTO> stops) { this.stops = stops; }
+        public Double getTotalDistance() { return totalDistance; }
+        public void setTotalDistance(Double totalDistance) { this.totalDistance = totalDistance; }
     }
 }
