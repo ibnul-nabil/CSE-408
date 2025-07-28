@@ -97,7 +97,17 @@ const ConfirmTourPage = () => {
         stops,
         totalDistance: tourData.totalDistance || 0 // Include the calculated distance
       },
-      accommodations: tourData.accommodations || []
+      accommodations: (tourData.accommodations || []).map(acc => ({
+        hotelId: acc.hotelId,
+        checkIn: acc.checkIn,
+        checkOut: acc.checkOut,
+        totalCost: acc.totalCost
+      })),
+      transportation: (tourData.transportation || []).map(trans => ({
+        transportId: trans.id,
+        date: trans.date,
+        cost: trans.cost
+      }))
     };
 
     console.log("📏 Tour data distance:", tourData.totalDistance);
@@ -132,7 +142,7 @@ const ConfirmTourPage = () => {
   };
 
   const handlePrevious = () => {
-    navigate('/finalize-route');
+    navigate('/select-transport');
   };
 
   const renderTourSummary = () => (
@@ -210,6 +220,29 @@ const ConfirmTourPage = () => {
     </div>
   );
 
+  const renderTransportationList = () => (
+    <div className="transportation-confirmation-list">
+      <h4 className="transportation-list-title">Your Selected Transportation:</h4>
+      <div className="transportation-grid">
+        {tourData.transportation && tourData.transportation.map((transport, index) => (
+          <div key={transport.id} className="transport-confirmation-card">
+            <div className="transport-number">{index + 1}</div>
+            <div className="transport-info">
+              <h5 className="transport-name">{transport.name}</h5>
+              <p className="transport-route">
+                {transport.startPointName} → {transport.endPointName}
+              </p>
+              <p className="transport-details">
+                {transport.type.charAt(0).toUpperCase() + transport.type.slice(1)} • {transport.transportClass.charAt(0).toUpperCase() + transport.transportClass.slice(1)}
+              </p>
+              <p className="transport-date">Date: {transport.date}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
   return (
     <div className="tour-page-container">
       <div className="tour-page-wrapper">
@@ -218,7 +251,7 @@ const ConfirmTourPage = () => {
           <p className="tour-page-subtitle">Plan your perfect adventure</p>
         </div>
         
-        <StepIndicator currentStep={5} />
+        <StepIndicator currentStep={6} />
         
         <div className="card">
           <div className="card-header">
@@ -233,6 +266,7 @@ const ConfirmTourPage = () => {
           <div className="card-content">
             {renderTourSummary()}
             {renderPlacesList()}
+            {tourData.transportation && tourData.transportation.length > 0 && renderTransportationList()}
           </div>
         </div>
         

@@ -35,7 +35,7 @@ const FinalizeRoutePage = () => {
   };
 
   const handleNext = () => {
-    navigate('/confirm-tour');
+    navigate('/select-transport');
   };
 
   const handlePrevious = () => {
