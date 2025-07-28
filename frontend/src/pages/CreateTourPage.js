@@ -275,23 +275,37 @@ const CreateTourPage = ({ isEditMode = false, onPrevious, onNext }) => {
 
       // Convert selected districts to route stops
       let stopOrder = 1;
-      selectedDistricts.forEach(({ district, selectedSubplaces }) => {
-        // Add the district as a stop
-        updateData.route.stops.push({
-          placeType: 'Destination',
-          placeId: district.id,
-          stopOrder: stopOrder++
-        });
-
-        // Add selected sub-places as stops
-        selectedSubplaces.forEach(subplace => {
+      
+      // Use optimized route if available in edit mode, otherwise use selected districts
+      if (isEditing && tourData.isRouteOptimized && tourData.optimizedRoute) {
+        // Use optimized route order
+        tourData.optimizedRoute.forEach((place) => {
           updateData.route.stops.push({
-            placeType: 'SubPlace',
-            placeId: subplace.id,
+            placeType: place.type,
+            placeId: place.id,
             stopOrder: stopOrder++
           });
         });
-      });
+      } else {
+        // Use selected districts order
+        selectedDistricts.forEach(({ district, selectedSubplaces }) => {
+          // Add the district as a stop
+          updateData.route.stops.push({
+            placeType: 'Destination',
+            placeId: district.id,
+            stopOrder: stopOrder++
+          });
+
+          // Add selected sub-places as stops
+          selectedSubplaces.forEach(subplace => {
+            updateData.route.stops.push({
+              placeType: 'SubPlace',
+              placeId: subplace.id,
+              stopOrder: stopOrder++
+            });
+          });
+        });
+      }
 
       console.log('🔄 Updating tour with data:', updateData);
       

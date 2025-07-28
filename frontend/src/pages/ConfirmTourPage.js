@@ -84,20 +84,38 @@ const ConfirmTourPage = ({ isEditMode = false, onPrevious, onComplete }) => {
     // Prepare request body for backend
     let stopOrder = 1;
     const stops = [];
-    tourData.places.forEach(({ destination, subplaces }) => {
-      stops.push({
-        placeType: "Destination",
-        placeId: destination.id,
-        stopOrder: stopOrder++
-      });
-      subplaces.forEach(sub => {
+    
+    // Use optimized route if available, otherwise use original places
+    const placesToUse = tourData.isRouteOptimized && tourData.optimizedRoute 
+      ? tourData.optimizedRoute 
+      : tourData.places;
+    
+    if (tourData.isRouteOptimized && tourData.optimizedRoute) {
+      // Use optimized route order
+      tourData.optimizedRoute.forEach((place) => {
         stops.push({
-          placeType: "SubPlace",
-          placeId: sub.id,
+          placeType: place.type,
+          placeId: place.id,
           stopOrder: stopOrder++
         });
       });
-    });
+    } else {
+      // Use original places order
+      tourData.places.forEach(({ destination, subplaces }) => {
+        stops.push({
+          placeType: "Destination",
+          placeId: destination.id,
+          stopOrder: stopOrder++
+        });
+        subplaces.forEach(sub => {
+          stops.push({
+            placeType: "SubPlace",
+            placeId: sub.id,
+            stopOrder: stopOrder++
+          });
+        });
+      });
+    }
     // Calculate total estimated cost from accommodations
     const totalAccommodationCost = calculateAccommodationCost();
     
@@ -251,31 +269,56 @@ const ConfirmTourPage = ({ isEditMode = false, onPrevious, onComplete }) => {
     );
   };
 
-  const renderPlacesList = () => (
-    <div className="places-confirmation-list">
-      <h4 className="places-list-title">Your Selected Places:</h4>
-      <div className="places-grid">
-        {tourData.places && tourData.places.map((item, index) => (
-          <div key={item.destination.id} className="place-confirmation-card">
-            <div className="place-number">{index + 1}</div>
-            <div className="place-info">
-              <h5 className="place-name">{item.destination.name}</h5>
-              <p className="place-type">Destination</p>
-              {item.subplaces.length > 0 && (
-                <div className="subplaces-list">
-                  {item.subplaces.map((subplace) => (
-                    <span key={subplace.id} className="subplace-tag">
-                      {subplace.name}
-                    </span>
-                  ))}
+  const renderPlacesList = () => {
+    // Use optimized route if available, otherwise use original places
+    const placesToShow = tourData.isRouteOptimized && tourData.optimizedRoute 
+      ? tourData.optimizedRoute 
+      : tourData.places;
+    
+    return (
+      <div className="places-confirmation-list">
+        <h4 className="places-list-title">
+          {tourData.isRouteOptimized ? "Your Optimized Route:" : "Your Selected Places:"}
+        </h4>
+        <div className="places-grid">
+          {placesToShow && placesToShow.map((item, index) => {
+            if (tourData.isRouteOptimized && tourData.optimizedRoute) {
+              // Display optimized route items
+              return (
+                <div key={item.id} className="place-confirmation-card">
+                  <div className="place-number">{index + 1}</div>
+                  <div className="place-info">
+                    <h5 className="place-name">{item.name}</h5>
+                    <p className="place-type">{item.type}</p>
+                  </div>
                 </div>
-              )}
-            </div>
-          </div>
-        ))}
+              );
+            } else {
+              // Display original places structure
+              return (
+                <div key={item.destination.id} className="place-confirmation-card">
+                  <div className="place-number">{index + 1}</div>
+                  <div className="place-info">
+                    <h5 className="place-name">{item.destination.name}</h5>
+                    <p className="place-type">Destination</p>
+                    {item.subplaces.length > 0 && (
+                      <div className="subplaces-list">
+                        {item.subplaces.map((subplace) => (
+                          <span key={subplace.id} className="subplace-tag">
+                            {subplace.name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            }
+          })}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   // Render hotel information if available
   const renderHotelsList = () => {
