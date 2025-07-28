@@ -1,3 +1,4 @@
+D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\config\CorsFilter.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\config\CorssConfig.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\config\SchedulingConfig.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\config\WebConfig.java
@@ -5,6 +6,7 @@ D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\controller\AuthCont
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\controller\BlogController.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\controller\DestinationController.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\controller\FileUploadController.java
+D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\controller\HotelController.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\controller\ProfileController.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\controller\SubPlaceController.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\controller\TestController.java
@@ -17,12 +19,14 @@ D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\dto\BlogSummary.jav
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\dto\CommentRequest.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\dto\CommentResponse.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\dto\ErrorResponse.java
+D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\dto\HotelResponse.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\dto\LoginRequest.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\dto\MediaRequest.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\dto\ProfileResponse.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\dto\RouteDTO.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\dto\SignupRequest.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\dto\StopDTO.java
+D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\dto\TourAccommodationRequest.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\dto\TourCreationRequest.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\dto\TourResponseDTO.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\dto\TourSummary.java
@@ -34,10 +38,12 @@ D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\entity\BlogLike.jav
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\entity\BlogMedia.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\entity\CommentLike.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\entity\Destination.java
+D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\entity\Hotel.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\entity\RouteStop.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\entity\Session.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\entity\SubPlace.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\entity\Tour.java
+D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\entity\TourAccommodation.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\entity\TourRoute.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\entity\User.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\repository\BlogCommentRepository.java
@@ -48,13 +54,16 @@ D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\repository\BlogMedi
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\repository\BlogRepository.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\repository\CommentLikeRepository.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\repository\DestinationRepository.java
+D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\repository\HotelRepository.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\repository\RouteStopRepository.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\repository\SessionRepository.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\repository\SubPlaceRepository.java
+D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\repository\TourAccommodationRepository.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\repository\TourRepository.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\repository\TourRouteRepository.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\repository\UserRepository.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\service\AuthService.java
+D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\service\HotelService.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\service\SessionService.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\service\SubPlaceService.java
 D:\CSE_408\backend\tourify\src\main\java\com\tourify\tourify\TourifyApplication.java

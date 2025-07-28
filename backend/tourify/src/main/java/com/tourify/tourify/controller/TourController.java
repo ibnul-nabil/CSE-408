@@ -553,12 +553,53 @@ public class TourController {
             Map<String, Object> optimizedResult = optimizeRouteWithORS(placesWithCoords);
 
             if (optimizedResult != null) {
+                // Get the optimized route order
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> optimizedRoute = (List<Map<String, Object>>) optimizedResult.get("optimizedRoute");
+                
+                // Calculate distance for the optimized route using getRouteFromORS
+                if (optimizedRoute != null && optimizedRoute.size() >= 2) {
+                    List<List<Double>> optimizedCoordinates = new ArrayList<>();
+                    for (Map<String, Object> place : optimizedRoute) {
+                        @SuppressWarnings("unchecked")
+                        double[] coords = (double[]) place.get("coordinates");
+                        if (coords != null) {
+                            optimizedCoordinates.add(List.of(coords[0], coords[1]));
+                        }
+                    }
+                    
+                    // Use getRouteFromORS to calculate the actual road distance for optimized route
+                    Map<String, Object> routeResult = getRouteFromORS(optimizedCoordinates);
+                    double optimizedDistance = 0.0;
+                    if (routeResult != null && routeResult.containsKey("distance")) {
+                        optimizedDistance = (Double) routeResult.get("distance");
+                    } else {
+                        // Fallback to haversine distance
+                        optimizedDistance = calculateHaversineDistance(optimizedCoordinates);
+                    }
+                    
+                    // Update the result with the calculated distance
+                    optimizedResult.put("totalDistance", optimizedDistance);
+                    System.out.println("✅ Optimized route distance calculated: " + optimizedDistance + " km");
+                }
+                
                 return ResponseEntity.ok(optimizedResult);
             } else {
                 // Fallback: return original order with distance calculation
                 Map<String, Object> fallbackResult = new HashMap<>();
                 fallbackResult.put("optimizedRoute", places);
-                fallbackResult.put("totalDistance", calculateDistanceForRoute(placesWithCoords));
+                
+                // Calculate distance for original route using getRouteFromORS
+                Map<String, Object> routeResult = getRouteFromORS(coordinates);
+                double originalDistance = 0.0;
+                if (routeResult != null && routeResult.containsKey("distance")) {
+                    originalDistance = (Double) routeResult.get("distance");
+                } else {
+                    // Fallback to haversine distance
+                    originalDistance = calculateHaversineDistance(coordinates);
+                }
+                
+                fallbackResult.put("totalDistance", originalDistance);
                 fallbackResult.put("message", "Using fallback optimization");
                 return ResponseEntity.ok(fallbackResult);
             }
@@ -778,14 +819,9 @@ public class TourController {
             }
 
             // Use ORS optimization API
-            String url = ORS_BASE_URL + "/v2/optimization/driving-car";
-
+            String url = ORS_BASE_URL + "/optimization";
 
             Map<String, Object> requestBody = new HashMap<>();
-
-            // Add the profile parameter - this is required!
-//            requestBody.put("profile", "driving-car"); // Valid profiles: driving-car, driving-hgv, cycling-regular, foot-walking, wheelchair
-            requestBody.put("instructions", false);
 
             // Create jobs (destinations to visit)
             List<Map<String, Object>> jobs = new ArrayList<>();
@@ -802,16 +838,18 @@ public class TourController {
             vehicle.put("id", 1);
             vehicle.put("start", coordinates.get(0));
             vehicle.put("end", coordinates.get(0)); // Return to start
+            vehicle.put("profile", "driving-car");
             vehicles.add(vehicle);
 
             requestBody.put("jobs", jobs);
             requestBody.put("vehicles", vehicles);
 
             HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", ORS_API_KEY);
             headers.set("Content-Type", "application/json");
+            headers.set("Authorization", ORS_API_KEY);
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+            System.out.println(entity);
 
             System.out.println("🚀 Sending ORS optimization request with profile: driving-car");
             ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
@@ -839,14 +877,41 @@ public class TourController {
                         }
                     }
 
-                    double totalDistance = route.get("distance").asDouble() / 1000.0; // Convert to km
+                    // Calculate distance for the optimized route using getRouteFromORS
+                    List<List<Double>> optimizedCoordinates = new ArrayList<>();
+                    for (Map<String, Object> place : optimizedRoute) {
+                        @SuppressWarnings("unchecked")
+                        double[] coords = (double[]) place.get("coordinates");
+                        if (coords != null) {
+                            optimizedCoordinates.add(List.of(coords[0], coords[1]));
+                        }
+                    }
+                    
+                    // Use getRouteFromORS to calculate the actual road distance for optimized route
+                    Map<String, Object> routeResult = getRouteFromORS(optimizedCoordinates);
+                    double optimizedDistance = 0.0;
+                    if (routeResult != null && routeResult.containsKey("distance")) {
+                        optimizedDistance = (Double) routeResult.get("distance");
+                    } else {
+                        // Fallback to haversine distance
+                        optimizedDistance = calculateHaversineDistance(optimizedCoordinates);
+                    }
 
                     Map<String, Object> result = new HashMap<>();
                     result.put("optimizedRoute", optimizedRoute);
-                    result.put("totalDistance", Math.round(totalDistance * 100.0) / 100.0);
+                    result.put("totalDistance", optimizedDistance);
                     result.put("method", "openrouteservice");
 
-                    System.out.println("✅ Route optimized with ORS, distance: " + totalDistance + " km");
+                    System.out.println("✅ Route optimized with ORS, distance: " + optimizedDistance + " km");
+
+                    double totalDurationSeconds = route.get("duration").asDouble();
+                    double totalDurationMinutes = Math.round(totalDurationSeconds / 60.0 * 100.0) / 100.0;
+                    System.out.println("✅ Route optimized with ORS, duration: " + totalDurationMinutes + " minutes");
+
+                    System.out.println("📍 Optimized visit order:");
+                    for (Map<String, Object> place : optimizedRoute) {
+                        System.out.println("   - " + place.get("name"));
+                    }
                     return result;
                 }
             }
