@@ -17,33 +17,16 @@ const CreateTourInfoPage = ({ isEditMode = false, onNext }) => {
 
     // Initialize form with existing tour data or reset for new tour
   useEffect(() => {
-    console.log('🔄 CreateTourInfoPage useEffect triggered');
-    console.log('📝 isEditMode:', isEditMode);
-    console.log('🎯 tourData:', tourData);
-    
-    if (!isEditMode) {
-      // Reset context for new tour creation
-      console.log('🆕 Resetting tour for new creation');
-      resetTour();
-      // Don't reset local state here - let user type
-    } else {
-      // Load existing tour data for editing
-      console.log('✏️ Loading existing tour data for editing');
+    // Always restore existing tour data from context if it exists
+    if (tourData.title || tourData.startDate || tourData.endDate) {
       if (tourData.title) setTitle(tourData.title);
       if (tourData.startDate) setStartDate(tourData.startDate);
       if (tourData.endDate) setEndDate(tourData.endDate);
+    } else if (!isEditMode) {
+      // Only reset if no existing data and not in edit mode
+      resetTour();
     }
-  }, [isEditMode, resetTour]); // Remove tourData dependency to avoid infinite loop
-
-  // Initialize local state only once when component mounts
-  useEffect(() => {
-    console.log('🏁 Initializing local state');
-    if (!isEditMode) {
-      setTitle('');
-      setStartDate('');
-      setEndDate('');
-    }
-  }, []); // Run only once on mount
+  }, [isEditMode, tourData.title, tourData.startDate, tourData.endDate, resetTour]);
 
   // Format date to readable format (July 7th, 2025)
   const formatDateDisplay = (dateString) => {
@@ -88,21 +71,18 @@ const CreateTourInfoPage = ({ isEditMode = false, onNext }) => {
 
   const handleTitleChange = useCallback((e) => {
     const newTitle = e.target.value;
-    console.log('Title changed:', newTitle);
     setTitle(newTitle);
     updateField('title', newTitle);
   }, [updateField]);
 
   const handleStartDateChange = useCallback((e) => {
     const newStartDate = e.target.value;
-    console.log('Start date changed:', newStartDate);
     setStartDate(newStartDate);
     updateField('startDate', newStartDate);
   }, [updateField]);
 
   const handleEndDateChange = useCallback((e) => {
     const newEndDate = e.target.value;
-    console.log('End date changed:', newEndDate);
     setEndDate(newEndDate);
     updateField('endDate', newEndDate);
   }, [updateField]);

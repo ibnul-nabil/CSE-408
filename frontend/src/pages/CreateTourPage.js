@@ -5,6 +5,7 @@ import { MapIcon, X, Search } from 'lucide-react';
 import { useTour } from '../context/TourContext';
 import StepIndicator from '../components/StepIndicator';
 import BlogSuggestions from '../components/BlogSuggestions';
+import SpecialEventSuggestions from '../components/SpecialEventSuggestions';
 
 const API_URL = process.env.REACT_APP_URL;
 
@@ -486,6 +487,14 @@ const CreateTourPage = ({ isEditMode = false, onPrevious, onNext }) => {
                             <BlogSuggestions 
                               destinationId={district.id}
                               destinationName={district.name}
+                            />
+                            
+                            {/* Special event suggestions for this destination */}
+                            <SpecialEventSuggestions 
+                              destinationId={district.id}
+                              destinationName={district.name}
+                              tourStartDate={tourData.startDate}
+                              tourEndDate={tourData.endDate}
                             />
                           </>
                         )}

@@ -25,6 +25,7 @@ import java.util.Optional;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tourify.tourify.dto.BlogSuggestionResponse;
+import com.tourify.tourify.dto.SpecialEventResponse;
 
 @RestController
 @RequestMapping("/api/tours")
@@ -49,6 +50,8 @@ public class TourController {
     private TourAccommodationRepository tourAccommodationRepository;
     @Autowired
     private HotelRepository hotelRepository;
+    @Autowired
+    private SpecialEventRepository specialEventRepository;
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -1294,5 +1297,112 @@ public class TourController {
         response.setHasMedia(blog.getHasMedia());
         
         return response;
+    }
+
+    // Special Events Endpoints
+    @GetMapping("/special-events/{destinationId}")
+    public ResponseEntity<?> getSpecialEventsByDestination(@PathVariable Long destinationId) {
+        try {
+            System.out.println("🎉 Getting special events for destination ID: " + destinationId);
+            
+            List<SpecialEvent> events = specialEventRepository.findByDestinationId(destinationId);
+            System.out.println("🎉 Found " + events.size() + " special events for destination " + destinationId);
+            
+            List<SpecialEventResponse> responseEvents = events.stream()
+                    .map(this::convertToSpecialEventResponse)
+                    .collect(Collectors.toList());
+            
+            return ResponseEntity.ok(responseEvents);
+            
+        } catch (Exception e) {
+            System.out.println("❌ Error getting special events: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Failed to get special events");
+        }
+    }
+
+    @GetMapping("/special-events/suggestions/{destinationId}")
+    public ResponseEntity<?> getSpecialEventSuggestions(
+            @PathVariable Long destinationId,
+            @RequestParam String tourStartDate,
+            @RequestParam String tourEndDate) {
+        try {
+            LocalDate startDate = LocalDate.parse(tourStartDate);
+            LocalDate endDate = LocalDate.parse(tourEndDate);
+            
+            // Calculate extended date range (10 days before and after tour dates)
+            LocalDate extendedStartDate = startDate.minusDays(10);
+            LocalDate extendedEndDate = endDate.plusDays(10);
+            
+            List<SpecialEvent> events = specialEventRepository.findEventsWithinDateRange(
+                destinationId, extendedStartDate, extendedEndDate);
+            
+            List<SpecialEventResponse> responseEvents = events.stream()
+                    .map(event -> {
+                        SpecialEventResponse response = convertToSpecialEventResponse(event);
+                        response.setSuggestionMessage(generateSuggestionMessage(event, startDate, endDate));
+                        return response;
+                    })
+                    .collect(Collectors.toList());
+            
+            return ResponseEntity.ok(responseEvents);
+            
+        } catch (Exception e) {
+            System.out.println("❌ Error getting special event suggestions: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Failed to get special event suggestions");
+        }
+    }
+
+    // Helper method to convert SpecialEvent to SpecialEventResponse
+    private SpecialEventResponse convertToSpecialEventResponse(SpecialEvent event) {
+        SpecialEventResponse response = new SpecialEventResponse();
+        response.setId(event.getId());
+        response.setEventName(event.getEventName());
+        response.setDestinationName(event.getDestination().getName());
+        response.setStartDate(event.getStartDate());
+        response.setEndDate(event.getEndDate());
+        response.setDescription(event.getDescription());
+        response.setDateRange(formatDateRange(event.getStartDate(), event.getEndDate()));
+        return response;
+    }
+
+    // Helper method to format date range
+    private String formatDateRange(LocalDate startDate, LocalDate endDate) {
+        if (startDate.equals(endDate)) {
+            return startDate.toString();
+        }
+        return startDate.toString() + " to " + endDate.toString();
+    }
+
+
+
+    // Helper method to generate suggestion message
+    private String generateSuggestionMessage(SpecialEvent event, LocalDate tourStartDate, LocalDate tourEndDate) {
+        LocalDate eventStart = event.getStartDate();
+        LocalDate eventEnd = event.getEndDate();
+        
+        // Check if event overlaps with tour dates
+        boolean overlapsWithTour = !(eventEnd.isBefore(tourStartDate) || eventStart.isAfter(tourEndDate));
+        
+        if (overlapsWithTour) {
+            return "Perfect timing! This event coincides with your tour dates.";
+        }
+        
+        // Calculate days difference
+        long daysBeforeTour = java.time.temporal.ChronoUnit.DAYS.between(eventEnd, tourStartDate);
+        long daysAfterTour = java.time.temporal.ChronoUnit.DAYS.between(tourEndDate, eventStart);
+        
+        if (daysBeforeTour >= 0 && daysBeforeTour <= 10) {
+            return "Consider extending your tour by " + daysBeforeTour + " days to catch this event!";
+        } else if (daysAfterTour >= 0 && daysAfterTour <= 10) {
+            return "Consider extending your tour by " + daysAfterTour + " days to catch this event!";
+        } else if (daysBeforeTour < 0 && Math.abs(daysBeforeTour) <= 10) {
+            return "This event ended " + Math.abs(daysBeforeTour) + " days before your tour starts.";
+        } else if (daysAfterTour < 0 && Math.abs(daysAfterTour) <= 10) {
+            return "This event starts " + Math.abs(daysAfterTour) + " days after your tour ends.";
+        }
+        
+        return "This event is within 10 days of your tour dates.";
     }
 }
