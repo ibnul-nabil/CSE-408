@@ -12,7 +12,7 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="tourify" options="-parameters --enable-preview" />
+      <module name="tourify" options="-parameters" />
     </option>
   </component>
 </project>

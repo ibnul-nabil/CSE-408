@@ -1,9 +1,6 @@
 package com.tourify.tourify.controller;
 
-import com.tourify.tourify.dto.StopDTO;
-import com.tourify.tourify.dto.TourCreationRequest;
-import com.tourify.tourify.dto.TourResponseDTO;
-import com.tourify.tourify.dto.TourAccommodationRequest;
+import com.tourify.tourify.dto.*;
 import com.tourify.tourify.entity.*;
 import com.tourify.tourify.repository.*;
 import com.tourify.tourify.service.AuthService;
@@ -24,7 +21,6 @@ import java.util.stream.Collectors;
 import java.util.Optional;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tourify.tourify.dto.BlogSuggestionResponse;
 
 @RestController
 @RequestMapping("/api/tours")
@@ -49,6 +45,10 @@ public class TourController {
     private TourAccommodationRepository tourAccommodationRepository;
     @Autowired
     private HotelRepository hotelRepository;
+    @Autowired
+    private TourTransportRepository tourTransportRepository;
+    @Autowired
+    private TransportRepository transportRepository;
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -112,6 +112,20 @@ public class TourController {
                     TourAccommodation accommodation = new TourAccommodation(tour, hotel, accommodationReq.getCheckIn(), accommodationReq.getCheckOut(), accommodationReq.getTotalCost());
                     
                     tourAccommodationRepository.save(accommodation);
+                }
+            }
+
+            // 6. Create Tour Transportation
+            if (req.getTransportation() != null && !req.getTransportation().isEmpty()) {
+                for (TourTransportRequest transportReq : req.getTransportation()) {
+                    // Get the transport
+                    Transport transport = transportRepository.findById(transportReq.getTransportId())
+                            .orElseThrow(() -> new RuntimeException("Transport not found with id: " + transportReq.getTransportId()));
+                    
+                    // Create tour transport
+                    TourTransport tourTransport = new TourTransport(tour, transport, transportReq.getDate(), transportReq.getCost());
+                    
+                    tourTransportRepository.save(tourTransport);
                 }
             }
 

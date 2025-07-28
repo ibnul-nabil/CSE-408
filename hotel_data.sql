@@ -63,3 +63,325 @@ INSERT INTO hotels (name, destination_id, sub_place_id, price_per_night, locatio
 -- Jaflong (more options)
 ('Jaflong Mountain Resort', 2, 8, 3800.00, 'Jaflong Mountain Road, Sylhet', '(25.2237, 92.2237)', 'mountain_resort.jpg', 'https://booking.com/mountain-resort', ARRAY['WiFi', 'Mountain View', 'Restaurant', 'Hiking Tours', 'Stone Collection']),
 ('Jaflong Comfort Hotel', 2, 8, 2200.00, 'Jaflong Comfort Area, Sylhet', '(25.2238, 92.2238)', 'comfort_hotel.jpg', 'https://booking.com/comfort-hotel', ARRAY['WiFi', 'Restaurant', 'Local Tours']); 
+
+
+
+
+
+
+
+******************************************************************************************************
+
+
+
+
+
+
+-- Transportation options
+CREATE TABLE transport (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50),
+    type VARCHAR(20), -- 'bus', 'train', 'flight', 'boat'
+    class VARCHAR(20), -- 'business' or 'economy'
+    description TEXT,
+    start_point INTEGER REFERENCES destinations(id),
+    end_point INTEGER REFERENCES destinations(id),
+    depart_start TIME,
+    depart_end TIME
+);
+
+-- Transport stops with pricing
+CREATE TABLE transport_stops (
+    transport_id INTEGER REFERENCES transport(id) ON DELETE CASCADE,
+    stop_id INTEGER REFERENCES destinations(id),
+    price DECIMAL(10, 2),
+    PRIMARY KEY (transport_id, stop_id)
+);
+
+-- User's selected transport for tour
+CREATE TABLE tour_transport (
+    id SERIAL PRIMARY KEY,
+    tour_id INTEGER REFERENCES tours(id) ON DELETE CASCADE,
+    transport_id INTEGER REFERENCES transport(id),
+    date DATE,
+    cost DECIMAL(10, 2)
+);
+
+
+-- -- Transport options (using correct destination IDs)
+-- INSERT INTO transport (name, type, class, description, start_point, end_point, depart_start, depart_end) VALUES
+-- ('Green Line Express', 'bus', 'business', 'Premium AC bus with WiFi and refreshments', 7, 1, '08:00:00', '18:00:00'),
+-- ('Green Line Express', 'bus', 'economy', 'Standard AC bus service', 7, 1, '08:00:00', '18:00:00'),
+-- ('Shyamoli Express', 'bus', 'economy', 'Budget bus service', 7, 1, '09:00:00', '19:00:00'),
+-- ('Bangladesh Railway', 'train', 'business', 'AC compartment with meal service', 7, 2, '07:30:00', '14:30:00'),
+-- ('Bangladesh Railway', 'train', 'economy', 'Non-AC compartment', 7, 2, '07:30:00', '14:30:00'),
+-- ('Biman Bangladesh', 'flight', 'business', 'Business class with priority boarding', 7, 1, '10:00:00', '11:00:00'),
+-- ('Biman Bangladesh', 'flight', 'economy', 'Economy class', 7, 1, '10:00:00', '11:00:00'),
+-- ('US Bangla Airlines', 'flight', 'economy', 'Budget airline service', 7, 1, '12:00:00', '13:00:00'),
+-- ('Royal Express', 'bus', 'business', 'Luxury bus with sleeper seats', 7, 9, '07:00:00', '15:00:00'),
+-- ('Sylhet Express', 'bus', 'economy', 'Direct bus to Sylhet', 7, 2, '08:30:00', '15:30:00'),
+-- ('Cox''s Bazar Express', 'bus', 'economy', 'Direct bus to Cox''s Bazar', 7, 1, '06:00:00', '16:00:00'),
+-- ('Rangamati Express', 'bus', 'business', 'Premium bus to Rangamati', 7, 9, '06:30:00', '14:30:00');
+
+-- -- Transport stops with pricing (using correct destination IDs)
+-- INSERT INTO transport_stops (transport_id, stop_id, price) VALUES
+-- -- Green Line Business (Chattogram to Cox's Bazar)
+-- (1, 7, 0.00),    -- Chattogram (start) - free
+-- (1, 3, 800.00),  -- Sreemangal stop
+-- (1, 1, 1200.00), -- Cox's Bazar (end)
+
+-- -- Green Line Economy (Chattogram to Cox's Bazar)
+-- (2, 7, 0.00),    -- Chattogram (start) - free
+-- (2, 3, 600.00),  -- Sreemangal stop
+-- (2, 1, 800.00),  -- Cox's Bazar (end)
+
+-- -- Shyamoli Express (Chattogram to Cox's Bazar)
+-- (3, 7, 0.00),    -- Chattogram (start) - free
+-- (3, 1, 600.00),  -- Cox's Bazar (end)
+
+-- -- Bangladesh Railway Business (Chattogram to Sylhet)
+-- (4, 7, 0.00),    -- Chattogram (start) - free
+-- (4, 2, 800.00),  -- Sylhet (end)
+
+-- -- Bangladesh Railway Economy (Chattogram to Sylhet)
+-- (5, 7, 0.00),    -- Chattogram (start) - free
+-- (5, 2, 450.00),  -- Sylhet (end)
+
+-- -- Biman Business (Chattogram to Cox's Bazar)
+-- (6, 7, 0.00),    -- Chattogram (start) - free
+-- (6, 1, 5000.00), -- Cox's Bazar (end)
+
+-- -- Biman Economy (Chattogram to Cox's Bazar)
+-- (7, 7, 0.00),    -- Chattogram (start) - free
+-- (7, 1, 2500.00), -- Cox's Bazar (end)
+
+-- -- US Bangla Economy (Chattogram to Cox's Bazar)
+-- (8, 7, 0.00),    -- Chattogram (start) - free
+-- (8, 1, 2200.00), -- Cox's Bazar (end)
+
+-- -- Royal Express (Chattogram to Rangamati)
+-- (9, 7, 0.00),    -- Chattogram (start) - free
+-- (9, 9, 1000.00), -- Rangamati (end)
+
+-- -- Sylhet Express (Chattogram to Sylhet)
+-- (10, 7, 0.00),   -- Chattogram (start) - free
+-- (10, 2, 400.00), -- Sylhet (end)
+
+-- -- Cox's Bazar Express (Chattogram to Cox's Bazar)
+-- (11, 7, 0.00),   -- Chattogram (start) - free
+-- (11, 1, 700.00), -- Cox's Bazar (end)
+
+-- -- Rangamati Express (Chattogram to Rangamati)
+-- (12, 7, 0.00),   -- Chattogram (start) - free
+-- (12, 9, 1200.00); -- Rangamati (end)
+
+
+-- Transport options (all possible routes)
+INSERT INTO transport (name, type, class, description, start_point, end_point, depart_start, depart_end) VALUES
+-- Chattogram to other destinations
+('Green Line Express', 'bus', 'business', 'Premium AC bus with WiFi', 7, 1, '08:00:00', '18:00:00'),
+('Green Line Express', 'bus', 'economy', 'Standard AC bus', 7, 1, '08:00:00', '18:00:00'),
+('Bangladesh Railway', 'train', 'business', 'AC compartment', 7, 2, '07:30:00', '14:30:00'),
+('Bangladesh Railway', 'train', 'economy', 'Non-AC compartment', 7, 2, '07:30:00', '14:30:00'),
+('Royal Express', 'bus', 'business', 'Luxury bus to Rangamati', 7, 9, '07:00:00', '15:00:00'),
+('Hill Express', 'bus', 'economy', 'Budget bus to Bandarban', 7, 5, '06:00:00', '12:00:00'),
+('Sundarbans Express', 'bus', 'business', 'Premium bus to Sundarbans', 7, 8, '05:00:00', '14:00:00'),
+('Khagrachari Express', 'bus', 'economy', 'Direct bus to Khagrachari', 7, 6, '07:30:00', '13:30:00'),
+
+-- Cox's Bazar to other destinations
+('Cox''s Bazar Express', 'bus', 'business', 'Premium bus from Cox''s Bazar', 1, 7, '06:00:00', '16:00:00'),
+('Cox''s Bazar Express', 'bus', 'economy', 'Standard bus from Cox''s Bazar', 1, 7, '06:00:00', '16:00:00'),
+('Cox''s Bazar Railway', 'train', 'economy', 'Train from Cox''s Bazar', 1, 2, '09:00:00', '16:00:00'),
+
+-- Sylhet to other destinations
+('Sylhet Express', 'bus', 'business', 'Premium bus from Sylhet', 2, 7, '08:30:00', '15:30:00'),
+('Sylhet Express', 'bus', 'economy', 'Standard bus from Sylhet', 2, 7, '08:30:00', '15:30:00'),
+('Sylhet Railway', 'train', 'business', 'AC train from Sylhet', 2, 7, '07:00:00', '14:00:00'),
+('Sylhet to Sreemangal', 'bus', 'economy', 'Local bus service', 2, 3, '10:00:00', '11:30:00'),
+
+-- Rangamati to other destinations
+('Rangamati Express', 'bus', 'business', 'Premium bus from Rangamati', 9, 7, '06:30:00', '14:30:00'),
+('Rangamati Express', 'bus', 'economy', 'Standard bus from Rangamati', 9, 7, '06:30:00', '14:30:00'),
+('Rangamati to Bandarban', 'bus', 'economy', 'Hill region bus', 9, 5, '08:00:00', '10:00:00'),
+
+-- Bandarban to other destinations
+('Bandarban Express', 'bus', 'business', 'Premium bus from Bandarban', 5, 7, '07:00:00', '13:00:00'),
+('Bandarban Express', 'bus', 'economy', 'Standard bus from Bandarban', 5, 7, '07:00:00', '13:00:00'),
+('Bandarban to Khagrachari', 'bus', 'economy', 'Hill region bus', 5, 6, '09:00:00', '11:00:00'),
+
+-- Khagrachari to other destinations
+('Khagrachari Express', 'bus', 'business', 'Premium bus from Khagrachari', 6, 7, '08:00:00', '14:00:00'),
+('Khagrachari Express', 'bus', 'economy', 'Standard bus from Khagrachari', 6, 7, '08:00:00', '14:00:00'),
+
+-- Sreemangal to other destinations
+('Sreemangal Express', 'bus', 'business', 'Premium bus from Sreemangal', 3, 7, '09:00:00', '16:00:00'),
+('Sreemangal Express', 'bus', 'economy', 'Standard bus from Sreemangal', 3, 7, '09:00:00', '16:00:00'),
+('Sreemangal to Sylhet', 'bus', 'economy', 'Local bus service', 3, 2, '08:00:00', '09:30:00'),
+
+-- Sunamganj to other destinations
+('Sunamganj Express', 'bus', 'business', 'Premium bus from Sunamganj', 4, 7, '07:30:00', '15:30:00'),
+('Sunamganj Express', 'bus', 'economy', 'Standard bus from Sunamganj', 4, 7, '07:30:00', '15:30:00'),
+('Sunamganj to Sylhet', 'bus', 'economy', 'Local bus service', 4, 2, '09:00:00', '10:30:00'),
+
+-- Sundarbans to other destinations
+('Sundarbans Express', 'bus', 'business', 'Premium bus from Sundarbans', 8, 7, '06:00:00', '15:00:00'),
+('Sundarbans Express', 'bus', 'economy', 'Standard bus from Sundarbans', 8, 7, '06:00:00', '15:00:00'),
+
+-- Flights (Chattogram to major destinations)
+('Biman Bangladesh', 'flight', 'business', 'Business class flight', 7, 1, '10:00:00', '11:00:00'),
+('Biman Bangladesh', 'flight', 'economy', 'Economy class flight', 7, 1, '10:00:00', '11:00:00'),
+('US Bangla Airlines', 'flight', 'economy', 'Budget airline', 7, 1, '12:00:00', '13:00:00'),
+('Biman Bangladesh', 'flight', 'business', 'Business class to Sylhet', 7, 2, '11:00:00', '12:00:00'),
+('Biman Bangladesh', 'flight', 'economy', 'Economy class to Sylhet', 7, 2, '11:00:00', '12:00:00');
+
+-- Transport stops with pricing (comprehensive stoppages)
+INSERT INTO transport_stops (transport_id, stop_id, price) VALUES
+-- Chattogram to Cox's Bazar (with stops)
+(1, 7, 0.00),    -- Chattogram (start)
+(1, 3, 800.00),  -- Sreemangal stop
+(1, 1, 1200.00), -- Cox's Bazar (end)
+
+(2, 7, 0.00),    -- Chattogram (start)
+(2, 3, 600.00),  -- Sreemangal stop
+(2, 1, 800.00),  -- Cox's Bazar (end)
+
+-- Chattogram to Sylhet (direct)
+(3, 7, 0.00),    -- Chattogram (start)
+(3, 2, 800.00),  -- Sylhet (end)
+
+(4, 7, 0.00),    -- Chattogram (start)
+(4, 2, 450.00),  -- Sylhet (end)
+
+-- Chattogram to Rangamati (direct)
+(5, 7, 0.00),    -- Chattogram (start)
+(5, 9, 1000.00), -- Rangamati (end)
+
+-- Chattogram to Bandarban (direct)
+(6, 7, 0.00),    -- Chattogram (start)
+(6, 5, 600.00),  -- Bandarban (end)
+
+-- Chattogram to Sundarbans (with stops)
+(7, 7, 0.00),    -- Chattogram (start)
+(7, 4, 400.00),  -- Sunamganj stop
+(7, 8, 800.00),  -- Sundarbans (end)
+
+-- Chattogram to Khagrachari (direct)
+(8, 7, 0.00),    -- Chattogram (start)
+(8, 6, 500.00),  -- Khagrachari (end)
+
+-- Cox's Bazar to Chattogram (return)
+(9, 1, 0.00),    -- Cox's Bazar (start)
+(9, 7, 1200.00), -- Chattogram (end)
+
+(10, 1, 0.00),   -- Cox's Bazar (start)
+(10, 7, 800.00), -- Chattogram (end)
+
+-- Cox's Bazar to Sylhet
+(11, 1, 0.00),   -- Cox's Bazar (start)
+(11, 2, 600.00), -- Sylhet (end)
+
+-- Sylhet to Chattogram (return)
+(12, 2, 0.00),   -- Sylhet (start)
+(12, 7, 800.00), -- Chattogram (end)
+
+(13, 2, 0.00),   -- Sylhet (start)
+(13, 7, 450.00), -- Chattogram (end)
+
+(14, 2, 0.00),   -- Sylhet (start)
+(14, 7, 800.00), -- Chattogram (end)
+
+-- Sylhet to Sreemangal
+(15, 2, 0.00),   -- Sylhet (start)
+(15, 3, 200.00), -- Sreemangal (end)
+
+-- Rangamati to Chattogram (return)
+(16, 9, 0.00),   -- Rangamati (start)
+(16, 7, 1000.00), -- Chattogram (end)
+
+(17, 9, 0.00),   -- Rangamati (start)
+(17, 7, 800.00), -- Chattogram (end)
+
+-- Rangamati to Bandarban
+(18, 9, 0.00),   -- Rangamati (start)
+(18, 5, 300.00), -- Bandarban (end)
+
+-- Bandarban to Chattogram (return)
+(19, 5, 0.00),   -- Bandarban (start)
+(19, 7, 600.00), -- Chattogram (end)
+
+(20, 5, 0.00),   -- Bandarban (start)
+(20, 7, 400.00), -- Chattogram (end)
+
+-- Bandarban to Khagrachari
+(21, 5, 0.00),   -- Bandarban (start)
+(21, 6, 200.00), -- Khagrachari (end)
+
+-- Khagrachari to Chattogram (return)
+(22, 6, 0.00),   -- Khagrachari (start)
+(22, 7, 500.00), -- Chattogram (end)
+
+(23, 6, 0.00),   -- Khagrachari (start)
+(23, 7, 350.00), -- Chattogram (end)
+
+-- Sreemangal to Chattogram (return)
+(24, 3, 0.00),   -- Sreemangal (start)
+(24, 7, 600.00), -- Chattogram (end)
+
+(25, 3, 0.00),   -- Sreemangal (start)
+(25, 7, 400.00), -- Chattogram (end)
+
+-- Sreemangal to Sylhet
+(26, 3, 0.00),   -- Sreemangal (start)
+(26, 2, 200.00), -- Sylhet (end)
+
+-- Sunamganj to Chattogram (return)
+(27, 4, 0.00),   -- Sunamganj (start)
+(27, 7, 700.00), -- Chattogram (end)
+
+(28, 4, 0.00),   -- Sunamganj (start)
+(28, 7, 500.00), -- Chattogram (end)
+
+-- Sunamganj to Sylhet
+(29, 4, 0.00),   -- Sunamganj (start)
+(29, 2, 300.00), -- Sylhet (end)
+
+-- Sundarbans to Chattogram (return)
+(30, 8, 0.00),   -- Sundarbans (start)
+(30, 7, 800.00), -- Chattogram (end)
+
+(31, 8, 0.00),   -- Sundarbans (start)
+(31, 7, 600.00), -- Chattogram (end)
+
+-- Flights (direct routes)
+(32, 7, 0.00),   -- Chattogram (start)
+(32, 1, 5000.00), -- Cox's Bazar (end)
+
+(33, 7, 0.00),   -- Chattogram (start)
+(33, 1, 2500.00), -- Cox's Bazar (end)
+
+(34, 7, 0.00),   -- Chattogram (start)
+(34, 1, 2200.00), -- Cox's Bazar (end)
+
+(35, 7, 0.00),   -- Chattogram (start)
+(35, 2, 3000.00), -- Sylhet (end)
+
+(36, 7, 0.00),   -- Chattogram (start)
+(36, 2, 1500.00); -- Sylhet (end)
+
+
+
+**************************************************************************************
+
+\c tourify
+GRANT SELECT, INSERT, UPDATE, DELETE ON transport TO tourify_user;
+GRANT SELECT, INSERT, UPDATE, DELETE ON transport_stops TO tourify_user;
+GRANT SELECT, INSERT, UPDATE, DELETE ON tour_transport TO tourify_user;
+
+-- Grant permissions on tables
+GRANT SELECT, INSERT, UPDATE, DELETE ON transport TO tourify_user;
+GRANT SELECT, INSERT, UPDATE, DELETE ON transport_stops TO tourify_user;
+GRANT SELECT, INSERT, UPDATE, DELETE ON tour_transport TO tourify_user;
+
+-- Grant permissions on sequences
+GRANT USAGE ON SEQUENCE tour_transport_id_seq TO tourify_user;
+GRANT SELECT ON SEQUENCE tour_transport_id_seq TO tourify_user;
