@@ -489,37 +489,31 @@ public class TourController {
     public ResponseEntity<?> optimizeRoute(@RequestBody Map<String, Object> request) {
         try {
             System.out.println("🚀 Route optimization API called");
-            
+
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> places = (List<Map<String, Object>>) request.get("places");
-            
+
             if (places == null || places.size() < 2) {
                 return ResponseEntity.badRequest().body("Need at least 2 places to optimize route");
             }
 
             // Get coordinates for all places
+            List<List<Double>> coordinates = getCoordinatesFromPlaces(places);
+            if (coordinates == null || coordinates.size() < 2) {
+                return ResponseEntity.badRequest().body("Could not get coordinates for places");
+            }
+
+            // Add coordinates to places for optimization
             List<Map<String, Object>> placesWithCoords = new ArrayList<>();
-            for (Map<String, Object> place : places) {
-                String placeName = (String) place.get("name");
-                String placeType = (String) place.get("type");
-                Object placeId = place.get("id");
-                
-                double[] coordinates = getCoordinatesForPlace(placeName, placeType, placeId);
-                if (coordinates != null) {
-                    Map<String, Object> placeWithCoords = new HashMap<>(place);
-                    placeWithCoords.put("coordinates", new double[]{coordinates[0], coordinates[1]}); // [lng, lat]
-                    placesWithCoords.add(placeWithCoords);
-                    System.out.println("📍 " + placeName + " coordinates: [" + coordinates[0] + ", " + coordinates[1] + "]");
-                } else {
-                    System.out.println("⚠️ Could not get coordinates for: " + placeName);
-                    // Still add the place without coordinates for fallback
-                    placesWithCoords.add(place);
-                }
+            for (int i = 0; i < places.size(); i++) {
+                Map<String, Object> placeWithCoords = new HashMap<>(places.get(i));
+                placeWithCoords.put("coordinates", new double[]{coordinates.get(i).get(0), coordinates.get(i).get(1)});
+                placesWithCoords.add(placeWithCoords);
             }
 
             // Use OpenRouteService for optimization
             Map<String, Object> optimizedResult = optimizeRouteWithORS(placesWithCoords);
-            
+
             if (optimizedResult != null) {
                 return ResponseEntity.ok(optimizedResult);
             } else {
@@ -530,7 +524,7 @@ public class TourController {
                 fallbackResult.put("message", "Using fallback optimization");
                 return ResponseEntity.ok(fallbackResult);
             }
-            
+
         } catch (Exception e) {
             System.out.println("❌ Error in route optimization: " + e.getMessage());
             e.printStackTrace();
@@ -550,19 +544,18 @@ public class TourController {
                 return ResponseEntity.badRequest().body("Need at least 2 places to calculate distance");
             }
 
-            // Get coordinates for all places
+            // Get coordinates for all places using the existing method
+            List<List<Double>> coordinates = getCoordinatesFromPlaces(places);
+            if (coordinates == null || coordinates.size() < 2) {
+                return ResponseEntity.badRequest().body("Could not get coordinates for places");
+            }
+
+            // Add coordinates to places for distance calculation
             List<Map<String, Object>> placesWithCoords = new ArrayList<>();
-            for (Map<String, Object> place : places) {
-                String placeName = (String) place.get("name");
-                String placeType = (String) place.get("type");
-                Object placeId = place.get("id");
-                
-                double[] coordinates = getCoordinatesForPlace(placeName, placeType, placeId);
-                if (coordinates != null) {
-                    Map<String, Object> placeWithCoords = new HashMap<>(place);
-                    placeWithCoords.put("coordinates", new double[]{coordinates[0], coordinates[1]});
-                    placesWithCoords.add(placeWithCoords);
-                }
+            for (int i = 0; i < places.size(); i++) {
+                Map<String, Object> placeWithCoords = new HashMap<>(places.get(i));
+                placeWithCoords.put("coordinates", new double[]{coordinates.get(i).get(0), coordinates.get(i).get(1)});
+                placesWithCoords.add(placeWithCoords);
             }
 
             double totalDistance = calculateDistanceForRoute(placesWithCoords);
@@ -579,32 +572,39 @@ public class TourController {
         }
     }
 
-    @PostMapping("/geocode-simple")
-    public ResponseEntity<?> geocodePlace(@RequestBody Map<String, String> request) {
-        try {
-            String placeName = request.get("placeName");
-            if (placeName == null || placeName.trim().isEmpty()) {
-                return ResponseEntity.badRequest().body("Place name is required");
-            }
 
-            double[] coordinates = geocodeWithNominatim(placeName);
+
+    @PostMapping("/get-place-coordinates")
+    public ResponseEntity<?> getPlaceCoordinates(@RequestBody Map<String, Object> request) {
+        try {
+            System.out.println("📍 Getting coordinates for place");
+            
+            String placeName = (String) request.get("name");
+            String placeType = (String) request.get("type");
+            Object placeId = request.get("id");
+            
+            if (placeName == null || placeType == null || placeId == null) {
+                return ResponseEntity.badRequest().body("Place name, type, and ID are required");
+            }
+            
+            double[] coordinates = getCoordinatesForPlace(placeName, placeType, placeId);
             
             Map<String, Object> result = new HashMap<>();
             if (coordinates != null) {
                 result.put("coordinates", coordinates); // [lng, lat]
                 result.put("success", true);
+                System.out.println("✅ Found coordinates for " + placeName + ": [lng: " + coordinates[0] + ", lat: " + coordinates[1] + "]");
             } else {
-                // Fallback to Dhaka coordinates
-                result.put("coordinates", new double[]{90.4125, 23.8103});
                 result.put("success", false);
-                result.put("message", "Geocoding failed, using default coordinates");
+                result.put("message", "Coordinates not found in database");
+                System.out.println("⚠️ No coordinates found for " + placeName);
             }
             
             return ResponseEntity.ok(result);
             
         } catch (Exception e) {
-            System.out.println("❌ Error in geocoding: " + e.getMessage());
-            return ResponseEntity.status(500).body("Geocoding failed: " + e.getMessage());
+            System.out.println("❌ Error getting place coordinates: " + e.getMessage());
+            return ResponseEntity.status(500).body("Failed to get coordinates: " + e.getMessage());
         }
     }
 
@@ -613,11 +613,23 @@ public class TourController {
         try {
             System.out.println("🛣️ Enhanced route fetching API called");
             
+            // Check if we have coordinates directly or places that need coordinate lookup
             @SuppressWarnings("unchecked")
             List<List<Double>> coordinates = (List<List<Double>>) request.get("coordinates");
             
             if (coordinates == null || coordinates.size() < 2) {
-                return ResponseEntity.badRequest().body("Need at least 2 coordinates for route");
+                // Try to get coordinates from places if coordinates not provided directly
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> places = (List<Map<String, Object>>) request.get("places");
+                
+                if (places != null && places.size() >= 2) {
+                    coordinates = getCoordinatesFromPlaces(places);
+                    if (coordinates == null || coordinates.size() < 2) {
+                        return ResponseEntity.badRequest().body("Could not get coordinates for places");
+                    }
+                } else {
+                    return ResponseEntity.badRequest().body("Need at least 2 coordinates or places for route");
+                }
             }
 
             // Try to get route from OpenRouteService
@@ -631,11 +643,38 @@ public class TourController {
         }
     }
 
-    // Helper methods for route optimization and geocoding
+    // Helper methods for route optimization and coordinate lookup
+    
+    private List<List<Double>> getCoordinatesFromPlaces(List<Map<String, Object>> places) {
+        try {
+            List<List<Double>> coordinates = new ArrayList<>();
+            
+            for (Map<String, Object> place : places) {
+                String placeName = (String) place.get("name");
+                String placeType = (String) place.get("type");
+                Object placeId = place.get("id");
+                
+                double[] coords = getCoordinatesForPlace(placeName, placeType, placeId);
+                if (coords != null) {
+                    coordinates.add(List.of(coords[0], coords[1])); // [lng, lat]
+                    System.out.println("📍 " + placeName + " coordinates: [lng: " + coords[0] + ", lat: " + coords[1] + "]");
+                } else {
+                    System.out.println("⚠️ Could not get coordinates for: " + placeName);
+                    return null; // Return null if any place is missing coordinates
+                }
+            }
+            
+            return coordinates;
+            
+        } catch (Exception e) {
+            System.out.println("❌ Error getting coordinates from places: " + e.getMessage());
+            return null;
+        }
+    }
     
     private double[] getCoordinatesForPlace(String placeName, String placeType, Object placeId) {
         try {
-            // First try to get coordinates from our database if we have them stored
+            // Get coordinates from our database
             double[] coordinates = null;
             
             if ("Destination".equals(placeType) && placeId != null) {
@@ -647,7 +686,7 @@ public class TourController {
                         if (dest.getCoordinates() != null && !dest.getCoordinates().trim().isEmpty()) {
                             coordinates = parseCoordinatesString(dest.getCoordinates());
                             if (coordinates != null) {
-                                System.out.println("📍 Found coordinates in database for destination " + placeName + ": [" + coordinates[0] + ", " + coordinates[1] + "]");
+                                System.out.println("📍 Found coordinates in database for destination " + placeName + ": [lng: " + coordinates[0] + ", lat: " + coordinates[1] + "]");
                             }
                         }
                     }
@@ -663,7 +702,7 @@ public class TourController {
                         if (sub.getCoordinates() != null && !sub.getCoordinates().trim().isEmpty()) {
                             coordinates = parseCoordinatesString(sub.getCoordinates());
                             if (coordinates != null) {
-                                System.out.println("📍 Found coordinates in database for subplace " + placeName + ": [" + coordinates[0] + ", " + coordinates[1] + "]");
+                                System.out.println("📍 Found coordinates in database for subplace " + placeName + ": [lng: " + coordinates[0] + ", lat: " + coordinates[1] + "]");
                             }
                         }
                     }
@@ -672,16 +711,7 @@ public class TourController {
                 }
             }
             
-            // If database lookup failed, try geocoding with place name
-//            if (coordinates == null) {
-//                coordinates = geocodeWithNominatim(placeName);
-//            }
-//
-//            if (coordinates == null) {
-//                // Try with place name + "Bangladesh" for better results
-//                coordinates = geocodeWithNominatim(placeName + ", Bangladesh");
-//            }
-            
+            // No geocoding fallback - only use database coordinates
             return coordinates;
             
         } catch (Exception e) {
@@ -690,37 +720,8 @@ public class TourController {
         }
     }
 
-    private double[] geocodeWithNominatim(String placeName) {
-        try {
-            String url = "https://nominatim.openstreetmap.org/search?q=" + 
-                        java.net.URLEncoder.encode(placeName, "UTF-8") + 
-                        "&format=json&limit=1&countrycodes=BD";
-            
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("User-Agent", "ibnul.nabil@gmail.com");
-            
-            HttpEntity<String> entity = new HttpEntity<>(headers);
-            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-            
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                JsonNode jsonResponse = objectMapper.readTree(response.getBody());
-                
-                if (jsonResponse.isArray() && jsonResponse.size() > 0) {
-                    JsonNode firstResult = jsonResponse.get(0);
-                    double lat = firstResult.get("lat").asDouble();
-                    double lon = firstResult.get("lon").asDouble();
-                    
-                    System.out.println("✅ Geocoded " + placeName + " to [" + lon + ", " + lat + "]");
-                    return new double[]{lon, lat}; // [longitude, latitude]
-                }
-            }
-            
-        } catch (Exception e) {
-            System.out.println("❌ Geocoding failed for " + placeName + ": " + e.getMessage());
-        }
-        
-        return null;
-    }
+
+
 
     private Map<String, Object> optimizeRouteWithORS(List<Map<String, Object>> places) {
         try {
@@ -739,9 +740,14 @@ public class TourController {
             }
 
             // Use ORS optimization API
-            String url = ORS_BASE_URL + "/optimization";
+            String url = ORS_BASE_URL + "/v2/optimization/driving-car";
+
 
             Map<String, Object> requestBody = new HashMap<>();
+
+            // Add the profile parameter - this is required!
+//            requestBody.put("profile", "driving-car"); // Valid profiles: driving-car, driving-hgv, cycling-regular, foot-walking, wheelchair
+            requestBody.put("instructions", false);
 
             // Create jobs (destinations to visit)
             List<Map<String, Object>> jobs = new ArrayList<>();
@@ -768,7 +774,10 @@ public class TourController {
             headers.set("Content-Type", "application/json");
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+
+            System.out.println("🚀 Sending ORS optimization request with profile: driving-car");
             ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+            System.out.println("optimize response " + response);
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 JsonNode jsonResponse = objectMapper.readTree(response.getBody());
@@ -806,6 +815,14 @@ public class TourController {
 
         } catch (Exception e) {
             System.out.println("❌ ORS optimization failed: " + e.getMessage());
+            // Print the full response body for debugging
+            if (e.getMessage().contains("400 Bad Request")) {
+                System.out.println("🔍 This might be due to:");
+                System.out.println("   - Invalid API key");
+                System.out.println("   - Rate limiting");
+                System.out.println("   - Invalid coordinates format");
+                System.out.println("   - Missing required parameters");
+            }
         }
 
         return null;
@@ -842,12 +859,13 @@ public class TourController {
     }
 
     private Map<String, Object> getRouteFromORS(List<List<Double>> coordinates) {
+        System.out.println(" in getRouteFromORS -------------");
         try {
             String url = ORS_BASE_URL + "/v2/directions/driving-car";
 
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("coordinates", coordinates);
-            requestBody.put("format", "geojson");
+            // Remove format=geojson to get the default format that matches your response
             requestBody.put("instructions", false);
 
             HttpHeaders headers = new HttpHeaders();
@@ -856,38 +874,49 @@ public class TourController {
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
             ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+            System.out.println(response);
+            System.out.println(response.getStatusCode());
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                System.out.println("in the ifs");
                 JsonNode jsonResponse = objectMapper.readTree(response.getBody());
-                JsonNode features = jsonResponse.get("features");
 
-                if (features != null && features.size() > 0) {
-                    JsonNode feature = features.get(0);
-                    JsonNode properties = feature.get("properties");
-                    JsonNode geometry = feature.get("geometry");
+                // Parse the default ORS format (not GeoJSON)
+                JsonNode routes = jsonResponse.get("routes");
+                System.out.println("Routes: " + routes);
 
-                    double distance = properties.get("segments").get(0).get("distance").asDouble() / 1000.0; // Convert to km
+                if (routes != null && routes.size() > 0) {
+                    JsonNode route = routes.get(0);
+                    JsonNode summary = route.get("summary");
 
-                    // Extract route coordinates
-                    JsonNode coords = geometry.get("coordinates");
-                    List<List<Double>> routeCoordinates = new ArrayList<>();
-                    for (JsonNode coord : coords) {
-                        routeCoordinates.add(List.of(coord.get(0).asDouble(), coord.get(1).asDouble()));
-                    }
+                    // Get distance from summary (already in meters)
+                    double distanceMeters = summary.get("distance").asDouble();
+                    double distanceKm = distanceMeters / 1000.0;
+
+                    // Get duration in seconds
+                    double durationSeconds = summary.get("duration").asDouble();
+
+                    // Get encoded geometry
+                    String encodedGeometry = route.get("geometry").asText();
+
+                    // Decode the polyline geometry to get coordinates
+                    List<List<Double>> routeCoordinates = decodePolyline(encodedGeometry);
 
                     Map<String, Object> result = new HashMap<>();
                     result.put("coordinates", routeCoordinates);
-                    result.put("distance", Math.round(distance * 100.0) / 100.0);
+                    result.put("distance", Math.round(distanceKm * 100.0) / 100.0);
+                    result.put("duration", Math.round(durationSeconds));
                     result.put("success", true);
                     result.put("method", "road_route");
 
-                    System.out.println("✅ Got route from ORS, distance: " + distance + " km");
+                    System.out.println("✅ Got route from ORS, distance: " + distanceKm + " km, duration: " + durationSeconds + " seconds");
                     return result;
                 }
             }
 
         } catch (Exception e) {
             System.out.println("❌ ORS route fetching failed: " + e.getMessage());
+            e.printStackTrace();
         }
 
         // Fallback result
@@ -899,6 +928,49 @@ public class TourController {
         fallbackResult.put("message", "Using direct lines as fallback");
 
         return fallbackResult;
+    }
+
+    // Helper method to decode polyline geometry
+    private List<List<Double>> decodePolyline(String encoded) {
+        List<List<Double>> coordinates = new ArrayList<>();
+
+        int index = 0;
+        int len = encoded.length();
+        int lat = 0;
+        int lng = 0;
+
+        while (index < len) {
+            int b;
+            int shift = 0;
+            int result = 0;
+
+            do {
+                b = encoded.charAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+
+            int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+            lat += dlat;
+
+            shift = 0;
+            result = 0;
+
+            do {
+                b = encoded.charAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+
+            int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+            lng += dlng;
+
+            // Convert to decimal degrees and add to coordinates
+            // Note: ORS returns [longitude, latitude] format
+            coordinates.add(List.of((double) lng / 1e5, (double) lat / 1e5));
+        }
+
+        return coordinates;
     }
 
     private double calculateHaversineDistance(List<List<Double>> coordinates) {
@@ -941,8 +1013,8 @@ public class TourController {
             // Split by comma
             String[] parts = cleaned.split(",");
             if (parts.length == 2) {
-                double lat = Double.parseDouble(parts[0].trim());
-                double lon = Double.parseDouble(parts[1].trim());
+                double lon = Double.parseDouble(parts[0].trim());
+                double lat = Double.parseDouble(parts[1].trim());
                 
                 // Return in [longitude, latitude] format for consistency with geocoding
                 return new double[]{lon, lat};

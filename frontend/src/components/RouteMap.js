@@ -122,29 +122,33 @@ const RouteMap = ({ places = [], optimizedRoute = [], totalDistance }) => {
     geocodePlaces();
   }, [places, optimizedRoute]);
 
-  // Simple function to get coordinates for a place using database only
+  // Function to get coordinates for a place using database only
   async function getCoordinatesForPlace(place) {
     try {
-      // Call our simple geocoding service
-      const response = await fetch(`${process.env.REACT_APP_URL || 'http://localhost:8080'}/api/tours/geocode-simple`, {
+      // Call our new coordinate lookup endpoint
+      const response = await fetch(`${process.env.REACT_APP_URL || 'http://localhost:8080'}/api/tours/get-place-coordinates`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          placeName: place.name
+          id: place.id,
+          name: place.name,
+          type: place.type || 'Destination'
         })
       });
 
       if (response.ok) {
         const data = await response.json();
-        if (data.coordinates) {
+        if (data.success && data.coordinates) {
           console.log(`📍 Found ${place.name} at [${data.coordinates[0]}, ${data.coordinates[1]}]`);
           return data.coordinates;
+        } else {
+          console.log(`⚠️ No coordinates found for ${place.name}: ${data.message}`);
         }
       }
     } catch (error) {
-      console.error('Geocoding failed for', place.name, ':', error);
+      console.error('Coordinate lookup failed for', place.name, ':', error);
     }
     
     // Ultimate fallback - use Dhaka coordinates
