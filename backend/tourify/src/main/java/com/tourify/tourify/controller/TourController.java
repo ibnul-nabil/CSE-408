@@ -8,6 +8,7 @@ import com.tourify.tourify.entity.*;
 import com.tourify.tourify.repository.*;
 import com.tourify.tourify.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpEntity;
@@ -54,7 +55,8 @@ public class TourController {
     private final ObjectMapper objectMapper = new ObjectMapper();
     
     // OpenRouteService API configuration
-    private static final String ORS_API_KEY = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImEzYzA3MGE5OTEyZTQ5MGM4OGMxN2M4OWQ4ODhkOThmIiwiaCI6Im11cm11cjY0In0="; // Replace with your API key
+    @Value("${openrouteservice.apiKey}")
+    private String orsApiKey; // Spring will inject the API key from application.properties
     private static final String ORS_BASE_URL = "https://api.openrouteservice.org";
 
     @PostMapping
@@ -869,7 +871,7 @@ public class TourController {
 
             HttpHeaders headers = new HttpHeaders();
             headers.set("Content-Type", "application/json");
-            headers.set("Authorization", ORS_API_KEY);
+            headers.set("Authorization", orsApiKey);
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
             System.out.println(entity);
@@ -995,7 +997,7 @@ public class TourController {
             requestBody.put("instructions", false);
 
             HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", ORS_API_KEY);
+            headers.set("Authorization", orsApiKey);
             headers.set("Content-Type", "application/json");
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
