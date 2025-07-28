@@ -15,6 +15,7 @@ public class TourResponseDTO {
     private ZonedDateTime createdAt;
     private List<PlaceInfo> places;
     private Integer totalDistance; // Distance in kilometers
+    private List<AccommodationInfo> accommodations; // Hotel information
     
     public TourResponseDTO(Long id, String title, String status) {
         this.id = id;
@@ -40,6 +41,8 @@ public class TourResponseDTO {
     public void setPlaces(List<PlaceInfo> places) { this.places = places; }
     public Integer getTotalDistance() { return totalDistance; }
     public void setTotalDistance(Integer totalDistance) { this.totalDistance = totalDistance; }
+    public List<AccommodationInfo> getAccommodations() { return accommodations; }
+    public void setAccommodations(List<AccommodationInfo> accommodations) { this.accommodations = accommodations; }
     
     // Inner class for place information
     public static class PlaceInfo {
@@ -85,5 +88,41 @@ public class TourResponseDTO {
         public void setType(String type) { this.type = type; }
         public Long getSubplaceId() { return subplaceId; }
         public void setSubplaceId(Long subplaceId) { this.subplaceId = subplaceId; }
+    }
+    
+    // Inner class for accommodation information
+    public static class AccommodationInfo {
+        private Long hotelId;
+        private String hotelName;
+        private String hotelLocation;
+        private BigDecimal hotelPrice;
+        private String checkIn;
+        private String checkOut;
+        private BigDecimal totalCost;
+        
+        public AccommodationInfo(Long hotelId, String hotelName, String hotelLocation, BigDecimal hotelPrice, String checkIn, String checkOut, BigDecimal totalCost) {
+            this.hotelId = hotelId;
+            this.hotelName = hotelName;
+            this.hotelLocation = hotelLocation;
+            this.hotelPrice = hotelPrice;
+            this.checkIn = checkIn;
+            this.checkOut = checkOut;
+            this.totalCost = totalCost;
+        }
+        
+        public Long getHotelId() { return hotelId; }
+        public void setHotelId(Long hotelId) { this.hotelId = hotelId; }
+        public String getHotelName() { return hotelName; }
+        public void setHotelName(String hotelName) { this.hotelName = hotelName; }
+        public String getHotelLocation() { return hotelLocation; }
+        public void setHotelLocation(String hotelLocation) { this.hotelLocation = hotelLocation; }
+        public BigDecimal getHotelPrice() { return hotelPrice; }
+        public void setHotelPrice(BigDecimal hotelPrice) { this.hotelPrice = hotelPrice; }
+        public String getCheckIn() { return checkIn; }
+        public void setCheckIn(String checkIn) { this.checkIn = checkIn; }
+        public String getCheckOut() { return checkOut; }
+        public void setCheckOut(String checkOut) { this.checkOut = checkOut; }
+        public BigDecimal getTotalCost() { return totalCost; }
+        public void setTotalCost(BigDecimal totalCost) { this.totalCost = totalCost; }
     }
 }

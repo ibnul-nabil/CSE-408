@@ -513,7 +513,30 @@ public class TourController {
             }
             dto.setPlaces(places);
 
-            System.out.println("✅ Returning tour DTO with " + places.size() + " places");
+            // Get accommodations information
+            List<TourAccommodation> tourAccommodations = tourAccommodationRepository.findByTourId(tour.getId());
+            if (tourAccommodations != null && !tourAccommodations.isEmpty()) {
+                List<TourResponseDTO.AccommodationInfo> accommodations = new ArrayList<>();
+                for (TourAccommodation accommodation : tourAccommodations) {
+                    Hotel hotel = accommodation.getHotel();
+                    TourResponseDTO.AccommodationInfo accommodationInfo = new TourResponseDTO.AccommodationInfo(
+                            hotel.getId(),
+                            hotel.getName(),
+                            hotel.getLocation(),
+                            hotel.getPricePerNight(),
+                            accommodation.getCheckIn() != null ? accommodation.getCheckIn().toString() : null,
+                            accommodation.getCheckOut() != null ? accommodation.getCheckOut().toString() : null,
+                            accommodation.getTotalCost()
+                    );
+                    accommodations.add(accommodationInfo);
+                }
+                dto.setAccommodations(accommodations);
+                System.out.println("🏨 Tour " + tour.getId() + " has " + accommodations.size() + " accommodations");
+            } else {
+                System.out.println("🏨 Tour " + tour.getId() + " has no accommodations");
+            }
+
+            System.out.println("✅ Returning tour DTO with " + places.size() + " places and " + (dto.getAccommodations() != null ? dto.getAccommodations().size() : 0) + " accommodations");
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
             System.out.println("❌ Error in getTourById: " + e.getMessage());

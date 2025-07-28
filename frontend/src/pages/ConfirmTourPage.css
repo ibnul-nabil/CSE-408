@@ -184,6 +184,94 @@
   font-weight: 500;
 }
 
+/* Hotel Information Styles */
+.hotels-confirmation-list {
+  margin-top: 2rem;
+}
+
+.hotels-list-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  margin-bottom: 1rem;
+}
+
+.hotels-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.hotel-confirmation-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  transition: all 0.2s;
+}
+
+.hotel-confirmation-card:hover {
+  border-color: #8b5cf6;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.1);
+}
+
+.hotel-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  background: #8b5cf6;
+  color: white;
+  border-radius: 50%;
+  font-weight: 600;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.hotel-info {
+  flex: 1;
+}
+
+.hotel-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  margin-bottom: 0.25rem;
+}
+
+.hotel-location {
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 0.5rem;
+}
+
+.hotel-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.hotel-price {
+  font-size: 0.875rem;
+  color: #059669;
+  font-weight: 600;
+}
+
+.hotel-dates {
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.hotel-total {
+  font-size: 0.875rem;
+  color: #dc2626;
+  font-weight: 600;
+}
+
 /* Status Messages */
 .error-message {
   background: hsl(var(--destructive) / 0.1);
@@ -236,5 +324,11 @@
   
   .tour-detail-card {
     padding: 1rem;
+  }
+  
+  .hotel-details {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
   }
 } 

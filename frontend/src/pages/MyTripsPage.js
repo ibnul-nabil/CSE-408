@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './MyTripsPage.css';
-import { Calendar, MapPin, Clock, Users, ArrowRight, Plus, ArrowLeft, Edit, ChevronDown, ChevronUp, Plane, Archive, Route } from 'lucide-react';
+import { Calendar, MapPin, Clock, Users, ArrowRight, Plus, ArrowLeft, Edit, ChevronDown, ChevronUp, Plane, Archive, Route, Bed, DollarSign } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const API_URL = process.env.REACT_APP_URL;
@@ -84,8 +84,11 @@ const MyTripsPage = () => {
         // Restore navigation state if returning from tour details
         if (returnState) {
           console.log('🔄 Restoring navigation state:', returnState);
-          setExpandedSections(returnState.expandedSections);
-          setHighlightedTour(returnState.highlightedTour);
+          // Add safety check for expandedSections
+          if (returnState.expandedSections) {
+            setExpandedSections(returnState.expandedSections);
+          }
+          setHighlightedTour(returnState.highlightedTour || null);
           
           // Scroll to the highlighted tour card after state is restored
           setTimeout(() => {
@@ -317,6 +320,18 @@ const MyTripsPage = () => {
     return `${diffDays} day${diffDays > 1 ? 's' : ''}`;
   };
 
+  // Calculate total accommodation cost
+  const calculateAccommodationCost = (accommodations) => {
+    if (!accommodations || accommodations.length === 0) return 0;
+    return accommodations.reduce((total, acc) => total + (acc.totalCost || 0), 0);
+  };
+
+  // Get hotel names for display
+  const getHotelNames = (accommodations) => {
+    if (!accommodations || accommodations.length === 0) return [];
+    return accommodations.map(acc => acc.hotelName).filter(name => name);
+  };
+
   const TourCard = ({ tour, type }) => {
     if (!tour) return null;
     
@@ -348,6 +363,8 @@ const MyTripsPage = () => {
     };
     
     const isHighlighted = highlightedTour === tour.id;
+    const accommodationCost = calculateAccommodationCost(tour.accommodations);
+    const hotelNames = getHotelNames(tour.accommodations);
     
     return (
       <div 
@@ -387,6 +404,21 @@ const MyTripsPage = () => {
               <span>{tour.totalDistance} km total distance</span>
             </div>
           )}
+
+          {/* Hotel Information */}
+          {tour.accommodations && tour.accommodations.length > 0 && (
+            <div className="tour-detail-item">
+              <Bed className="detail-icon" />
+              <span>{tour.accommodations.length} hotel{tour.accommodations.length !== 1 ? 's' : ''} selected</span>
+            </div>
+          )}
+
+          {accommodationCost > 0 && (
+            <div className="tour-detail-item">
+              <DollarSign className="detail-icon" />
+              <span>${accommodationCost} accommodation cost</span>
+            </div>
+          )}
         </div>
 
         {tour.places && tour.places.length > 0 && (
@@ -401,6 +433,25 @@ const MyTripsPage = () => {
               {tour.places.length > 3 && (
                 <span className="destination-tag more">
                   +{tour.places.length - 3} more
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Hotel Names Display */}
+        {hotelNames.length > 0 && (
+          <div className="tour-hotels">
+            <h4>Hotels:</h4>
+            <div className="hotel-tags">
+              {hotelNames.slice(0, 2).map((hotelName, index) => (
+                <span key={index} className="hotel-tag">
+                  {hotelName}
+                </span>
+              ))}
+              {hotelNames.length > 2 && (
+                <span className="hotel-tag more">
+                  +{hotelNames.length - 2} more
                 </span>
               )}
             </div>
@@ -465,8 +516,13 @@ const MyTripsPage = () => {
   );
 
   const TourSection = ({ title, tours, type, hasMore, onLoadMore, loadingMore }) => {
-    const isExpanded = expandedSections[type];
-    const visibleCount = visibleCounts[type];
+    // Add safety checks for state variables
+    if (!expandedSections || !visibleCounts) {
+      return null; // Don't render if state is not ready
+    }
+    
+    const isExpanded = expandedSections[type] || false;
+    const visibleCount = visibleCounts[type] || 6;
     const allTours = tours || [];
     const visibleTours = allTours.slice(0, visibleCount);
     const canLoadMore = allTours.length > visibleCount;
@@ -512,7 +568,7 @@ const MyTripsPage = () => {
                       <button
                         className="load-more-btn"
                         onClick={() => loadMoreTours(type)}
-                        disabled={loadingMore}
+                        disabled={loadingMore || false}
                       >
                         <span>Load More</span>
                       </button>
@@ -535,7 +591,8 @@ const MyTripsPage = () => {
     );
   };
 
-  if (loading) {
+  // Add safety check to ensure state is properly initialized
+  if (loading || !expandedSections || !visibleCounts) {
     return (
       <div className="my-trips-container">
         <div className="loading-state">

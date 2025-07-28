@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "../context/AuthContext";
 import { useTour } from "../context/TourContext";
-import { CheckCircle, ArrowLeft, Calendar, MapPin, Clock, Navigation } from 'lucide-react';
+import { CheckCircle, ArrowLeft, Calendar, MapPin, Clock, Navigation, Bed, DollarSign } from 'lucide-react';
 import StepIndicator from '../components/StepIndicator';
 import './ConfirmTourPage.css';
 
 const API_URL = process.env.REACT_APP_URL;
 
-const ConfirmTourPage = () => {
+const ConfirmTourPage = ({ isEditMode = false, onPrevious, onComplete }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { tourData, resetTour } = useTour();
@@ -46,6 +46,18 @@ const ConfirmTourPage = () => {
     const diffTime = Math.abs(end - start);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return `${diffDays} ${diffDays === 1 ? 'day' : 'days'}`;
+  };
+
+  // Calculate total accommodation cost
+  const calculateAccommodationCost = () => {
+    if (!tourData.accommodations || tourData.accommodations.length === 0) return 0;
+    return tourData.accommodations.reduce((total, acc) => total + (acc.totalCost || 0), 0);
+  };
+
+  // Get hotel names for display
+  const getHotelNames = () => {
+    if (!tourData.accommodations || tourData.accommodations.length === 0) return [];
+    return tourData.accommodations.map(acc => acc.hotelName).filter(name => name);
   };
 
   const handleConfirmTour = async () => {
@@ -86,12 +98,15 @@ const ConfirmTourPage = () => {
         });
       });
     });
+    // Calculate total estimated cost from accommodations
+    const totalAccommodationCost = calculateAccommodationCost();
+    
     const reqBody = {
       userId,
       title: tourData.title || "New Tour",
       startDate: tourData.startDate,
       endDate: tourData.endDate,
-      estimatedCost: 0, // You can update this if you collect cost
+      estimatedCost: totalAccommodationCost, // Use calculated accommodation cost
       route: {
         routeSource: "user",
         stops,
@@ -104,8 +119,14 @@ const ConfirmTourPage = () => {
     console.log("🚀 Sending tour creation request with distance:", reqBody.route.totalDistance);
 
     try {
-      const res = await fetch(`${API_URL}/api/tours`, {
-        method: "POST",
+      const url = isEditMode 
+        ? `${API_URL}/api/tours/${tourData.editingTourId}` 
+        : `${API_URL}/api/tours`;
+      
+      const method = isEditMode ? "PUT" : "POST";
+      
+      const res = await fetch(url, {
+        method: method,
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
@@ -115,15 +136,22 @@ const ConfirmTourPage = () => {
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.message || "Failed to create tour.");
+        setError(data.message || `Failed to ${isEditMode ? 'update' : 'create'} tour.`);
         setLoading(false);
         return;
       }
 
       setSuccess(true);
-      // Reset tour data after successful creation
+      // Reset tour data after successful creation/update
       resetTour();
-      setTimeout(() => navigate("/my-trips", { replace: true, state: { skipLoading: true } }), 1500);
+      
+      if (isEditMode && onComplete) {
+        // For edit mode, call the completion callback
+        setTimeout(() => onComplete(), 1500);
+      } else {
+        // For create mode, navigate to my trips
+        setTimeout(() => navigate("/my-trips", { replace: true, state: { skipLoading: true } }), 1500);
+      }
     } catch (err) {
       setError("Network error.");
     } finally {
@@ -132,57 +160,96 @@ const ConfirmTourPage = () => {
   };
 
   const handlePrevious = () => {
-    navigate('/finalize-route');
+    if (isEditMode && onPrevious) {
+      onPrevious();
+    } else {
+      navigate('/finalize-route');
+    }
   };
 
-  const renderTourSummary = () => (
-    <div className="tour-confirmation-summary">
-      <div className="confirmation-header">
-        <CheckCircle className="confirmation-icon" />
-        <h3 className="confirmation-title">Ready to Create Your Tour?</h3>
-        <p className="confirmation-subtitle">Please review your tour details before confirming</p>
-      </div>
-      
-      <div className="tour-details-grid">
-        <div className="tour-detail-card">
-          <Calendar className="detail-icon" />
-          <div className="detail-content">
-            <h4 className="detail-title">Tour Dates</h4>
-            <p className="detail-value">{formatDateDisplay(tourData.startDate)} - {formatDateDisplay(tourData.endDate)}</p>
-            <p className="detail-subtitle">Duration: {calculateDuration()}</p>
-          </div>
+  const renderTourSummary = () => {
+    const accommodationCost = calculateAccommodationCost();
+    const hotelNames = getHotelNames();
+    
+    return (
+      <div className="tour-confirmation-summary">
+        <div className="confirmation-header">
+          <CheckCircle className="confirmation-icon" />
+          <h3 className="confirmation-title">
+            {isEditMode ? 'Ready to Update Your Tour?' : 'Ready to Create Your Tour?'}
+          </h3>
+          <p className="confirmation-subtitle">
+            {isEditMode ? 'Please review your tour changes before confirming' : 'Please review your tour details before confirming'}
+          </p>
         </div>
         
-        <div className="tour-detail-card">
-          <MapPin className="detail-icon" />
-          <div className="detail-content">
-            <h4 className="detail-title">Destinations</h4>
-            <p className="detail-value">{tourData.places?.length || 0} places selected</p>
-            <p className="detail-subtitle">
-              {tourData.places?.reduce((total, place) => total + place.subplaces.length, 0) || 0} sub-places included
-            </p>
-          </div>
-        </div>
-        
-        {tourData.totalDistance && (
+        <div className="tour-details-grid">
           <div className="tour-detail-card">
-            <Navigation className="detail-icon" />
+            <Calendar className="detail-icon" />
             <div className="detail-content">
-              <h4 className="detail-title">Route Distance</h4>
-              <p className="detail-value">{tourData.totalDistance} km</p>
+              <h4 className="detail-title">Tour Dates</h4>
+              <p className="detail-value">{formatDateDisplay(tourData.startDate)} - {formatDateDisplay(tourData.endDate)}</p>
+              <p className="detail-subtitle">Duration: {calculateDuration()}</p>
+            </div>
+          </div>
+          
+          <div className="tour-detail-card">
+            <MapPin className="detail-icon" />
+            <div className="detail-content">
+              <h4 className="detail-title">Destinations</h4>
+              <p className="detail-value">{tourData.places?.length || 0} places selected</p>
               <p className="detail-subtitle">
-                {tourData.isRouteOptimized ? 'Optimized route' : 'Direct route'}
+                {tourData.places?.reduce((total, place) => total + place.subplaces.length, 0) || 0} sub-places included
               </p>
             </div>
           </div>
-        )}
+          
+          {tourData.totalDistance && (
+            <div className="tour-detail-card">
+              <Navigation className="detail-icon" />
+              <div className="detail-content">
+                <h4 className="detail-title">Route Distance</h4>
+                <p className="detail-value">{tourData.totalDistance} km</p>
+                <p className="detail-subtitle">
+                  {tourData.isRouteOptimized ? 'Optimized route' : 'Direct route'}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Hotel Information */}
+          {tourData.accommodations && tourData.accommodations.length > 0 && (
+            <div className="tour-detail-card">
+              <Bed className="detail-icon" />
+              <div className="detail-content">
+                <h4 className="detail-title">Accommodations</h4>
+                <p className="detail-value">{tourData.accommodations.length} hotel{tourData.accommodations.length !== 1 ? 's' : ''} selected</p>
+                <p className="detail-subtitle">
+                  {hotelNames.slice(0, 2).join(', ')}
+                  {hotelNames.length > 2 && ` +${hotelNames.length - 2} more`}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {accommodationCost > 0 && (
+            <div className="tour-detail-card">
+              <DollarSign className="detail-icon" />
+              <div className="detail-content">
+                <h4 className="detail-title">Accommodation Cost</h4>
+                <p className="detail-value">${accommodationCost}</p>
+                <p className="detail-subtitle">Total for all hotels</p>
+              </div>
+            </div>
+          )}
+        </div>
+        
+        <div className="tour-title-display">
+          <h2 className="tour-final-title">"{tourData.title || "Untitled Tour"}"</h2>
+        </div>
       </div>
-      
-      <div className="tour-title-display">
-        <h2 className="tour-final-title">"{tourData.title || "Untitled Tour"}"</h2>
-      </div>
-    </div>
-  );
+    );
+  };
 
   const renderPlacesList = () => (
     <div className="places-confirmation-list">
@@ -210,12 +277,43 @@ const ConfirmTourPage = () => {
     </div>
   );
 
+  // Render hotel information if available
+  const renderHotelsList = () => {
+    if (!tourData.accommodations || tourData.accommodations.length === 0) return null;
+    
+    return (
+      <div className="hotels-confirmation-list">
+        <h4 className="hotels-list-title">Your Selected Hotels:</h4>
+        <div className="hotels-grid">
+          {tourData.accommodations.map((accommodation, index) => (
+            <div key={accommodation.hotelId} className="hotel-confirmation-card">
+              <div className="hotel-number">{index + 1}</div>
+              <div className="hotel-info">
+                <h5 className="hotel-name">{accommodation.hotelName}</h5>
+                <p className="hotel-location">{accommodation.hotelLocation}</p>
+                <div className="hotel-details">
+                  <span className="hotel-price">${accommodation.hotelPrice} per night</span>
+                  {accommodation.checkIn && accommodation.checkOut && (
+                    <span className="hotel-dates">
+                      {formatDateDisplay(accommodation.checkIn)} - {formatDateDisplay(accommodation.checkOut)}
+                    </span>
+                  )}
+                  <span className="hotel-total">Total: ${accommodation.totalCost || accommodation.hotelPrice}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="tour-page-container">
       <div className="tour-page-wrapper">
         <div className="tour-page-header">
-          <h1 className="tour-page-title">Tour Planner</h1>
-          <p className="tour-page-subtitle">Plan your perfect adventure</p>
+          <h1 className="tour-page-title">{isEditMode ? 'Edit Tour' : 'Tour Planner'}</h1>
+          <p className="tour-page-subtitle">{isEditMode ? 'Update your tour details' : 'Plan your perfect adventure'}</p>
         </div>
         
         <StepIndicator currentStep={5} />
@@ -224,21 +322,26 @@ const ConfirmTourPage = () => {
           <div className="card-header">
             <h2 className="card-title">
               <CheckCircle className="title-icon" />
-              Confirm Tour
+              {isEditMode ? 'Update Tour' : 'Confirm Tour'}
             </h2>
             <p className="card-description">
-              Review and confirm your tour details
+              {isEditMode ? 'Review and update your tour details' : 'Review and confirm your tour details'}
             </p>
           </div>
           <div className="card-content">
             {renderTourSummary()}
             {renderPlacesList()}
+            {renderHotelsList()}
           </div>
         </div>
         
         {/* Status Messages */}
         {error && <div className="error-message">{error}</div>}
-        {success && <div className="success-message">Tour created successfully! Redirecting to your trips...</div>}
+        {success && (
+          <div className="success-message">
+            {isEditMode ? 'Tour updated successfully! Redirecting...' : 'Tour created successfully! Redirecting to your trips...'}
+          </div>
+        )}
         
         {/* Navigation Buttons */}
         <div className="form-navigation">
@@ -255,7 +358,12 @@ const ConfirmTourPage = () => {
             onClick={handleConfirmTour}
             disabled={loading}
           >
-            <span>{loading ? "Creating Tour..." : "Confirm Tour"}</span>
+            <span>
+              {loading 
+                ? (isEditMode ? "Updating Tour..." : "Creating Tour...") 
+                : (isEditMode ? "Update Tour" : "Confirm Tour")
+              }
+            </span>
           </button>
         </div>
       </div>

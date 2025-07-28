@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Calendar, Clock, MapPin, DollarSign, User, Navigation } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, MapPin, DollarSign, User, Navigation, Bed } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './TourDetailsPage.css';
 
@@ -70,6 +70,9 @@ const TourDetailsPage = () => {
       console.log('✅ Tour data received:', data);
       console.log('📊 Tour places:', data.places);
       console.log('💰 Tour estimated cost:', data.estimatedCost);
+      console.log('🏨 Tour accommodations:', data.accommodations);
+      console.log('🏨 Accommodations length:', data.accommodations?.length);
+      console.log('🏨 Accommodations structure:', JSON.stringify(data.accommodations, null, 2));
       setTour(data);
     } catch (err) {
       console.error('❌ Fetch error:', err);
@@ -104,6 +107,12 @@ const TourDetailsPage = () => {
     if (now < start) return 'upcoming';
     if (now > end) return 'past';
     return 'current';
+  };
+
+  // Calculate total accommodation cost
+  const calculateAccommodationCost = (accommodations) => {
+    if (!accommodations || accommodations.length === 0) return 0;
+    return accommodations.reduce((total, acc) => total + (acc.totalCost || 0), 0);
   };
 
   const handleBackNavigation = () => {
@@ -158,6 +167,14 @@ const TourDetailsPage = () => {
   }
 
   const status = getTourStatus(tour.startDate, tour.endDate);
+  const accommodationCost = calculateAccommodationCost(tour.accommodations);
+
+  console.log('🎯 Rendering tour details with:', {
+    tourId: tour.id,
+    accommodations: tour.accommodations,
+    accommodationCost,
+    hasAccommodations: tour.accommodations && tour.accommodations.length > 0
+  });
 
   return (
     <div className="tour-details-container">
@@ -223,6 +240,29 @@ const TourDetailsPage = () => {
                     <span className="info-value">${tour.estimatedCost || 0}</span>
                   </div>
                 </div>
+
+                {/* Hotel Information */}
+                {tour.accommodations && tour.accommodations.length > 0 && (
+                  <div className="info-item">
+                    <Bed className="info-icon" />
+                    <div className="info-content">
+                      <span className="info-label">Accommodations</span>
+                      <span className="info-value">
+                        {tour.accommodations.length} hotel{tour.accommodations.length !== 1 ? 's' : ''} selected
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {accommodationCost > 0 && (
+                  <div className="info-item">
+                    <DollarSign className="info-icon" />
+                    <div className="info-content">
+                      <span className="info-label">Accommodation Cost</span>
+                      <span className="info-value">${accommodationCost}</span>
+                    </div>
+                  </div>
+                )}
                 
                 <div className="info-item">
                   <User className="info-icon" />
@@ -273,6 +313,40 @@ const TourDetailsPage = () => {
               </div>
             </div>
           ) : null}
+
+          {/* Hotel Information Section */}
+          {tour.accommodations && tour.accommodations.length > 0 && (
+            <div className="hotels-section">
+              <div className="hotels-card">
+                <h3 className="hotels-title">
+                  <Bed className="hotels-icon" />
+                  Accommodations & Hotels
+                </h3>
+                <div className="hotels-list">
+                  {tour.accommodations.map((accommodation, index) => (
+                    <div key={accommodation.hotelId} className="hotel-item">
+                      <div className="hotel-marker">
+                        <span className="marker-number">{index + 1}</span>
+                      </div>
+                      <div className="hotel-content">
+                        <h4 className="hotel-name">{accommodation.hotelName}</h4>
+                        <p className="hotel-location">{accommodation.hotelLocation}</p>
+                        <div className="hotel-details">
+                          <span className="hotel-price">${accommodation.hotelPrice} per night</span>
+                          {accommodation.checkIn && accommodation.checkOut && (
+                            <span className="hotel-dates">
+                              {formatDate(accommodation.checkIn)} - {formatDate(accommodation.checkOut)}
+                            </span>
+                          )}
+                          <span className="hotel-total">Total: ${accommodation.totalCost || accommodation.hotelPrice}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="tour-actions">
             {/* Actions removed - edit functionality moved to My Trips page */}

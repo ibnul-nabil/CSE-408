@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bed, Calendar, DollarSign, MapPin, Star, Wifi, Car, Utensils } from 'lucide-react';
+import { Bed, Calendar, DollarSign, MapPin, Star, Wifi, Car, Utensils, ExternalLink } from 'lucide-react';
 import { useTour } from '../context/TourContext';
 import StepIndicator from '../components/StepIndicator';
 import './SelectHotelsPage.css';
@@ -173,13 +173,17 @@ const SelectHotelsPage = ({ isEditMode = false, onPrevious, onNext }) => {
       acc => acc.hotelId === hotel.id
     );
     
+    console.log('🏨 Hotel selection:', hotel.name, 'existingIndex:', existingIndex);
+    
     if (existingIndex >= 0) {
       // Remove hotel if already selected
+      console.log('🗑️ Removing hotel:', hotel.name);
       setSelectedAccommodations(prev => 
         prev.filter((_, index) => index !== existingIndex)
       );
     } else {
       // Add hotel with default dates
+      console.log('➕ Adding hotel:', hotel.name);
       const newAccommodation = {
         hotelId: hotel.id,
         hotelName: hotel.name,
@@ -262,7 +266,18 @@ const SelectHotelsPage = ({ isEditMode = false, onPrevious, onNext }) => {
   };
 
   const handleNext = () => {
-    // Save accommodations to context
+    // Check if no hotels are selected and show confirmation popup
+    if (selectedAccommodations.length === 0) {
+      const confirmed = window.confirm(
+        'You haven\'t selected any hotels for this tour. Are you sure you want to continue without accommodations?'
+      );
+      if (!confirmed) {
+        return; // User cancelled, stay on current page
+      }
+    }
+    
+    // Save accommodations to context (can be empty array)
+    console.log('💾 Saving accommodations to context:', selectedAccommodations);
     setAccommodations(selectedAccommodations);
     
     if (isEditMode && onNext) {
@@ -328,62 +343,62 @@ const SelectHotelsPage = ({ isEditMode = false, onPrevious, onNext }) => {
       <div className="tour-page-wrapper">
         <div className="tour-page-header">
           <h1 className="tour-page-title">{isEditMode ? 'Edit Tour' : 'Tour Planner'}</h1>
-          <p className="tour-page-subtitle">{isEditMode ? 'Update your accommodation choices' : 'Choose your perfect accommodations'}</p>
+          <p className="tour-page-subtitle">{isEditMode ? 'Update your accommodation choices' : 'Choose your perfect accommodations (optional)'}</p>
         </div>
         
         <StepIndicator currentStep={3} />
         
         <div className="hotels-page-content">
-          {/* Filters Section */}
+
+
+          {/* Compact Filters Section */}
           <div className="filters-section card">
             <div className="card-header">
               <h2 className="card-title">
                 <Bed className="title-icon" />
-                Filter Hotels
+                Quick Filters
               </h2>
             </div>
             <div className="card-content">
-              <div className="filters-grid">
-                {/* Search */}
-                <div className="filter-group">
-                  <label>Search Hotels</label>
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search by hotel name..."
-                    className="input"
-                  />
-                </div>
-                
-                {/* Price Range */}
-                <div className="filter-group">
-                  <label>Price Range (per night)</label>
-                  <div className="price-range">
+              <div className="compact-filters">
+                {/* Search and Price in one row */}
+                <div className="filter-row">
+                  <div className="search-filter">
+                    <input
+                      type="text"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder="Search hotels..."
+                      className="compact-input"
+                    />
+                  </div>
+                  
+                  <div className="price-filter">
+                    <span className="filter-label">Price Range:</span>
                     <input
                       type="number"
                       value={priceRange.min}
                       onChange={(e) => setPriceRange(prev => ({ ...prev, min: Number(e.target.value) }))}
-                      placeholder="Min"
-                      className="input"
+                      placeholder="Min $"
+                      className="compact-input"
                     />
-                    <span>to</span>
+                    <span>-</span>
                     <input
                       type="number"
                       value={priceRange.max}
                       onChange={(e) => setPriceRange(prev => ({ ...prev, max: Number(e.target.value) }))}
-                      placeholder="Max"
-                      className="input"
+                      placeholder="Max $"
+                      className="compact-input"
                     />
                   </div>
                 </div>
                 
-                {/* Amenities */}
-                <div className="filter-group">
-                  <label>Amenities</label>
+                {/* Amenities and Destinations in one row */}
+                <div className="filter-row">
                   <div className="amenities-filter">
-                    {availableAmenities.slice(0, 8).map(amenity => (
-                      <label key={amenity} className="amenity-checkbox">
+                    <span className="filter-label">Amenities:</span>
+                    {availableAmenities.slice(0, 4).map(amenity => (
+                      <label key={amenity} className="compact-checkbox">
                         <input
                           type="checkbox"
                           checked={selectedAmenities.includes(amenity)}
@@ -399,40 +414,30 @@ const SelectHotelsPage = ({ isEditMode = false, onPrevious, onNext }) => {
                       </label>
                     ))}
                   </div>
+                  
+                  <div className="destinations-filter">
+                    <span className="filter-label">Destinations:</span>
+                    {tourData.places && tourData.places.map(place => {
+                      const destination = place.destination;
+                      return (
+                        <label key={destination.id} className="compact-checkbox">
+                          <input
+                            type="checkbox"
+                            checked={selectedDestinations.some(d => d.id === destination.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedDestinations(prev => [...prev, destination]);
+                              } else {
+                                setSelectedDestinations(prev => prev.filter(d => d.id !== destination.id));
+                              }
+                            }}
+                          />
+                          <span>{destination.name}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Destination Filter Section */}
-          <div className="destination-filter-section card">
-            <div className="card-header">
-              <h2 className="card-title">
-                <MapPin className="title-icon" />
-                Filter by Destination
-              </h2>
-            </div>
-            <div className="card-content">
-              <div className="destinations-filter">
-                {tourData.places && tourData.places.map(place => {
-                  const destination = place.destination;
-                  return (
-                    <label key={destination.id} className="destination-checkbox">
-                      <input
-                        type="checkbox"
-                        checked={selectedDestinations.some(d => d.id === destination.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedDestinations(prev => [...prev, destination]);
-                          } else {
-                            setSelectedDestinations(prev => prev.filter(d => d.id !== destination.id));
-                          }
-                        }}
-                      />
-                      <span>{destination.name}</span>
-                    </label>
-                  );
-                })}
               </div>
             </div>
           </div>
@@ -450,8 +455,6 @@ const SelectHotelsPage = ({ isEditMode = false, onPrevious, onNext }) => {
                 <div 
                   key={hotel.id} 
                   className={`hotel-card ${isHotelSelected(hotel.id) ? 'selected' : ''}`}
-                  onClick={() => window.open('https://booking.com', '_blank')}
-                  style={{ cursor: 'pointer' }}
                 >
                   <div className="hotel-info">
                     <div className="hotel-header">
@@ -459,7 +462,7 @@ const SelectHotelsPage = ({ isEditMode = false, onPrevious, onNext }) => {
                       <button
                         className={`add-hotel-btn ${isHotelSelected(hotel.id) ? 'selected' : ''}`}
                         onClick={(e) => {
-                          e.stopPropagation(); // Prevent card click when clicking the add button
+                          e.stopPropagation();
                           handleHotelSelect(hotel);
                         }}
                         title={isHotelSelected(hotel.id) ? 'Remove Hotel' : 'Add Hotel'}
@@ -491,7 +494,7 @@ const SelectHotelsPage = ({ isEditMode = false, onPrevious, onNext }) => {
                             <button
                               className="amenity-toggle-btn"
                               onClick={(e) => {
-                                e.stopPropagation(); // Prevent card click when clicking the amenities button
+                                e.stopPropagation();
                                 toggleAmenitiesExpansion(hotel.id);
                               }}
                             >
@@ -503,6 +506,21 @@ const SelectHotelsPage = ({ isEditMode = false, onPrevious, onNext }) => {
                           )}
                         </div>
                       )}
+                    </div>
+                    
+                    {/* Booking.com Button */}
+                    <div className="hotel-actions">
+                      <button
+                        className="booking-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open('https://booking.com', '_blank');
+                        }}
+                        title="Book on Booking.com"
+                      >
+                        <ExternalLink size={16} />
+                        Book on Booking.com
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -604,6 +622,8 @@ const SelectHotelsPage = ({ isEditMode = false, onPrevious, onNext }) => {
           )}
         </div>
         
+
+
         {/* Navigation Buttons */}
         <div className="form-navigation">
           <button
@@ -615,9 +635,8 @@ const SelectHotelsPage = ({ isEditMode = false, onPrevious, onNext }) => {
           <button
             className="btn btn-primary"
             onClick={handleNext}
-            disabled={selectedAccommodations.length === 0}
           >
-            <span>{isEditMode ? 'Update Tour' : 'Next'}</span>
+            <span>Next</span>
           </button>
         </div>
       </div>

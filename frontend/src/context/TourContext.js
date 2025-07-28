@@ -106,9 +106,21 @@ export const TourProvider = ({ children }) => {
   };
 
   const setAccommodations = (accommodations) => {
+    // Calculate total estimated cost from accommodations
+    const totalCost = accommodations.reduce((total, acc) => total + (acc.totalCost || 0), 0);
+    
+    console.log('💰 Setting accommodations:', accommodations);
+    console.log('💰 Calculated total cost:', totalCost);
+    
     dispatch({
       type: TOUR_ACTIONS.SET_ACCOMMODATIONS,
       payload: accommodations
+    });
+    
+    // Also update the estimated cost
+    dispatch({
+      type: TOUR_ACTIONS.UPDATE_FIELD,
+      payload: { field: 'estimatedCost', value: totalCost }
     });
   };
 

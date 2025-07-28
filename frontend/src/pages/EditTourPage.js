@@ -3,15 +3,18 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTour } from '../context/TourContext';
 import CreateTourInfoPage from './CreateTourInfoPage';
 import CreateTourPage from './CreateTourPage';
+import SelectHotelsPage from './SelectHotelsPage';
+import FinalizeRoutePage from './FinalizeRoutePage';
+import ConfirmTourPage from './ConfirmTourPage';
 import './EditTourPage.css';
 
 const EditTourPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { setTourInfo, setPlaces, setEditMode, resetTour } = useTour();
+  const { setTourInfo, setPlaces, setAccommodations, setEditMode, resetTour } = useTour();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentStep, setCurrentStep] = useState(1); // 1: Tour Info, 2: Destinations
+  const [currentStep, setCurrentStep] = useState(1); // 1: Tour Info, 2: Destinations, 3: Hotels, 4: Finalize Route, 5: Confirm
 
   useEffect(() => {
     const loadTourForEditing = async () => {
@@ -20,7 +23,7 @@ const EditTourPage = () => {
         setLoading(true);
         
         // Check if required functions are available
-        if (!setTourInfo || !setPlaces || !setEditMode || !resetTour) {
+        if (!setTourInfo || !setPlaces || !setAccommodations || !setEditMode || !resetTour) {
           console.error('❌ Required context functions not available');
           setError('Context functions not available');
           setLoading(false);
@@ -57,6 +60,7 @@ const EditTourPage = () => {
         const tourData = await response.json();
         console.log('📦 Received tour data:', tourData);
         console.log('📦 Places structure:', tourData.places);
+        console.log('🏨 Accommodations structure:', tourData.accommodations);
         
         // Reset the tour context first
         resetTour();
@@ -98,31 +102,25 @@ const EditTourPage = () => {
             const parentDestination = destinationMap.get(place.parentDestinationId);
             if (parentDestination) {
               parentDestination.subplaces.push({
-                id: place.destinationId, // This is the sub-place ID
-                name: place.name,
-                type: place.type
-              });
-            } else {
-              // Track missing destinations
-              missingDestinations.add(place.parentDestinationId);
-              
-              // Create or update destination entry
-              if (!destinationMap.has(place.parentDestinationId)) {
-                destinationMap.set(place.parentDestinationId, {
-                  destination: {
-                    id: place.parentDestinationId,
-                    name: `Loading...`, // Will be updated
-                    type: 'Destination'
-                  },
-                  subplaces: []
-                });
-              }
-              
-              destinationMap.get(place.parentDestinationId).subplaces.push({
                 id: place.destinationId,
                 name: place.name,
                 type: place.type
               });
+            } else {
+              // If parent destination not found, create it
+              destinationMap.set(place.parentDestinationId, {
+                destination: {
+                  id: place.parentDestinationId,
+                  name: `Destination ${place.parentDestinationId}`,
+                  type: 'Destination'
+                },
+                subplaces: [{
+                  id: place.destinationId,
+                  name: place.name,
+                  type: place.type
+                }]
+              });
+              missingDestinations.add(place.parentDestinationId);
             }
           }
         });
@@ -155,9 +153,16 @@ const EditTourPage = () => {
         console.log('✅ Formatted places for context:', formattedPlaces);
         setPlaces(formattedPlaces);
         
+        // Set accommodations if available
+        if (tourData.accommodations && tourData.accommodations.length > 0) {
+          console.log('✅ Setting accommodations:', tourData.accommodations);
+          setAccommodations(tourData.accommodations);
+        }
+        
         console.log('✅ Tour data loaded for editing:', { 
           title: tourData.title, 
-          places: formattedPlaces 
+          places: formattedPlaces,
+          accommodations: tourData.accommodations
         });
         console.log('✅ Setting loading to false');
       } catch (err) {
@@ -201,13 +206,30 @@ const EditTourPage = () => {
     setCurrentStep(step);
   };
 
+  // Handle tour update completion
+  const handleTourUpdate = () => {
+    console.log('✅ Tour updated successfully');
+    navigate('/my-trips', { 
+      state: { 
+        skipLoading: true,
+        returnState: { highlightedTour: id }
+      } 
+    });
+  };
+
   // Render the appropriate component based on current step
   const renderCurrentStep = () => {
     switch (currentStep) {
       case 1:
         return <CreateTourInfoPage isEditMode={true} onNext={() => handleStepChange(2)} />;
       case 2:
-        return <CreateTourPage isEditMode={true} onPrevious={() => handleStepChange(1)} />;
+        return <CreateTourPage isEditMode={true} onPrevious={() => handleStepChange(1)} onNext={() => handleStepChange(3)} />;
+      case 3:
+        return <SelectHotelsPage isEditMode={true} onPrevious={() => handleStepChange(2)} onNext={() => handleStepChange(4)} />;
+      case 4:
+        return <FinalizeRoutePage isEditMode={true} onPrevious={() => handleStepChange(3)} onNext={() => handleStepChange(5)} />;
+      case 5:
+        return <ConfirmTourPage isEditMode={true} onPrevious={() => handleStepChange(4)} onComplete={handleTourUpdate} />;
       default:
         return <CreateTourInfoPage isEditMode={true} onNext={() => handleStepChange(2)} />;
     }

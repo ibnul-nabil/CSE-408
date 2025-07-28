@@ -7,7 +7,7 @@ import StepIndicator from '../components/StepIndicator';
 import RouteOptimizer from '../components/RouteOptimizer';
 import './FinalizeRoutePage.css';
 
-const FinalizeRoutePage = () => {
+const FinalizeRoutePage = ({ isEditMode = false, onPrevious, onNext }) => {
   const navigate = useNavigate();
   const { tourData } = useTour();
   const [showOptimizer, setShowOptimizer] = useState(true);
@@ -35,11 +35,19 @@ const FinalizeRoutePage = () => {
   };
 
   const handleNext = () => {
-    navigate('/confirm-tour');
+    if (isEditMode && onNext) {
+      onNext();
+    } else {
+      navigate('/confirm-tour');
+    }
   };
 
   const handlePrevious = () => {
-    navigate('/select-hotels');
+    if (isEditMode && onPrevious) {
+      onPrevious();
+    } else {
+      navigate('/select-hotels');
+    }
   };
 
   const handleRouteChange = (optimizedRoute, totalDistance) => {
@@ -100,14 +108,16 @@ const FinalizeRoutePage = () => {
             <div className="route-stop-content">
               <h4 className="route-stop-title">{item.destination.name}</h4>
               <p className="route-stop-type">Destination</p>
-              {item.subplaces.length > 0 && (
+              {item.subplaces && item.subplaces.length > 0 && (
                 <div className="route-subplaces">
-                  {item.subplaces.map((subplace, subIndex) => (
-                    <div key={subplace.id} className="route-subplace">
-                      <div className="route-subplace-dot"></div>
-                      <span className="route-subplace-name">{subplace.name}</span>
-                    </div>
-                  ))}
+                  <span className="subplaces-label">Sub-places:</span>
+                  <div className="subplaces-list">
+                    {item.subplaces.map((subplace, subIndex) => (
+                      <span key={subIndex} className="subplace-tag">
+                        {subplace.name}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -119,28 +129,31 @@ const FinalizeRoutePage = () => {
 
   const renderTourSummary = () => (
     <div className="tour-summary">
-      <h3 className="tour-summary-title">{tourData.title || "Untitled Tour"}</h3>
-      <div className="tour-summary-details">
-        <div className="tour-summary-item">
-          <span className="tour-summary-label">Start Date:</span>
-          <span className="tour-summary-value">{formatDateDisplay(tourData.startDate)}</span>
+      <div className="summary-header">
+        <h3>Tour Summary</h3>
+      </div>
+      <div className="summary-content">
+        <div className="summary-item">
+          <span className="summary-label">Tour Title:</span>
+          <span className="summary-value">{tourData.title || 'Untitled Tour'}</span>
         </div>
-        <div className="tour-summary-item">
-          <span className="tour-summary-label">End Date:</span>
-          <span className="tour-summary-value">{formatDateDisplay(tourData.endDate)}</span>
+        <div className="summary-item">
+          <span className="summary-label">Duration:</span>
+          <span className="summary-value">
+            {tourData.startDate && tourData.endDate 
+              ? `${formatDateDisplay(tourData.startDate)} - ${formatDateDisplay(tourData.endDate)}`
+              : 'Not set'
+            }
+          </span>
         </div>
-        <div className="tour-summary-item">
-          <span className="tour-summary-label">Places:</span>
-          <span className="tour-summary-value">{tourData.places?.length || 0} destinations</span>
+        <div className="summary-item">
+          <span className="summary-label">Destinations:</span>
+          <span className="summary-value">{tourData.places?.length || 0} places</span>
         </div>
-        <div className="tour-summary-item">
-          <span className="tour-summary-label">Accommodations:</span>
-          <span className="tour-summary-value">{tourData.accommodations?.length || 0} hotels</span>
-        </div>
-        {tourData.totalDistance && (
-          <div className="tour-summary-item">
-            <span className="tour-summary-label">Total Distance:</span>
-            <span className="tour-summary-value">{tourData.totalDistance} km</span>
+        {tourData.accommodations && tourData.accommodations.length > 0 && (
+          <div className="summary-item">
+            <span className="summary-label">Hotels:</span>
+            <span className="summary-value">{tourData.accommodations.length} selected</span>
           </div>
         )}
       </div>
@@ -151,52 +164,34 @@ const FinalizeRoutePage = () => {
     <div className="tour-page-container">
       <div className="tour-page-wrapper">
         <div className="tour-page-header">
-          <h1 className="tour-page-title">Tour Planner</h1>
-          <p className="tour-page-subtitle">Optimize your route and finalize your tour</p>
+          <h1 className="tour-page-title">{isEditMode ? 'Edit Tour' : 'Tour Planner'}</h1>
+          <p className="tour-page-subtitle">{isEditMode ? 'Finalize your route changes' : 'Finalize your route'}</p>
         </div>
         
         <StepIndicator currentStep={4} />
-        
-        {/* Route Optimizer Component */}
-        {showOptimizer && tourData.places && tourData.places.length > 0 && (
-          <RouteOptimizer 
-            places={tourData.places} 
-            onRouteChange={handleRouteChange}
-          />
-        )}
         
         <div className="card">
           <div className="card-header">
             <h2 className="card-title">
               <RouteIcon className="title-icon" />
-              Route Preview
+              {isEditMode ? 'Update Route' : 'Finalize Route'}
             </h2>
             <p className="card-description">
-              {tourData.isRouteOptimized 
-                ? "Your optimized route is ready" 
-                : "Here's your planned route"
-              }
+              {isEditMode ? 'Review and optimize your route changes' : 'Review and optimize your route'}
             </p>
-            {tourData.places && tourData.places.length > 1 && (
-              <button
-                className="toggle-optimizer-btn"
-                onClick={() => setShowOptimizer(!showOptimizer)}
-              >
-                <MapIcon className="btn-icon" />
-                {showOptimizer ? 'Hide Optimizer' : 'Show Route Optimizer'}
-              </button>
-            )}
           </div>
           <div className="card-content">
             {renderTourSummary()}
+            {renderRoutePreview()}
             
-            {tourData.places && tourData.places.length === 0 ? (
-              <div className="empty-state">
-                <p>No route selected.</p>
-              </div>
-            ) : (
-              renderRoutePreview()
-            )}
+            <div className="route-optimizer-section">
+              <RouteOptimizer 
+                places={tourData.places}
+                onRouteChange={handleRouteChange}
+                showOptimizer={showOptimizer}
+                onToggleOptimizer={() => setShowOptimizer(!showOptimizer)}
+              />
+            </div>
           </div>
         </div>
         

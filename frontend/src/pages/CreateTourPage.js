@@ -8,7 +8,7 @@ import BlogSuggestions from '../components/BlogSuggestions';
 
 const API_URL = process.env.REACT_APP_URL;
 
-const CreateTourPage = ({ isEditMode = false, onPrevious }) => {
+const CreateTourPage = ({ isEditMode = false, onPrevious, onNext }) => {
   const navigate = useNavigate();
   const { tourData, setPlaces } = useTour();
   
@@ -226,8 +226,11 @@ const CreateTourPage = ({ isEditMode = false, onPrevious }) => {
       return;
     }
     
-    if (isEditing) {
-      // Handle tour update
+    if (isEditing && onNext) {
+      // In edit mode, call the onNext callback
+      onNext();
+    } else if (isEditing) {
+      // Fallback for edit mode without onNext
       await handleUpdateTour();
     } else {
       // Handle normal tour creation flow
@@ -333,10 +336,10 @@ const CreateTourPage = ({ isEditMode = false, onPrevious }) => {
       <div className="tour-page-wrapper">
         <div className="tour-page-header">
           <h1 className="tour-page-title">{isEditing ? 'Edit Tour' : 'Tour Planner'}</h1>
-          <p className="tour-page-subtitle">{isEditing ? 'Update your adventure details' : 'Plan your perfect adventure'}</p>
+          <p className="tour-page-subtitle">{isEditing ? 'Update your destinations' : 'Plan your perfect adventure'}</p>
         </div>
         
-        <StepIndicator currentStep={2} />
+        <StepIndicator currentStep={isEditMode ? 2 : 2} />
         
         <div className="card">
           <div className="card-header">
@@ -508,7 +511,7 @@ const CreateTourPage = ({ isEditMode = false, onPrevious }) => {
             onClick={handleNext}
             disabled={selectedDistricts.length === 0}
           >
-            <span>{isEditing ? 'Update Tour' : 'Next'}</span>
+            <span>Next</span>
           </button>
         </div>
       </div>
