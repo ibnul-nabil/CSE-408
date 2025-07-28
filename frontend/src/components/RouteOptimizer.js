@@ -68,6 +68,13 @@ const RouteOptimizer = ({ places = [], onRouteChange }) => {
     }
   }, []);
 
+  // Calculate initial distance when places are loaded
+  useEffect(() => {
+    if (optimizedPlaces.length >= 2) {
+      calculateCurrentDistance(optimizedPlaces);
+    }
+  }, [optimizedPlaces, calculateCurrentDistance]);
+
   // Optimize route using backend API
   const optimizeRoute = async () => {
     if (optimizedPlaces.length < 2) {
