@@ -39,7 +39,7 @@ const FinalizeRoutePage = () => {
   };
 
   const handlePrevious = () => {
-    navigate('/select-places');
+    navigate('/select-hotels');
   };
 
   const handleRouteChange = (optimizedRoute, totalDistance) => {
@@ -133,6 +133,10 @@ const FinalizeRoutePage = () => {
           <span className="tour-summary-label">Places:</span>
           <span className="tour-summary-value">{tourData.places?.length || 0} destinations</span>
         </div>
+        <div className="tour-summary-item">
+          <span className="tour-summary-label">Accommodations:</span>
+          <span className="tour-summary-value">{tourData.accommodations?.length || 0} hotels</span>
+        </div>
         {tourData.totalDistance && (
           <div className="tour-summary-item">
             <span className="tour-summary-label">Total Distance:</span>
@@ -151,7 +155,7 @@ const FinalizeRoutePage = () => {
           <p className="tour-page-subtitle">Optimize your route and finalize your tour</p>
         </div>
         
-        <StepIndicator currentStep={3} />
+        <StepIndicator currentStep={4} />
         
         {/* Route Optimizer Component */}
         {showOptimizer && tourData.places && tourData.places.length > 0 && (

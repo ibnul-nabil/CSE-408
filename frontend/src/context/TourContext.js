@@ -6,6 +6,7 @@ const initialState = {
   startDate: '',
   endDate: '',
   places: [],
+  accommodations: [],
   route: [],
   optimizedRoute: null,
   totalDistance: null,
@@ -20,6 +21,7 @@ const initialState = {
 const TOUR_ACTIONS = {
   SET_TOUR_INFO: 'SET_TOUR_INFO',
   SET_PLACES: 'SET_PLACES',
+  SET_ACCOMMODATIONS: 'SET_ACCOMMODATIONS',
   SET_ROUTE: 'SET_ROUTE',
   SET_OPTIMIZED_ROUTE: 'SET_OPTIMIZED_ROUTE',
   RESET_TOUR: 'RESET_TOUR',
@@ -45,6 +47,11 @@ const tourReducer = (state, action) => {
         optimizedRoute: null,
         totalDistance: null,
         isRouteOptimized: false
+      };
+    case TOUR_ACTIONS.SET_ACCOMMODATIONS:
+      return {
+        ...state,
+        accommodations: action.payload
       };
     case TOUR_ACTIONS.SET_ROUTE:
       return {
@@ -98,6 +105,13 @@ export const TourProvider = ({ children }) => {
     });
   };
 
+  const setAccommodations = (accommodations) => {
+    dispatch({
+      type: TOUR_ACTIONS.SET_ACCOMMODATIONS,
+      payload: accommodations
+    });
+  };
+
   const setRoute = (route) => {
     dispatch({
       type: TOUR_ACTIONS.SET_ROUTE,
@@ -138,6 +152,7 @@ export const TourProvider = ({ children }) => {
     tourData,
     setTourInfo,
     setPlaces,
+    setAccommodations,
     setRoute,
     setOptimizedRoute,
     updateField,

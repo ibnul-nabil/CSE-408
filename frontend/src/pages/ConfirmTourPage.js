@@ -96,7 +96,8 @@ const ConfirmTourPage = () => {
         routeSource: "user",
         stops,
         totalDistance: tourData.totalDistance || 0 // Include the calculated distance
-      }
+      },
+      accommodations: tourData.accommodations || []
     };
 
     console.log("📏 Tour data distance:", tourData.totalDistance);
@@ -217,7 +218,7 @@ const ConfirmTourPage = () => {
           <p className="tour-page-subtitle">Plan your perfect adventure</p>
         </div>
         
-        <StepIndicator currentStep={4} />
+        <StepIndicator currentStep={5} />
         
         <div className="card">
           <div className="card-header">

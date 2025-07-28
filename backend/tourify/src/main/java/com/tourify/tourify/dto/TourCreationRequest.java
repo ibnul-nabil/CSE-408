@@ -12,6 +12,7 @@ public class TourCreationRequest {
     private java.math.BigDecimal estimatedCost;
     private RouteDTO route;
     private Long userId;
+    private List<TourAccommodationRequest> accommodations;
 
     // getters and setters
     public String getTitle() {
@@ -60,6 +61,14 @@ public class TourCreationRequest {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public List<TourAccommodationRequest> getAccommodations() {
+        return accommodations;
+    }
+
+    public void setAccommodations(List<TourAccommodationRequest> accommodations) {
+        this.accommodations = accommodations;
     }
 
     public static class RouteDTO {

@@ -14,8 +14,10 @@ public class CorssConfig implements WebMvcConfigurer {
                     "http://20.40.57.81",
                     "http://20.40.57.81:80"
                 ) // Allow both local and production domains
-                .allowedMethods("GET", "POST", "PUT", "DELETE")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
-                .allowCredentials(true);
+                .exposedHeaders("*")
+                .allowCredentials(true)
+                .maxAge(3600);
     }
 }

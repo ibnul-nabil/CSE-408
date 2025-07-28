@@ -231,7 +231,7 @@ const CreateTourPage = ({ isEditMode = false, onPrevious }) => {
       await handleUpdateTour();
     } else {
       // Handle normal tour creation flow
-      navigate('/finalize-route');
+      navigate('/select-hotels');
     }
   };
 

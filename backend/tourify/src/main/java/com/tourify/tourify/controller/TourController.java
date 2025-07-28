@@ -3,6 +3,7 @@ package com.tourify.tourify.controller;
 import com.tourify.tourify.dto.StopDTO;
 import com.tourify.tourify.dto.TourCreationRequest;
 import com.tourify.tourify.dto.TourResponseDTO;
+import com.tourify.tourify.dto.TourAccommodationRequest;
 import com.tourify.tourify.entity.*;
 import com.tourify.tourify.repository.*;
 import com.tourify.tourify.service.AuthService;
@@ -44,6 +45,10 @@ public class TourController {
     private SubPlaceRepository subPlaceRepository;
     @Autowired
     private BlogRepository blogRepository;
+    @Autowired
+    private TourAccommodationRepository tourAccommodationRepository;
+    @Autowired
+    private HotelRepository hotelRepository;
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -93,6 +98,20 @@ public class TourController {
                     stop.setPlaceId(stopDTO.getPlaceId());
                     stop.setStopOrder(stopDTO.getStopOrder());
                     routeStopRepository.save(stop);
+                }
+            }
+
+            // 5. Create Tour Accommodations
+            if (req.getAccommodations() != null && !req.getAccommodations().isEmpty()) {
+                for (TourAccommodationRequest accommodationReq : req.getAccommodations()) {
+                    // Get the hotel
+                    Hotel hotel = hotelRepository.findById(accommodationReq.getHotelId())
+                            .orElseThrow(() -> new RuntimeException("Hotel not found with id: " + accommodationReq.getHotelId()));
+                    
+                    // Create tour accommodation with proper ID
+                    TourAccommodation accommodation = new TourAccommodation(tour, hotel, accommodationReq.getCheckIn(), accommodationReq.getCheckOut(), accommodationReq.getTotalCost());
+                    
+                    tourAccommodationRepository.save(accommodation);
                 }
             }
 
@@ -190,6 +209,25 @@ public class TourController {
                     stop.setPlaceId(stopDTO.getPlaceId());
                     stop.setStopOrder(stopDTO.getStopOrder());
                     routeStopRepository.save(stop);
+                }
+            }
+
+            // Update tour accommodations
+            // First, delete existing accommodations
+            List<TourAccommodation> existingAccommodations = tourAccommodationRepository.findByTourId(existingTour.getId());
+            tourAccommodationRepository.deleteAll(existingAccommodations);
+
+            // Create new accommodations
+            if (req.getAccommodations() != null && !req.getAccommodations().isEmpty()) {
+                for (TourAccommodationRequest accommodationReq : req.getAccommodations()) {
+                    // Get the hotel
+                    Hotel hotel = hotelRepository.findById(accommodationReq.getHotelId())
+                            .orElseThrow(() -> new RuntimeException("Hotel not found with id: " + accommodationReq.getHotelId()));
+                    
+                    // Create tour accommodation with proper ID
+                    TourAccommodation accommodation = new TourAccommodation(existingTour, hotel, accommodationReq.getCheckIn(), accommodationReq.getCheckOut(), accommodationReq.getTotalCost());
+                    
+                    tourAccommodationRepository.save(accommodation);
                 }
             }
 
