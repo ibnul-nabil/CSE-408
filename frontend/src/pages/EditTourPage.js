@@ -8,6 +8,7 @@ import CreateTourInfoPage from './CreateTourInfoPage';
 import CreateTourPage from './CreateTourPage';
 import SelectHotelsPage from './SelectHotelsPage';
 import FinalizeRoutePage from './FinalizeRoutePage';
+import SelectTransportPage from './SelectTransportPage';
 import ConfirmTourPage from './ConfirmTourPage';
 import './EditTourPage.css';
 
@@ -16,10 +17,10 @@ const API_URL = process.env.REACT_APP_URL;
 const EditTourPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { setTourInfo, setPlaces, setAccommodations, setEditMode, resetTour } = useTour();
+  const { setTourInfo, setPlaces, setAccommodations, setTransportation, setEditMode, resetTour } = useTour();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentStep, setCurrentStep] = useState(1); // 1: Tour Info, 2: Destinations, 3: Hotels, 4: Finalize Route, 5: Confirm
+  const [currentStep, setCurrentStep] = useState(1); // 1: Tour Info, 2: Destinations, 3: Hotels, 4: Finalize Route, 5: Transport, 6: Confirm
 
   useEffect(() => {
     const loadTourForEditing = async () => {
@@ -164,10 +165,17 @@ const EditTourPage = () => {
           setAccommodations(tourData.accommodations);
         }
         
+        // Set transportation if available
+        if (tourData.transportation && tourData.transportation.length > 0) {
+          console.log('✅ Setting transportation:', tourData.transportation);
+          setTransportation(tourData.transportation);
+        }
+        
         console.log('✅ Tour data loaded for editing:', { 
           title: tourData.title, 
           places: formattedPlaces,
-          accommodations: tourData.accommodations
+          accommodations: tourData.accommodations,
+          transportation: tourData.transportation
         });
         console.log('✅ Setting loading to false');
       } catch (err) {
@@ -234,7 +242,9 @@ const EditTourPage = () => {
       case 4:
         return <FinalizeRoutePage isEditMode={true} onPrevious={() => handleStepChange(3)} onNext={() => handleStepChange(5)} />;
       case 5:
-        return <ConfirmTourPage isEditMode={true} onPrevious={() => handleStepChange(4)} onComplete={handleTourUpdate} />;
+        return <SelectTransportPage isEditMode={true} onPrevious={() => handleStepChange(4)} onNext={() => handleStepChange(6)} />;
+      case 6:
+        return <ConfirmTourPage isEditMode={true} onPrevious={() => handleStepChange(5)} onComplete={handleTourUpdate} />;
       default:
         return <CreateTourInfoPage isEditMode={true} onNext={() => handleStepChange(2)} />;
     }

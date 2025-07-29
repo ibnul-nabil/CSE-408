@@ -6,6 +6,8 @@ import { Truck, ArrowLeft, Filter, Search, Calendar, X } from 'lucide-react';
 import StepIndicator from '../components/StepIndicator';
 import './SelectTransportPage.css';
 
+const API_URL = process.env.REACT_APP_URL;
+
 const SelectTransportPage = ({ isEditMode = false, onPrevious, onNext }) => {
   const navigate = useNavigate();
   const { tourData, setTransportation } = useTour();
@@ -80,7 +82,7 @@ const SelectTransportPage = ({ isEditMode = false, onPrevious, onNext }) => {
   const fetchTransports = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:8080/api/transport', {
+      const response = await fetch(`${API_URL}/api/transport`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
