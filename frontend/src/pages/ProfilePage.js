@@ -103,10 +103,6 @@ const ProfilePage = () => {
           </div>
 
           <div className="nav-section-title">Settings</div>
-          <div className={`nav-item ${activeNav === 'edit' ? 'active' : ''}`} onClick={() => setActiveNav('edit')}>
-            <span className="nav-item-icon">⚙️</span>
-            Edit Profile
-          </div>
           <div className="nav-item" onClick={handleLogout}>
             <span className="nav-item-icon">🚪</span>
             Logout
