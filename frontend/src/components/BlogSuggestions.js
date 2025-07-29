@@ -70,7 +70,7 @@ const BlogSuggestions = ({ destinationId, destinationName }) => {
                                 <span>📷 {blog.mediaCount || 0}</span>
                             </div>
                             <button 
-                                onClick={() => navigate(`/blogs/${blog.id}`)}
+                                onClick={() => window.open(`/blogs/${blog.id}`, '_blank')}
                                 className="read-blog-btn"
                             >
                                 Read Blog
