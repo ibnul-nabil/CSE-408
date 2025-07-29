@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { useTour } from '../context/TourContext';
+import { Calendar, MapPin, ArrowLeft, ArrowRight } from 'lucide-react';
+import StepIndicator from '../components/StepIndicator';
 import CreateTourInfoPage from './CreateTourInfoPage';
 import CreateTourPage from './CreateTourPage';
 import SelectHotelsPage from './SelectHotelsPage';
 import FinalizeRoutePage from './FinalizeRoutePage';
 import ConfirmTourPage from './ConfirmTourPage';
 import './EditTourPage.css';
+
+const API_URL = process.env.REACT_APP_URL;
 
 const EditTourPage = () => {
   const { id } = useParams();
@@ -38,8 +43,8 @@ const EditTourPage = () => {
           return;
         }
 
-        console.log('🌐 Making API call to:', `http://localhost:8080/api/tours/${id}`);
-        const response = await fetch(`http://localhost:8080/api/tours/${id}`, {
+        console.log('🌐 Making API call to:', `${API_URL}/api/tours/${id}`);
+        const response = await fetch(`${API_URL}/api/tours/${id}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -132,7 +137,7 @@ const EditTourPage = () => {
           // Fetch destination names for missing destinations
           for (const destId of missingDestinations) {
             try {
-              const destResponse = await fetch(`http://localhost:8080/api/destinations/${destId}`);
+              const destResponse = await fetch(`${API_URL}/api/destinations/${destId}`);
               if (destResponse.ok) {
                 const destData = await destResponse.json();
                 const destEntry = destinationMap.get(destId);

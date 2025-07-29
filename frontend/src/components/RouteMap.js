@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { MapIcon } from 'lucide-react';
 import './RouteMap.css';
+
+const API_URL = process.env.REACT_APP_URL;
 
 // Fix for default markers in react-leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -130,15 +132,15 @@ const RouteMap = ({ places = [], optimizedRoute = [], totalDistance }) => {
   async function getCoordinatesForPlace(place) {
     try {
       // Call our new coordinate lookup endpoint
-      const response = await fetch(`${process.env.REACT_APP_URL || 'http://localhost:8080'}/api/tours/get-place-coordinates`, {
+      const response = await fetch(`${API_URL}/api/tours/get-place-coordinates`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          id: place.id,
           name: place.name,
-          type: place.type || 'Destination'
+          type: place.type || 'Destination',
+          id: place.id
         })
       });
 
@@ -177,7 +179,7 @@ const RouteMap = ({ places = [], optimizedRoute = [], totalDistance }) => {
       console.log('🔄 Calling enhanced route endpoint with coordinate snapping...');
       
       // Call our enhanced backend endpoint with coordinate snapping
-      const response = await fetch(`${process.env.REACT_APP_URL || 'http://localhost:8080'}/api/tours/fetch-route-enhanced`, {
+      const response = await fetch(`${API_URL}/api/tours/fetch-route-enhanced`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

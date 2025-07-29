@@ -1073,15 +1073,31 @@ public class TourController {
                     JsonNode route = routes.get(0);
                     JsonNode summary = route.get("summary");
 
+                    // Add null checks to prevent NullPointerException
+                    if (summary == null) {
+                        System.out.println("⚠️ No summary found in ORS response");
+                        throw new RuntimeException("No summary found in ORS response");
+                    }
+
+                    JsonNode distanceNode = summary.get("distance");
+                    JsonNode durationNode = summary.get("duration");
+                    JsonNode geometryNode = route.get("geometry");
+
+                    if (distanceNode == null || durationNode == null || geometryNode == null) {
+                        System.out.println("⚠️ Missing required fields in ORS response: distance=" + (distanceNode != null) + 
+                                         ", duration=" + (durationNode != null) + ", geometry=" + (geometryNode != null));
+                        throw new RuntimeException("Missing required fields in ORS response");
+                    }
+
                     // Get distance from summary (already in meters)
-                    double distanceMeters = summary.get("distance").asDouble();
+                    double distanceMeters = distanceNode.asDouble();
                     double distanceKm = distanceMeters / 1000.0;
 
                     // Get duration in seconds
-                    double durationSeconds = summary.get("duration").asDouble();
+                    double durationSeconds = durationNode.asDouble();
 
                     // Get encoded geometry
-                    String encodedGeometry = route.get("geometry").asText();
+                    String encodedGeometry = geometryNode.asText();
 
                     // Decode the polyline geometry to get coordinates
                     List<List<Double>> routeCoordinates = decodePolyline(encodedGeometry);

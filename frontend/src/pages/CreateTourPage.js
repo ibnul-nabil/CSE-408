@@ -407,7 +407,7 @@ const CreateTourPage = ({ isEditMode = false, onPrevious, onNext }) => {
 
       console.log('🔄 Updating tour with data:', updateData);
       
-      const response = await fetch(`http://localhost:8080/api/tours/${tourData.editingTourId}`, {
+      const response = await fetch(`${API_URL}/api/tours/${tourData.editingTourId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

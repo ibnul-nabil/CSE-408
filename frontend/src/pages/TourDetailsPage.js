@@ -42,7 +42,7 @@ const TourDetailsPage = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:8080/api/tours/${id}`, {
+      const response = await fetch(`${API_URL}/api/tours/${id}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
