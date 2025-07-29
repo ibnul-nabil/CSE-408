@@ -1,5 +1,5 @@
 import React from 'react';
-import { CalendarIcon, MapIcon, Bed, RouteIcon, CheckCircle, ChevronRight } from 'lucide-react';
+import { CalendarIcon, MapIcon, Bed, RouteIcon, Truck, CheckCircle, ChevronRight } from 'lucide-react';
 import './StepIndicator.css';
 
 const StepIndicator = ({ currentStep }) => {
@@ -8,7 +8,8 @@ const StepIndicator = ({ currentStep }) => {
     { number: 2, title: "Add Places", icon: MapIcon },
     { number: 3, title: "Select Hotels", icon: Bed },
     { number: 4, title: "Route Preview", icon: RouteIcon },
-    { number: 5, title: "Confirm Tour", icon: CheckCircle }
+    { number: 5, title: "Select Transport", icon: Truck },
+    { number: 6, title: "Confirm Tour", icon: CheckCircle }
   ];
 
   return (

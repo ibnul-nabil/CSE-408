@@ -14,6 +14,7 @@ public class TourCreationRequest {
     private RouteDTO route;
     private Long userId;
     private List<TourAccommodationRequest> accommodations;
+    private List<TourTransportRequest> transportation;
 
     // getters and setters
     public String getTitle() {
@@ -78,6 +79,14 @@ public class TourCreationRequest {
 
     public void setAccommodations(List<TourAccommodationRequest> accommodations) {
         this.accommodations = accommodations;
+    }
+
+    public List<TourTransportRequest> getTransportation() {
+        return transportation;
+    }
+
+    public void setTransportation(List<TourTransportRequest> transportation) {
+        this.transportation = transportation;
     }
 
     public static class RouteDTO {
