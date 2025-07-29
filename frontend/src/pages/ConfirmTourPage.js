@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "../context/AuthContext";
 import { useTour } from "../context/TourContext";
-import { CheckCircle, ArrowLeft, Calendar, MapPin, Clock, Navigation, Bed, DollarSign } from 'lucide-react';
+import { CheckCircle, ArrowLeft, Calendar, MapPin, Clock, Navigation, Bed, DollarSign, Truck } from 'lucide-react';
 import StepIndicator from '../components/StepIndicator';
 import TourSpecialEvents from '../components/TourSpecialEvents';
 import './ConfirmTourPage.css';
@@ -60,6 +60,18 @@ const ConfirmTourPage = ({ isEditMode = false, onPrevious, onComplete }) => {
   const getHotelNames = () => {
     if (!tourData.accommodations || tourData.accommodations.length === 0) return [];
     return tourData.accommodations.map(acc => acc.hotelName).filter(name => name);
+  };
+
+  // Calculate total transportation cost
+  const calculateTransportationCost = () => {
+    if (!tourData.transportation || tourData.transportation.length === 0) return 0;
+    return tourData.transportation.reduce((total, transport) => total + (transport.totalCost || 0), 0);
+  };
+
+  // Get transport names for display
+  const getTransportNames = () => {
+    if (!tourData.transportation || tourData.transportation.length === 0) return [];
+    return tourData.transportation.map(transport => transport.transportName).filter(name => name);
   };
 
   const handleConfirmTour = async () => {
@@ -139,8 +151,10 @@ const ConfirmTourPage = ({ isEditMode = false, onPrevious, onComplete }) => {
         });
       });
     }
-    // Calculate total estimated cost from accommodations
+    // Calculate total estimated cost from accommodations and transportation
     const totalAccommodationCost = calculateAccommodationCost();
+    const totalTransportationCost = calculateTransportationCost();
+    const totalEstimatedCost = totalAccommodationCost + totalTransportationCost;
     
     const reqBody = {
       userId,
@@ -148,13 +162,14 @@ const ConfirmTourPage = ({ isEditMode = false, onPrevious, onComplete }) => {
       startDate: tourData.startDate,
       endDate: tourData.endDate,
       startingPoint: tourData.startingPoint,
-      estimatedCost: totalAccommodationCost, // Use calculated accommodation cost
+      estimatedCost: totalEstimatedCost, // Use calculated total cost including transportation
       route: {
         routeSource: "user",
         stops,
         totalDistance: tourData.totalDistance || 0 // Include the calculated distance
       },
-      accommodations: tourData.accommodations || []
+      accommodations: tourData.accommodations || [],
+      transportation: tourData.transportation || []
     };
 
     console.log("📏 Tour data distance:", tourData.totalDistance);
@@ -205,7 +220,7 @@ const ConfirmTourPage = ({ isEditMode = false, onPrevious, onComplete }) => {
     if (isEditMode && onPrevious) {
       onPrevious();
     } else {
-      navigate('/finalize-route');
+      navigate('/select-transport');
     }
   };
 
@@ -281,6 +296,44 @@ const ConfirmTourPage = ({ isEditMode = false, onPrevious, onComplete }) => {
                 <h4 className="detail-title">Accommodation Cost</h4>
                 <p className="detail-value">${accommodationCost}</p>
                 <p className="detail-subtitle">Total for all hotels</p>
+              </div>
+            </div>
+          )}
+
+          {/* Transportation Information */}
+          {tourData.transportation && tourData.transportation.length > 0 && (
+            <div className="tour-detail-card">
+              <Truck className="detail-icon" />
+              <div className="detail-content">
+                <h4 className="detail-title">Transportation</h4>
+                <p className="detail-value">{tourData.transportation.length} transport{tourData.transportation.length !== 1 ? 's' : ''} selected</p>
+                <p className="detail-subtitle">
+                  {getTransportNames().slice(0, 2).join(', ')}
+                  {getTransportNames().length > 2 && ` +${getTransportNames().length - 2} more`}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {calculateTransportationCost() > 0 && (
+            <div className="tour-detail-card">
+              <DollarSign className="detail-icon" />
+              <div className="detail-content">
+                <h4 className="detail-title">Transportation Cost</h4>
+                <p className="detail-value">${calculateTransportationCost()}</p>
+                <p className="detail-subtitle">Total for all transport</p>
+              </div>
+            </div>
+          )}
+
+          {/* Total Cost Information */}
+          {(calculateAccommodationCost() > 0 || calculateTransportationCost() > 0) && (
+            <div className="tour-detail-card total-cost-card">
+              <DollarSign className="detail-icon" />
+              <div className="detail-content">
+                <h4 className="detail-title">Total Estimated Cost</h4>
+                <p className="detail-value">${calculateAccommodationCost() + calculateTransportationCost()}</p>
+                <p className="detail-subtitle">Accommodation + Transportation</p>
               </div>
             </div>
           )}
@@ -398,6 +451,46 @@ const ConfirmTourPage = ({ isEditMode = false, onPrevious, onComplete }) => {
     );
   };
 
+  // Render transportation information if available
+  const renderTransportationList = () => {
+    if (!tourData.transportation || tourData.transportation.length === 0) return null;
+    
+    return (
+      <div className="transportation-confirmation-list">
+        <h4 className="transportation-list-title">Your Selected Transportation:</h4>
+        <div className="transportation-grid">
+          {tourData.transportation.map((transport, index) => (
+            <div key={transport.transportId} className="transportation-confirmation-card">
+              <div className="transportation-number">{index + 1}</div>
+              <div className="transportation-info">
+                <h5 className="transportation-name">{transport.transportName}</h5>
+                <div className="transportation-route">
+                  {transport.fromDestination} → {transport.toDestination}
+                </div>
+                <div className="transportation-details">
+                  <span className="transportation-type">
+                    {transport.transportType} - {transport.transportClass}
+                  </span>
+                  <span className="transportation-passengers">
+                    {transport.passengerCount} passenger{transport.passengerCount !== 1 ? 's' : ''}
+                  </span>
+                  {transport.travelDate && (
+                    <span className="transportation-date">
+                      {formatDateDisplay(transport.travelDate)}
+                    </span>
+                  )}
+                  <span className="transportation-total">
+                    Total: ${transport.totalCost}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="tour-page-container">
       <div className="tour-page-wrapper">
@@ -422,6 +515,7 @@ const ConfirmTourPage = ({ isEditMode = false, onPrevious, onComplete }) => {
             {renderTourSummary()}
             {renderPlacesList()}
             {renderHotelsList()}
+            {renderTransportationList()}
           </div>
         </div>
         

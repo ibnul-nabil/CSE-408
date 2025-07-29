@@ -8,6 +8,7 @@ const initialState = {
   startingPoint: '',
   places: [],
   accommodations: [],
+  transportation: [],
   route: [],
   optimizedRoute: null,
   totalDistance: null,
@@ -24,6 +25,7 @@ const TOUR_ACTIONS = {
   SET_TOUR_INFO: 'SET_TOUR_INFO',
   SET_PLACES: 'SET_PLACES',
   SET_ACCOMMODATIONS: 'SET_ACCOMMODATIONS',
+  SET_TRANSPORTATION: 'SET_TRANSPORTATION',
   SET_ROUTE: 'SET_ROUTE',
   SET_OPTIMIZED_ROUTE: 'SET_OPTIMIZED_ROUTE',
   SET_SPECIAL_EVENTS: 'SET_SPECIAL_EVENTS', // Add special events action
@@ -56,6 +58,11 @@ const tourReducer = (state, action) => {
       return {
         ...state,
         accommodations: action.payload
+      };
+    case TOUR_ACTIONS.SET_TRANSPORTATION:
+      return {
+        ...state,
+        transportation: action.payload
       };
     case TOUR_ACTIONS.SET_ROUTE:
       return {
@@ -133,6 +140,13 @@ export const TourProvider = ({ children }) => {
     });
   };
 
+  const setTransportation = (transportation) => {
+    dispatch({
+      type: TOUR_ACTIONS.SET_TRANSPORTATION,
+      payload: transportation
+    });
+  };
+
   const setRoute = (route) => {
     dispatch({
       type: TOUR_ACTIONS.SET_ROUTE,
@@ -181,6 +195,7 @@ export const TourProvider = ({ children }) => {
     setTourInfo,
     setPlaces,
     setAccommodations,
+    setTransportation,
     setRoute,
     setOptimizedRoute,
     setSpecialEvents,

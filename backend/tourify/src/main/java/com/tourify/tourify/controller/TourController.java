@@ -4,6 +4,7 @@ import com.tourify.tourify.dto.StopDTO;
 import com.tourify.tourify.dto.TourCreationRequest;
 import com.tourify.tourify.dto.TourResponseDTO;
 import com.tourify.tourify.dto.TourAccommodationRequest;
+import com.tourify.tourify.dto.TourTransportRequest;
 import com.tourify.tourify.entity.*;
 import com.tourify.tourify.repository.*;
 import com.tourify.tourify.service.AuthService;
@@ -17,6 +18,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -53,6 +55,10 @@ public class TourController {
     private HotelRepository hotelRepository;
     @Autowired
     private SpecialEventRepository specialEventRepository;
+    @Autowired
+    private TourTransportRepository tourTransportRepository;
+    @Autowired
+    private TransportRepository transportRepository;
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -118,6 +124,27 @@ public class TourController {
                     TourAccommodation accommodation = new TourAccommodation(tour, hotel, accommodationReq.getCheckIn(), accommodationReq.getCheckOut(), accommodationReq.getTotalCost());
                     
                     tourAccommodationRepository.save(accommodation);
+                }
+            }
+
+            // 6. Create Tour Transport
+            if (req.getTransportation() != null && !req.getTransportation().isEmpty()) {
+                for (TourTransportRequest transportReq : req.getTransportation()) {
+                    // Get the transport
+                    Transport transport = transportRepository.findById(transportReq.getTransportId())
+                            .orElseThrow(() -> new RuntimeException("Transport not found with id: " + transportReq.getTransportId()));
+                    
+                    // Create tour transport
+                    TourTransport tourTransport = new TourTransport(
+                        tour, 
+                        transport, 
+                        transportReq.getTravelDate(), 
+                        transportReq.getPassengerCount(), 
+                        transportReq.getCostPerPerson(), 
+                        transportReq.getTotalCost()
+                    );
+                    
+                    tourTransportRepository.save(tourTransport);
                 }
             }
 
@@ -235,6 +262,32 @@ public class TourController {
                     TourAccommodation accommodation = new TourAccommodation(existingTour, hotel, accommodationReq.getCheckIn(), accommodationReq.getCheckOut(), accommodationReq.getTotalCost());
                     
                     tourAccommodationRepository.save(accommodation);
+                }
+            }
+
+            // Update tour transportation
+            // First, delete existing transportation
+            List<TourTransport> existingTransportation = tourTransportRepository.findByTourId(existingTour.getId());
+            tourTransportRepository.deleteAll(existingTransportation);
+
+            // Create new transportation
+            if (req.getTransportation() != null && !req.getTransportation().isEmpty()) {
+                for (TourTransportRequest transportReq : req.getTransportation()) {
+                    // Get the transport
+                    Transport transport = transportRepository.findById(transportReq.getTransportId())
+                            .orElseThrow(() -> new RuntimeException("Transport not found with id: " + transportReq.getTransportId()));
+                    
+                    // Create tour transport
+                    TourTransport tourTransport = new TourTransport(
+                        existingTour, 
+                        transport, 
+                        transportReq.getTravelDate(), 
+                        transportReq.getPassengerCount(), 
+                        transportReq.getCostPerPerson(), 
+                        transportReq.getTotalCost()
+                    );
+                    
+                    tourTransportRepository.save(tourTransport);
                 }
             }
 
@@ -555,7 +608,35 @@ public class TourController {
                 System.out.println("🏨 Tour " + tour.getId() + " has no accommodations");
             }
 
-            System.out.println("✅ Returning tour DTO with " + places.size() + " places and " + (dto.getAccommodations() != null ? dto.getAccommodations().size() : 0) + " accommodations");
+            // Get transportation information
+            List<TourTransport> tourTransports = tourTransportRepository.findByTourId(tour.getId());
+            if (tourTransports != null && !tourTransports.isEmpty()) {
+                List<TourResponseDTO.TransportationInfo> transportation = new ArrayList<>();
+                for (TourTransport tourTransport : tourTransports) {
+                    Transport transport = tourTransport.getTransport();
+                    TourResponseDTO.TransportationInfo transportationInfo = new TourResponseDTO.TransportationInfo(
+                            transport.getId(),
+                            transport.getName(),
+                            transport.getType(),
+                            transport.getTransportClass(),
+                            transport.getStartPlace() != null ? transport.getStartPlace().getName() : "Unknown",
+                            transport.getEndPlace() != null ? transport.getEndPlace().getName() : "Unknown",
+                            tourTransport.getTravelDate() != null ? tourTransport.getTravelDate().toString() : null,
+                            tourTransport.getPassengerCount(),
+                            tourTransport.getCostPerPerson(),
+                            tourTransport.getTotalCost()
+                    );
+                    transportation.add(transportationInfo);
+                }
+                dto.setTransportation(transportation);
+                System.out.println("🚗 Tour " + tour.getId() + " has " + transportation.size() + " transportation options");
+            } else {
+                System.out.println("🚗 Tour " + tour.getId() + " has no transportation");
+            }
+
+            System.out.println("✅ Returning tour DTO with " + places.size() + " places, " + 
+                (dto.getAccommodations() != null ? dto.getAccommodations().size() : 0) + " accommodations, and " + 
+                (dto.getTransportation() != null ? dto.getTransportation().size() : 0) + " transportation options");
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
             System.out.println("❌ Error in getTourById: " + e.getMessage());

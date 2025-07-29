@@ -346,10 +346,18 @@
   z-index: 1;
 }
 
+.destination-marker.starting-point {
+  background: linear-gradient(135deg, #10b981, #34d399);
+}
+
 .marker-number {
   color: white;
   font-weight: 600;
   font-size: 1rem;
+}
+
+.marker-number.starting-point {
+  font-size: 0.75rem;
 }
 
 .destination-content {
@@ -685,6 +693,8 @@
   .destination-item,
   .hotel-item {
     padding: 1rem;
+    flex-direction: column;
+    gap: 0.75rem;
   }
   
   .hotel-details {
@@ -724,5 +734,226 @@
   
   .marker-number {
     font-size: 0.9rem;
+  }
+} 
+
+/* Transportation Section Styles */
+.transportation-section {
+  margin-top: 2rem;
+}
+
+.transportation-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.transportation-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(16, 185, 129, 0.05), rgba(52, 211, 153, 0.05), rgba(34, 197, 94, 0.05));
+  pointer-events: none;
+}
+
+.transportation-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  position: relative;
+  z-index: 1;
+}
+
+.transportation-icon {
+  width: 1.75rem;
+  height: 1.75rem;
+  color: #10b981;
+}
+
+.transportation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.transport-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 16px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.transport-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(16, 185, 129, 0.02), rgba(52, 211, 153, 0.02));
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.transport-item:hover::before {
+  background: linear-gradient(45deg, rgba(16, 185, 129, 0.05), rgba(52, 211, 153, 0.05));
+}
+
+.transport-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.transport-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  color: white;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 1rem;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  position: relative;
+  z-index: 1;
+}
+
+.transport-content {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.transport-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+
+.transport-route {
+  font-size: 1rem;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.transport-route::before {
+  content: '🛤️';
+  font-size: 0.875rem;
+}
+
+.transport-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.75rem;
+  background: rgba(16, 185, 129, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(16, 185, 129, 0.1);
+}
+
+.transport-type {
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 4px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.transport-passengers {
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.transport-passengers::before {
+  content: '👥';
+  font-size: 0.75rem;
+}
+
+.transport-date {
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.transport-date::before {
+  content: '📅';
+  font-size: 0.75rem;
+}
+
+.transport-total {
+  font-size: 1rem;
+  color: #10b981;
+  font-weight: 700;
+  margin-left: auto;
+  padding: 0.25rem 0.75rem;
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: 6px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+/* Responsive adjustments for transportation */
+@media (max-width: 768px) {
+  .transport-item {
+    padding: 1rem;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .transport-details {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .transport-total {
+    margin-left: 0;
+    align-self: flex-start;
+  }
+  
+  .transport-marker {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 0.875rem;
   }
 } 

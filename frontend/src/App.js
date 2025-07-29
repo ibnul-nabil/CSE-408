@@ -6,6 +6,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ProfilePage from "./pages/ProfilePage";
 import CreateTourPage from "./pages/CreateTourPage";
 import SelectHotelsPage from "./pages/SelectHotelsPage";
+import SelectTransportPage from "./pages/SelectTransportPage";
 import LoginPage from "./pages/LoginPage";
 import CreateBlogPage from './pages/CreateBlogPage';
 import BlogListPage from './pages/BlogListPage';
@@ -67,6 +68,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <SelectHotelsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/select-transport" 
+              element={
+                <ProtectedRoute>
+                  <SelectTransportPage />
                 </ProtectedRoute>
               } 
             />

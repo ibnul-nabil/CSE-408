@@ -17,6 +17,7 @@ public class TourResponseDTO {
     private List<PlaceInfo> places;
     private Integer totalDistance; // Distance in kilometers
     private List<AccommodationInfo> accommodations; // Hotel information
+    private List<TransportationInfo> transportation; // Transportation information
     
     public TourResponseDTO(Long id, String title, String status) {
         this.id = id;
@@ -46,6 +47,8 @@ public class TourResponseDTO {
     public void setTotalDistance(Integer totalDistance) { this.totalDistance = totalDistance; }
     public List<AccommodationInfo> getAccommodations() { return accommodations; }
     public void setAccommodations(List<AccommodationInfo> accommodations) { this.accommodations = accommodations; }
+    public List<TransportationInfo> getTransportation() { return transportation; }
+    public void setTransportation(List<TransportationInfo> transportation) { this.transportation = transportation; }
     
     // Inner class for place information
     public static class PlaceInfo {
@@ -125,6 +128,56 @@ public class TourResponseDTO {
         public void setCheckIn(String checkIn) { this.checkIn = checkIn; }
         public String getCheckOut() { return checkOut; }
         public void setCheckOut(String checkOut) { this.checkOut = checkOut; }
+        public BigDecimal getTotalCost() { return totalCost; }
+        public void setTotalCost(BigDecimal totalCost) { this.totalCost = totalCost; }
+    }
+    
+    // Inner class for transportation information
+    public static class TransportationInfo {
+        private Long transportId;
+        private String transportName;
+        private String transportType;
+        private String transportClass;
+        private String fromDestination;
+        private String toDestination;
+        private String travelDate;
+        private Integer passengerCount;
+        private BigDecimal costPerPerson;
+        private BigDecimal totalCost;
+        
+        public TransportationInfo(Long transportId, String transportName, String transportType, String transportClass, 
+                                String fromDestination, String toDestination, String travelDate, 
+                                Integer passengerCount, BigDecimal costPerPerson, BigDecimal totalCost) {
+            this.transportId = transportId;
+            this.transportName = transportName;
+            this.transportType = transportType;
+            this.transportClass = transportClass;
+            this.fromDestination = fromDestination;
+            this.toDestination = toDestination;
+            this.travelDate = travelDate;
+            this.passengerCount = passengerCount;
+            this.costPerPerson = costPerPerson;
+            this.totalCost = totalCost;
+        }
+        
+        public Long getTransportId() { return transportId; }
+        public void setTransportId(Long transportId) { this.transportId = transportId; }
+        public String getTransportName() { return transportName; }
+        public void setTransportName(String transportName) { this.transportName = transportName; }
+        public String getTransportType() { return transportType; }
+        public void setTransportType(String transportType) { this.transportType = transportType; }
+        public String getTransportClass() { return transportClass; }
+        public void setTransportClass(String transportClass) { this.transportClass = transportClass; }
+        public String getFromDestination() { return fromDestination; }
+        public void setFromDestination(String fromDestination) { this.fromDestination = fromDestination; }
+        public String getToDestination() { return toDestination; }
+        public void setToDestination(String toDestination) { this.toDestination = toDestination; }
+        public String getTravelDate() { return travelDate; }
+        public void setTravelDate(String travelDate) { this.travelDate = travelDate; }
+        public Integer getPassengerCount() { return passengerCount; }
+        public void setPassengerCount(Integer passengerCount) { this.passengerCount = passengerCount; }
+        public BigDecimal getCostPerPerson() { return costPerPerson; }
+        public void setCostPerPerson(BigDecimal costPerPerson) { this.costPerPerson = costPerPerson; }
         public BigDecimal getTotalCost() { return totalCost; }
         public void setTotalCost(BigDecimal totalCost) { this.totalCost = totalCost; }
     }
