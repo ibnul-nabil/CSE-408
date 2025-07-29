@@ -57,7 +57,7 @@ public class BlogController {
         return blogRepository.findPublishedBlogsOrderByCreatedAtDesc();
     }
 
-    // Get recent blogs (last N days)
+    // Get recent blogs (last N days) - MUST be before /{id} endpoints
     @GetMapping("/recent")
     public ResponseEntity<?> getRecentBlogs(@RequestParam(defaultValue = "5") int days) {
         try {
@@ -78,7 +78,7 @@ public class BlogController {
         }
     }
 
-    // Get popular blogs (by likes)
+    // Get popular blogs (by likes) - MUST be before /{id} endpoints
     @GetMapping("/popular")
     public ResponseEntity<?> getPopularBlogs(@RequestParam(defaultValue = "6") int limit) {
         try {
@@ -101,22 +101,22 @@ public class BlogController {
         }
     }
 
-    // Get blogs by destination
-    @GetMapping("/destination/{destinationId}")
-    public List<Blog> getBlogsByDestination(@PathVariable Long destinationId) {
-        return blogRepository.findPublishedBlogsByDestinationId(destinationId);
+    // Search blogs - MUST be before /{id} endpoints
+    @GetMapping("/search")
+    public List<Blog> searchBlogs(@RequestParam String q) {
+        return blogRepository.searchPublishedBlogs(q);
     }
 
-    // Get blogs by custom destination name
+    // Get blogs by custom destination name - MUST be before /{id} endpoints
     @GetMapping("/destination")
     public List<Blog> getBlogsByCustomDestination(@RequestParam String name) {
         return blogRepository.findPublishedBlogsByCustomDestination(name);
     }
 
-    // Search blogs
-    @GetMapping("/search")
-    public List<Blog> searchBlogs(@RequestParam String q) {
-        return blogRepository.searchPublishedBlogs(q);
+    // Get blogs by destination - MUST be before /{id} endpoints
+    @GetMapping("/destination/{destinationId}")
+    public List<Blog> getBlogsByDestination(@PathVariable Long destinationId) {
+        return blogRepository.findPublishedBlogsByDestinationId(destinationId);
     }
 
     // Create a new blog post
