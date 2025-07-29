@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useTour } from "../context/TourContext";
 import { CheckCircle, ArrowLeft, Calendar, MapPin, Clock, Navigation, Bed, DollarSign } from 'lucide-react';
 import StepIndicator from '../components/StepIndicator';
+import TourSpecialEvents from '../components/TourSpecialEvents';
 import './ConfirmTourPage.css';
 
 const API_URL = process.env.REACT_APP_URL;
@@ -15,6 +16,7 @@ const ConfirmTourPage = ({ isEditMode = false, onPrevious, onComplete }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [specialEventsCount, setSpecialEventsCount] = useState(0);
 
   // Format date to readable format (July 7th, 2025)
   const formatDateDisplay = (dateString) => {
@@ -260,11 +262,34 @@ const ConfirmTourPage = ({ isEditMode = false, onPrevious, onComplete }) => {
               </div>
             </div>
           )}
+
+          {/* Special Events Information */}
+          <div className="tour-detail-card">
+            <Calendar className="detail-icon" />
+            <div className="detail-content">
+              <h4 className="detail-title">Special Events</h4>
+              <p className="detail-value">
+                {specialEventsCount > 0 ? `${specialEventsCount} events found` : 'No events found'}
+              </p>
+              <p className="detail-subtitle">
+                Cultural events during your tour dates
+              </p>
+            </div>
+          </div>
         </div>
         
         <div className="tour-title-display">
           <h2 className="tour-final-title">"{tourData.title || "Untitled Tour"}"</h2>
         </div>
+        
+        {/* Special Events Section */}
+        <TourSpecialEvents 
+          tourData={tourData}
+          onEventsLoaded={(events) => {
+            console.log('🎉 Special events loaded for tour confirmation:', events);
+            setSpecialEventsCount(events.length);
+          }}
+        />
       </div>
     );
   };

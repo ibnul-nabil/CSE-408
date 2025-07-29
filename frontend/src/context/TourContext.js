@@ -14,6 +14,7 @@ const initialState = {
   isEditing: false,
   editingTourId: null,
   estimatedCost: null,
+  specialEvents: [], // Add special events to state
   // Add more fields as needed
 };
 
@@ -24,6 +25,7 @@ const TOUR_ACTIONS = {
   SET_ACCOMMODATIONS: 'SET_ACCOMMODATIONS',
   SET_ROUTE: 'SET_ROUTE',
   SET_OPTIMIZED_ROUTE: 'SET_OPTIMIZED_ROUTE',
+  SET_SPECIAL_EVENTS: 'SET_SPECIAL_EVENTS', // Add special events action
   RESET_TOUR: 'RESET_TOUR',
   UPDATE_FIELD: 'UPDATE_FIELD',
   SET_EDIT_MODE: 'SET_EDIT_MODE'
@@ -64,6 +66,11 @@ const tourReducer = (state, action) => {
         optimizedRoute: action.payload.optimizedRoute,
         totalDistance: action.payload.totalDistance,
         isRouteOptimized: true
+      };
+    case TOUR_ACTIONS.SET_SPECIAL_EVENTS:
+      return {
+        ...state,
+        specialEvents: action.payload
       };
     case TOUR_ACTIONS.UPDATE_FIELD:
       return {
@@ -138,6 +145,13 @@ export const TourProvider = ({ children }) => {
     });
   };
 
+  const setSpecialEvents = (events) => {
+    dispatch({
+      type: TOUR_ACTIONS.SET_SPECIAL_EVENTS,
+      payload: events
+    });
+  };
+
   const updateField = (field, value) => {
     console.log('🔄 TourContext updateField called:', field, '=', value);
     dispatch({
@@ -167,6 +181,7 @@ export const TourProvider = ({ children }) => {
     setAccommodations,
     setRoute,
     setOptimizedRoute,
+    setSpecialEvents,
     updateField,
     setEditMode,
     resetTour

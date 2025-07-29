@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Calendar, Clock, MapPin, DollarSign, User, Navigation, Bed } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import TourSpecialEvents from '../components/TourSpecialEvents';
 import './TourDetailsPage.css';
+
+const API_URL = process.env.REACT_APP_URL;
 
 const TourDetailsPage = () => {
   const { id } = useParams();
@@ -347,6 +350,26 @@ const TourDetailsPage = () => {
               </div>
             </div>
           )}
+
+          {/* Special Events Section */}
+          {console.log('🔍 Tour data for special events:', {
+            places: tour.places,
+            startDate: tour.startDate,
+            endDate: tour.endDate,
+            hasPlaces: !!tour.places,
+            placesLength: tour.places?.length,
+            hasDates: !!(tour.startDate && tour.endDate)
+          })}
+          <TourSpecialEvents 
+            tourData={{
+              places: tour.places,
+              startDate: tour.startDate,
+              endDate: tour.endDate
+            }}
+            onEventsLoaded={(events) => {
+              console.log('🎉 Special events loaded for tour details:', events);
+            }}
+          />
 
           <div className="tour-actions">
             {/* Actions removed - edit functionality moved to My Trips page */}

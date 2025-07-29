@@ -5,12 +5,14 @@ import { useTour } from "../context/TourContext";
 import { RouteIcon, ArrowLeft, MapIcon } from 'lucide-react';
 import StepIndicator from '../components/StepIndicator';
 import RouteOptimizer from '../components/RouteOptimizer';
+import TourSpecialEvents from '../components/TourSpecialEvents';
 import './FinalizeRoutePage.css';
 
 const FinalizeRoutePage = ({ isEditMode = false, onPrevious, onNext }) => {
   const navigate = useNavigate();
   const { tourData } = useTour();
   const [showOptimizer, setShowOptimizer] = useState(true);
+  const [specialEventsCount, setSpecialEventsCount] = useState(0);
 
   // Format date to readable format (July 7th, 2025)
   const formatDateDisplay = (dateString) => {
@@ -156,7 +158,22 @@ const FinalizeRoutePage = ({ isEditMode = false, onPrevious, onNext }) => {
             <span className="summary-value">{tourData.accommodations.length} selected</span>
           </div>
         )}
+        <div className="summary-item">
+          <span className="summary-label">Special Events:</span>
+          <span className="summary-value">
+            {specialEventsCount > 0 ? `${specialEventsCount} found` : 'None found'}
+          </span>
+        </div>
       </div>
+      
+      {/* Special Events Section */}
+      <TourSpecialEvents 
+        tourData={tourData}
+        onEventsLoaded={(events) => {
+          console.log('🎉 Special events loaded for tour summary:', events);
+          setSpecialEventsCount(events.length);
+        }}
+      />
     </div>
   );
 
