@@ -451,25 +451,27 @@ const SelectHotelsPage = ({ isEditMode = false, onPrevious, onNext }) => {
                   
                   <div className="destinations-filter">
                     <span className="filter-label">Destinations:</span>
-                    {tourData.places && tourData.places.map(place => {
-                      const destination = place.destination;
-                      return (
-                        <label key={destination.id} className="compact-checkbox">
-                          <input
-                            type="checkbox"
-                            checked={selectedDestinations.some(d => d.id === destination.id)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedDestinations(prev => [...prev, destination]);
-                              } else {
-                                setSelectedDestinations(prev => prev.filter(d => d.id !== destination.id));
-                              }
-                            }}
-                          />
-                          <span>{destination.name}</span>
-                        </label>
-                      );
-                    })}
+                    {tourData.places && tourData.places
+                      .filter(place => !place.isStartingPoint) // Filter out starting point
+                      .map(place => {
+                        const destination = place.destination;
+                        return (
+                          <label key={destination.id} className="compact-checkbox">
+                            <input
+                              type="checkbox"
+                              checked={selectedDestinations.some(d => d.id === destination.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedDestinations(prev => [...prev, destination]);
+                                } else {
+                                  setSelectedDestinations(prev => prev.filter(d => d.id !== destination.id));
+                                }
+                              }}
+                            />
+                            <span>{destination.name}</span>
+                          </label>
+                        );
+                      })}
                   </div>
                 </div>
               </div>

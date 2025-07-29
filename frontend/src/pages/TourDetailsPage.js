@@ -226,15 +226,17 @@ const TourDetailsPage = () => {
                   </div>
                 )}
                 
-                <div className="info-item">
-                  <MapPin className="info-icon" />
-                  <div className="info-content">
-                    <span className="info-label">Destinations</span>
-                    <span className="info-value">
-                      {tour.places?.length || 0} destination{(tour.places?.length || 0) !== 1 ? 's' : ''}
-                    </span>
+                {tour.places && tour.places.length > 0 && (
+                  <div className="info-item">
+                    <MapPin className="info-icon" />
+                    <div className="info-content">
+                      <span className="info-label">Destinations</span>
+                      <span className="info-value">
+                        {(tour.places?.length || 0) - 1} destination{((tour.places?.length || 0) - 1) !== 1 ? '' : ''}
+                      </span>
+                    </div>
                   </div>
-                </div>
+                )}
                 
                 <div className="info-item">
                   <DollarSign className="info-icon" />
@@ -288,7 +290,9 @@ const TourDetailsPage = () => {
                   Tour Route & Destinations
                 </h3>
                 <div className="destinations-list">
-                  {tour.places.map((place, index) => (
+                  {tour.places
+                    .filter(place => !place.isStartingPoint) // Filter out starting point from destinations list
+                    .map((place, index) => (
                     <div key={index} className="destination-item">
                       <div className="destination-marker">
                         <span className="marker-number">{index + 1}</span>

@@ -239,7 +239,7 @@ const ConfirmTourPage = ({ isEditMode = false, onPrevious, onComplete }) => {
             <MapPin className="detail-icon" />
             <div className="detail-content">
               <h4 className="detail-title">Destinations</h4>
-              <p className="detail-value">{tourData.places?.length || 0} places selected</p>
+              <p className="detail-value">{(tourData.places?.length || 0) - 1} places selected</p>
               <p className="detail-subtitle">
                 {tourData.places?.reduce((total, place) => total + place.subplaces.length, 0) || 0} sub-places included
               </p>

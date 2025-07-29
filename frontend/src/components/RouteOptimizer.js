@@ -150,12 +150,43 @@ const RouteOptimizer = ({ places = [], onRouteChange }) => {
 
   // Handle drag and drop reordering
   const handleDragStart = (e, index) => {
+    const place = optimizedPlaces[index];
+    
+    // Prevent dragging starting point if disabled
+    if (place.isStartingPoint) {
+      e.preventDefault();
+      return;
+    }
+    
     setDraggedIndex(index);
     e.dataTransfer.effectAllowed = 'move';
   };
 
   const handleDragOver = (e) => {
     e.preventDefault();
+    
+    // Check if trying to drop on the starting point position
+    const startingPointIndex = optimizedPlaces.findIndex(place => place.isStartingPoint);
+    if (startingPointIndex !== -1) {
+      // Get the drop target index
+      const targetElement = e.currentTarget;
+      const placeItems = targetElement.querySelectorAll('.route-place-item');
+      let dropIndex = -1;
+      
+      for (let i = 0; i < placeItems.length; i++) {
+        if (placeItems[i] === e.target.closest('.route-place-item')) {
+          dropIndex = i;
+          break;
+        }
+      }
+      
+      // If trying to drop on the starting point position, show invalid cursor
+      if (dropIndex === startingPointIndex) {
+        e.dataTransfer.dropEffect = 'none';
+        return;
+      }
+    }
+    
     e.dataTransfer.dropEffect = 'move';
   };
 
@@ -167,9 +198,16 @@ const RouteOptimizer = ({ places = [], onRouteChange }) => {
       return;
     }
 
-    // Prevent moving the starting point
+    // Prevent moving the starting point itself
     const draggedPlace = optimizedPlaces[draggedIndex];
     if (draggedPlace.isStartingPoint) {
+      setDraggedIndex(null);
+      return;
+    }
+
+    // Prevent dropping on the starting point position (but allow dropping after it)
+    const startingPointIndex = optimizedPlaces.findIndex(place => place.isStartingPoint);
+    if (startingPointIndex !== -1 && dropIndex === startingPointIndex) {
       setDraggedIndex(null);
       return;
     }
@@ -302,12 +340,24 @@ const RouteOptimizer = ({ places = [], onRouteChange }) => {
           Drag and drop to reorder places, or click optimize for the shortest route
         </p>
         
+        {/* Starting point protection notice */}
+        {optimizedPlaces.some(place => place.isStartingPoint) && (
+          <div className="starting-point-notice">
+            <span className="notice-icon">🚀</span>
+            <span className="notice-text">Starting point is fixed and cannot be moved</span>
+          </div>
+        )}
+        
         {optimizedPlaces.map((place, index) => (
           <div
             key={`${place.type}-${place.id}`}
             className={`route-place-item ${place.type.toLowerCase()} ${place.isStartingPoint ? 'starting-point' : ''}`}
             draggable={!place.isStartingPoint}
-            onDragStart={(e) => !place.isStartingPoint && handleDragStart(e, index)}
+            onDragStart={(e) => {
+              if (!place.isStartingPoint) {
+                handleDragStart(e, index);
+              }
+            }}
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, index)}
             onDragEnd={handleDragEnd}

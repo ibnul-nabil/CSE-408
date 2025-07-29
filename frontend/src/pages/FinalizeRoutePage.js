@@ -75,10 +75,10 @@ const FinalizeRoutePage = ({ isEditMode = false, onPrevious, onNext }) => {
             )}
           </div>
           {tourData.optimizedRoute.map((place, index) => (
-            <div key={`${place.type}-${place.id}`} className="route-stop optimized-stop">
+            <div key={`${place.type}-${place.id}`} className={`route-stop optimized-stop ${place.isStartingPoint ? 'starting-point' : ''}`}>
               <div className="route-stop-indicator">
-                <div className="route-stop-number">
-                  {index + 1}
+                <div className={`route-stop-number ${place.isStartingPoint ? 'starting-point-number' : ''}`}>
+                  {place.isStartingPoint ? '🚀' : index + 1}
                 </div>
                 {index < tourData.optimizedRoute.length - 1 && (
                   <div className="route-connector"></div>
@@ -86,7 +86,9 @@ const FinalizeRoutePage = ({ isEditMode = false, onPrevious, onNext }) => {
               </div>
               <div className="route-stop-content">
                 <h4 className="route-stop-title">{place.name}</h4>
-                <p className="route-stop-type">{place.type}</p>
+                <p className="route-stop-type">
+                  {place.isStartingPoint ? 'Starting Point' : place.type}
+                </p>
               </div>
             </div>
           ))}
@@ -94,75 +96,95 @@ const FinalizeRoutePage = ({ isEditMode = false, onPrevious, onNext }) => {
       );
     }
 
-    // Original route preview
+    // Original route preview with card format
     return (
       <div className="route-preview">
-        {tourData.places && tourData.places.map((item, index) => (
-          <div key={item.destination.id} className="route-stop">
-            <div className="route-stop-indicator">
-              <div className="route-stop-number">
-                {index + 1}
-              </div>
-              {index < tourData.places.length - 1 && (
-                <div className="route-connector"></div>
-              )}
-            </div>
-            <div className="route-stop-content">
-              <h4 className="route-stop-title">{item.destination.name}</h4>
-              <p className="route-stop-type">Destination</p>
-              {item.subplaces && item.subplaces.length > 0 && (
-                <div className="route-subplaces">
-                  <span className="subplaces-label">Sub-places:</span>
-                  <div className="subplaces-list">
-                    {item.subplaces.map((subplace, subIndex) => (
-                      <span key={subIndex} className="subplace-tag">
-                        {subplace.name}
-                      </span>
-                    ))}
-                  </div>
+        {tourData.places && tourData.places.map((item, index) => {
+          const isStartingPoint = tourData.startingPoint && item.destination.name === tourData.startingPoint;
+          return (
+            <div key={item.destination.id} className={`route-stop ${isStartingPoint ? 'starting-point' : ''}`}>
+              <div className="route-stop-indicator">
+                <div className={`route-stop-number ${isStartingPoint ? 'starting-point-number' : ''}`}>
+                  {isStartingPoint ? '🚀' : index + 1}
                 </div>
-              )}
+                {index < tourData.places.length - 1 && (
+                  <div className="route-connector"></div>
+                )}
+              </div>
+              <div className="route-stop-content">
+                <h4 className="route-stop-title">{item.destination.name}</h4>
+                <p className="route-stop-type">
+                  {isStartingPoint ? 'Starting Point' : 'Destination'}
+                </p>
+                {item.subplaces && item.subplaces.length > 0 && (
+                  <div className="route-subplaces">
+                    <span className="subplaces-label">Sub-places:</span>
+                    <div className="subplaces-list">
+                      {item.subplaces.map((subplace, subIndex) => (
+                        <span key={subIndex} className="subplace-tag">
+                          {subplace.name}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     );
   };
 
   const renderTourSummary = () => (
-    <div className="tour-summary">
+    <div className="tour-summary-card">
       <div className="summary-header">
         <h3>Tour Summary</h3>
       </div>
       <div className="summary-content">
         <div className="summary-item">
-          <span className="summary-label">Tour Title:</span>
-          <span className="summary-value">{tourData.title || 'Untitled Tour'}</span>
+          <div className="summary-icon">📝</div>
+          <div className="summary-details">
+            <span className="summary-label">Tour Title</span>
+            <span className="summary-value">{tourData.title || 'Untitled Tour'}</span>
+          </div>
         </div>
         <div className="summary-item">
-          <span className="summary-label">Duration:</span>
-          <span className="summary-value">
-            {tourData.startDate && tourData.endDate 
-              ? `${formatDateDisplay(tourData.startDate)} - ${formatDateDisplay(tourData.endDate)}`
-              : 'Not set'
-            }
-          </span>
+          <div className="summary-icon">📅</div>
+          <div className="summary-details">
+            <span className="summary-label">Duration</span>
+            <span className="summary-value">
+              {tourData.startDate && tourData.endDate 
+                ? `${formatDateDisplay(tourData.startDate)} - ${formatDateDisplay(tourData.endDate)}`
+                : 'Not set'
+              }
+            </span>
+          </div>
         </div>
         <div className="summary-item">
-          <span className="summary-label">Destinations:</span>
-          <span className="summary-value">{tourData.places?.length || 0} places</span>
+          <div className="summary-icon">📍</div>
+          <div className="summary-details">
+            <span className="summary-label">Destinations</span>
+            <span className="summary-value">{(tourData.places?.length || 0) - 1} places</span>
+          </div>
         </div>
         {tourData.accommodations && tourData.accommodations.length > 0 && (
           <div className="summary-item">
-            <span className="summary-label">Hotels:</span>
-            <span className="summary-value">{tourData.accommodations.length} selected</span>
+            <div className="summary-icon">🏨</div>
+            <div className="summary-details">
+              <span className="summary-label">Hotels</span>
+              <span className="summary-value">{tourData.accommodations.length} selected</span>
+            </div>
           </div>
         )}
         <div className="summary-item">
-          <span className="summary-label">Special Events:</span>
-          <span className="summary-value">
-            {specialEventsCount > 0 ? `${specialEventsCount} found` : 'None found'}
-          </span>
+          <div className="summary-icon">🎉</div>
+          <div className="summary-details">
+            <span className="summary-label">Special Events</span>
+            <span className="summary-value">
+              {specialEventsCount > 0 ? `${specialEventsCount} found` : 'None found'}
+            </span>
+          </div>
         </div>
       </div>
       
@@ -199,15 +221,14 @@ const FinalizeRoutePage = ({ isEditMode = false, onPrevious, onNext }) => {
           </div>
           <div className="card-content">
             {renderTourSummary()}
-            {renderRoutePreview()}
             
             <div className="route-optimizer-section">
-              <RouteOptimizer 
-                places={tourData.places}
-                onRouteChange={handleRouteChange}
-                showOptimizer={showOptimizer}
-                onToggleOptimizer={() => setShowOptimizer(!showOptimizer)}
-              />
+              {showOptimizer && (
+                <RouteOptimizer 
+                  places={tourData.places || []} 
+                  onRouteChange={handleRouteChange}
+                />
+              )}
             </div>
           </div>
         </div>

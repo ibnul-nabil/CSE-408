@@ -395,7 +395,7 @@ const MyTripsPage = () => {
           
           <div className="tour-detail-item">
             <MapPin className="detail-icon" />
-            <span>{tour.places?.length || 0} destination{(tour.places?.length || 0) !== 1 ? 's' : ''}</span>
+            <span>{(tour.places?.length || 0) - 1} destination{((tour.places?.length || 0) - 1) !== 1 ? 's' : ''}</span>
           </div>
           
           {tour.totalDistance && (

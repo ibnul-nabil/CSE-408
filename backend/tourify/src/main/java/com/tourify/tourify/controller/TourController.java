@@ -380,6 +380,11 @@ public class TourController {
                                     // Fetch destination name
                                     destinationRepository.findById(stop.getPlaceId().longValue())
                                             .ifPresent(destination -> {
+                                                // Skip if this is the starting point (first stop)
+                                                if (stop.getStopOrder() == 1 && tour.getStartingPoint() != null && 
+                                                    tour.getStartingPoint().equals(destination.getName())) {
+                                                    return; // Skip the starting point
+                                                }
                                                 // This is a bit hacky but will work for now
                                                 places.add(new TourResponseDTO.PlaceInfo(
                                                         destination.getName(),
@@ -490,6 +495,11 @@ public class TourController {
                         // Fetch destination name
                         destinationRepository.findById(stop.getPlaceId().longValue())
                                 .ifPresent(destination -> {
+                                    // Skip if this is the starting point (first stop)
+                                    if (stop.getStopOrder() == 1 && tour.getStartingPoint() != null && 
+                                        tour.getStartingPoint().equals(destination.getName())) {
+                                        return; // Skip the starting point
+                                    }
                                     places.add(new TourResponseDTO.PlaceInfo(
                                             destination.getName(),
                                             stop.getPlaceType(),

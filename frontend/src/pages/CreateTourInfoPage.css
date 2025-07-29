@@ -450,17 +450,22 @@
 }
 
 .search-input {
-  padding-left: 2.5rem;
-  padding-right: 2.5rem;
+  padding-left: 2.5rem !important;
+  padding-right: 2.5rem !important;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .search-icon {
   position: absolute;
   left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
   color: #6b7280;
   width: 1rem;
   height: 1rem;
   z-index: 1;
+  pointer-events: none;
 }
 
 .clear-btn {

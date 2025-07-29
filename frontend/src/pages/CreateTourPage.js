@@ -134,7 +134,13 @@ const CreateTourPage = ({ isEditMode = false, onPrevious, onNext }) => {
         const response = await fetch(`${API_URL}/api/destinations?search=${encodeURIComponent(query)}&type=district`);
         if (!response.ok) throw new Error('Failed to fetch districts');
         const data = await response.json();
-        setDistrictResults(data);
+        
+        // Filter out the starting point from search results
+        const filteredData = data.filter(district => 
+          district.name !== tourData.startingPoint
+        );
+        
+        setDistrictResults(filteredData);
       } catch (err) {
         setError(err.message);
         setDistrictResults([]);
@@ -512,10 +518,12 @@ const CreateTourPage = ({ isEditMode = false, onPrevious, onNext }) => {
             {selectedDistricts.length > 0 && (
               <div className="selected-districts-section">
                 <h3 className="section-title">
-                  Selected Districts ({selectedDistricts.length}) - Choose Sub-places:
+                  Selected Districts ({selectedDistricts.filter(({ district }) => district.name !== tourData.startingPoint).length}) - Choose Sub-places:
                 </h3>
                 <div className="selected-districts-grid">
-                  {selectedDistricts.map(({ district, selectedSubplaces }) => (
+                  {selectedDistricts
+                    .filter(({ district }) => district.name !== tourData.startingPoint) // Filter out starting point from display
+                    .map(({ district, selectedSubplaces }) => (
                     <div key={district.id} className="selected-district-card">
                       <div className="district-header">
                         <h4 className="district-name">{district.name}</h4>

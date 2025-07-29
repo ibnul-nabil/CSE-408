@@ -333,6 +333,14 @@
 .route-place-item.starting-point {
   background-color: #fef2f2;
   border-left: 4px solid #ef4444;
+  cursor: default;
+  opacity: 0.9;
+}
+
+.route-place-item.starting-point:hover {
+  background-color: #fef2f2;
+  transform: none;
+  box-shadow: none;
 }
 
 .route-place-item.starting-point .route-place-number {
@@ -343,11 +351,51 @@
 .starting-point-icon {
   font-size: 1.2rem;
   color: #ef4444;
+  cursor: default;
 }
 
 .route-place-item.starting-point .route-place-type {
   color: #ef4444;
   font-weight: 600;
+}
+
+.route-place-item.starting-point .route-place-drag-handle {
+  cursor: default;
+}
+
+/* Prevent dropping on starting point area */
+.route-place-item.starting-point.drag-over {
+  background-color: #fee2e2;
+  border-left: 4px solid #dc2626;
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+/* Starting point protection notice */
+.starting-point-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  color: #dc2626;
+}
+
+.notice-icon {
+  font-size: 1rem;
+}
+
+.notice-text {
+  font-weight: 500;
 }
 
 /* Responsive design */
