@@ -350,6 +350,24 @@
   color: #65676b;
 }
 
+.facebook-card-author {
+  font-size: 0.8rem;
+  color: #666;
+  margin: 0.25rem 0;
+  font-style: italic;
+}
+
+.facebook-loading-state {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+  font-style: italic;
+}
+
+.facebook-loading-state p {
+  margin: 0;
+}
+
 /* Empty State */
 .facebook-empty-state {
   text-align: center;

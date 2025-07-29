@@ -16,6 +16,9 @@ const ProfilePage = () => {
   const [activeNav, setActiveNav] = useState('profile');
   const [modalOpen, setModalOpen] = useState(false);
   const [modalPhotoType, setModalPhotoType] = useState('profile'); // 'profile' or 'cover'
+  const [recentBlogs, setRecentBlogs] = useState([]);
+  const [popularBlogs, setPopularBlogs] = useState([]);
+  const [blogsLoading, setBlogsLoading] = useState(true);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -37,6 +40,34 @@ const ProfilePage = () => {
     }
   }, [authUser]);
 
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        setBlogsLoading(true);
+        
+        // Fetch recent blogs (last 5 days)
+        const recentRes = await fetch(`${API_URL}/api/blogs/recent?days=5`);
+        if (recentRes.ok) {
+          const recentData = await recentRes.json();
+          setRecentBlogs(recentData);
+        }
+        
+        // Fetch popular blogs (by likes)
+        const popularRes = await fetch(`${API_URL}/api/blogs/popular?limit=6`);
+        if (popularRes.ok) {
+          const popularData = await popularRes.json();
+          setPopularBlogs(popularData);
+        }
+      } catch (err) {
+        console.error('Error fetching blogs:', err);
+      } finally {
+        setBlogsLoading(false);
+      }
+    };
+
+    fetchBlogs();
+  }, []);
+
   const handleLogout = () => {
     logout();
     navigate('/login');
@@ -53,6 +84,10 @@ const ProfilePage = () => {
     } else {
       setUser(prev => ({ ...prev, coverPhoto: newPhotoUrl }));
     }
+  };
+
+  const handleBlogClick = (blogId) => {
+    window.open(`/blogs/${blogId}`, '_blank');
   };
 
   if (loading) {
@@ -154,80 +189,95 @@ const ProfilePage = () => {
             <div className="facebook-profile-details">
               <h1 className="facebook-profile-name">{user.username}</h1>
               <p className="facebook-friends-count">{user.tours?.length || 0} tours created</p>
+              <p className="facebook-friends-count">{user.blogSummaries?.length || 0} blogs written</p>
             </div>
           </div>
         </div>
 
         {/* Content Sections */}
         <div className="facebook-content-container">
-          {/* Recent Blogs Section */}
+          {/* Most Recent Blogs Section */}
           <div className="facebook-content-section">
-            <h2 className="facebook-section-title">Recent Blogs</h2>
-            <div className="facebook-content-grid">
-              {user.blogSummaries?.slice(0, 6).map(blog => {
-                const allDestinations = blog.destinations || [];
-                const destinationText = allDestinations.length > 0 
-                  ? allDestinations.slice(0, 2).join(', ') + (allDestinations.length > 2 ? '...' : '')
-                  : 'No destination';
-                
-                return (
-                  <div key={blog.id} className="facebook-content-card" onClick={() => navigate(`/blogs/${blog.id}`)}>
-                    <img
-                      src={getImageUrl(blog.thumbnailUrl || blog.firstMediaUrl) || "https://images.unsplash.com/photo-1488646953014-85cb44e25828"}
-                      alt={blog.title || 'Blog post'}
-                      className="facebook-card-image"
-                    />
-                    <div className="facebook-card-content">
-                      <h3 className="facebook-card-title">{blog.title}</h3>
-                      <p className="facebook-card-description">{destinationText}</p>
-                      <div className="facebook-card-stats">
-                        <span>❤️ {blog.likeCount || 0}</span>
-                        <span>💬 {blog.commentCount || 0}</span>
+            <h2 className="facebook-section-title">Most Recent Blogs</h2>
+            {blogsLoading ? (
+              <div className="facebook-loading-state">
+                <p>Loading recent blogs...</p>
+              </div>
+            ) : (
+              <div className="facebook-content-grid">
+                {recentBlogs.slice(0, 6).map(blog => {
+                  const allDestinations = blog.destinations || [];
+                  const destinationText = allDestinations.length > 0 
+                    ? allDestinations.slice(0, 2).join(', ') + (allDestinations.length > 2 ? '...' : '')
+                    : 'No destination';
+                  
+                  return (
+                    <div key={blog.id} className="facebook-content-card" onClick={() => handleBlogClick(blog.id)}>
+                      <img
+                        src={getImageUrl(blog.thumbnailUrl || blog.firstMediaUrl) || "https://images.unsplash.com/photo-1488646953014-85cb44e25828"}
+                        alt={blog.title || 'Blog post'}
+                        className="facebook-card-image"
+                      />
+                      <div className="facebook-card-content">
+                        <h3 className="facebook-card-title">{blog.title}</h3>
+                        <p className="facebook-card-author">by {blog.authorUsername}</p>
+                        <p className="facebook-card-description">{destinationText}</p>
+                        <div className="facebook-card-stats">
+                          <span>❤️ {blog.likes || 0}</span>
+                          <span>💬 {blog.commentsCount || 0}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-            {(!user.blogSummaries || user.blogSummaries.length === 0) && (
+                  );
+                })}
+              </div>
+            )}
+            {(!blogsLoading && recentBlogs.length === 0) && (
               <div className="facebook-empty-state">
-                <p>No blogs yet. Start writing your travel stories!</p>
-                <button className="facebook-create-btn" onClick={() => navigate('/create-blog')}>
-                  Write Your First Blog
-                </button>
+                <p>No recent blogs found.</p>
               </div>
             )}
           </div>
 
-          {/* Recent Tours Section */}
+          {/* Most Popular Blogs Section */}
           <div className="facebook-content-section">
-            <h2 className="facebook-section-title">Tours Created</h2>
-            <div className="facebook-content-grid">
-              {user.tours?.slice(0, 6).map(tour => (
-                <div key={tour.id} className="facebook-content-card">
-                  <img
-                    src="https://images.unsplash.com/photo-1488646953014-85cb44e25828"
-                    alt={tour.title}
-                    className="facebook-card-image"
-                  />
-                  <div className="facebook-card-content">
-                    <h3 className="facebook-card-title">{tour.title}</h3>
-                    <p className="facebook-card-description">
-                      Status: {tour.status}
-                    </p>
-                    <p className="facebook-card-date">
-                      {tour.startDate ? `From ${tour.startDate}` : 'No dates set'}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            {(!user.tours || user.tours.length === 0) && (
+            <h2 className="facebook-section-title">Most Popular Blogs</h2>
+            {blogsLoading ? (
+              <div className="facebook-loading-state">
+                <p>Loading popular blogs...</p>
+              </div>
+            ) : (
+              <div className="facebook-content-grid">
+                {popularBlogs.slice(0, 6).map(blog => {
+                  const allDestinations = blog.destinations || [];
+                  const destinationText = allDestinations.length > 0 
+                    ? allDestinations.slice(0, 2).join(', ') + (allDestinations.length > 2 ? '...' : '')
+                    : 'No destination';
+                  
+                  return (
+                    <div key={blog.id} className="facebook-content-card" onClick={() => handleBlogClick(blog.id)}>
+                      <img
+                        src={getImageUrl(blog.thumbnailUrl || blog.firstMediaUrl) || "https://images.unsplash.com/photo-1488646953014-85cb44e25828"}
+                        alt={blog.title || 'Blog post'}
+                        className="facebook-card-image"
+                      />
+                      <div className="facebook-card-content">
+                        <h3 className="facebook-card-title">{blog.title}</h3>
+                        <p className="facebook-card-author">by {blog.authorUsername}</p>
+                        <p className="facebook-card-description">{destinationText}</p>
+                        <div className="facebook-card-stats">
+                          <span>❤️ {blog.likes || 0}</span>
+                          <span>💬 {blog.commentsCount || 0}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            {(!blogsLoading && popularBlogs.length === 0) && (
               <div className="facebook-empty-state">
-                <p>No tours created yet. Plan your first adventure!</p>
-                <button className="facebook-create-btn" onClick={() => navigate('/create-tour-info')}>
-                  Create Your First Tour
-                </button>
+                <p>No popular blogs found.</p>
               </div>
             )}
           </div>

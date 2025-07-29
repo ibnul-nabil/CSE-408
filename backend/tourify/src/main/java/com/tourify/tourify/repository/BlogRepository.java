@@ -63,4 +63,9 @@ public interface BlogRepository extends JpaRepository<Blog, Long> {
     
     @Query("SELECT COUNT(b) FROM Blog b WHERE b.status = :status")
     Long countByStatus(@Param("status") String status);
+    
+    @Query("SELECT b FROM Blog b WHERE b.status = 'published' " +
+           "AND b.createdAt >= :startDate " +
+           "ORDER BY b.createdAt DESC")
+    List<Blog> findRecentPublishedBlogs(@Param("startDate") java.time.LocalDateTime startDate);
 }

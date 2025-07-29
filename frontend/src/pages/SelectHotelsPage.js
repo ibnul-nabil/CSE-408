@@ -577,12 +577,6 @@ const SelectHotelsPage = ({ isEditMode = false, onPrevious, onNext }) => {
                     <div key={accommodation.hotelId} className="accommodation-item">
                       <div className="accommodation-header">
                         <h4>{accommodation.hotelName}</h4>
-                        <button
-                          className="remove-btn"
-                          onClick={() => handleRemoveAccommodation(accommodation.hotelId)}
-                        >
-                          ×
-                        </button>
                       </div>
                       
                       <div className="accommodation-details">

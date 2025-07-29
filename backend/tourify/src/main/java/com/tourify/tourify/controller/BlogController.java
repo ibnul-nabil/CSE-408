@@ -5,6 +5,7 @@ import com.tourify.tourify.dto.CommentRequest;
 import com.tourify.tourify.dto.CommentResponse;
 import com.tourify.tourify.dto.MediaRequest;
 import com.tourify.tourify.dto.BlogDetailResponse;
+import com.tourify.tourify.dto.BlogSuggestionResponse;
 import com.tourify.tourify.entity.*;
 import com.tourify.tourify.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,50 @@ public class BlogController {
     @GetMapping
     public List<Blog> getAllBlogs() {
         return blogRepository.findPublishedBlogsOrderByCreatedAtDesc();
+    }
+
+    // Get recent blogs (last N days)
+    @GetMapping("/recent")
+    public ResponseEntity<?> getRecentBlogs(@RequestParam(defaultValue = "5") int days) {
+        try {
+            // Calculate start date (N days ago)
+            java.time.LocalDateTime startDate = java.time.LocalDateTime.now().minusDays(days);
+            
+            List<Blog> recentBlogs = blogRepository.findRecentPublishedBlogs(startDate);
+            
+            // Convert to response DTOs to avoid circular references
+            List<BlogSuggestionResponse> responseBlogs = recentBlogs.stream()
+                    .map(this::convertToBlogSuggestionResponse)
+                    .collect(Collectors.toList());
+            
+            return ResponseEntity.ok(responseBlogs);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                .body(Map.of("message", "Error loading recent blogs: " + e.getMessage()));
+        }
+    }
+
+    // Get popular blogs (by likes)
+    @GetMapping("/popular")
+    public ResponseEntity<?> getPopularBlogs(@RequestParam(defaultValue = "6") int limit) {
+        try {
+            List<Blog> popularBlogs = blogRepository.findPublishedBlogsOrderByLikes();
+            
+            // Limit the results
+            List<Blog> limitedBlogs = popularBlogs.stream()
+                    .limit(limit)
+                    .collect(Collectors.toList());
+            
+            // Convert to response DTOs to avoid circular references
+            List<BlogSuggestionResponse> responseBlogs = limitedBlogs.stream()
+                    .map(this::convertToBlogSuggestionResponse)
+                    .collect(Collectors.toList());
+            
+            return ResponseEntity.ok(responseBlogs);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                .body(Map.of("message", "Error loading popular blogs: " + e.getMessage()));
+        }
     }
 
     // Get blogs by destination
@@ -511,6 +556,36 @@ public class BlogController {
     // Helper method to convert Blog to BlogDetailResponse
     private BlogDetailResponse convertToBlogDetailResponse(Blog blog) {
         BlogDetailResponse response = new BlogDetailResponse();
+        response.setId(blog.getId());
+        response.setTitle(blog.getTitle());
+        response.setContent(blog.getContent());
+        response.setThumbnailUrl(blog.getThumbnailUrl());
+        response.setLikes(blog.getLikes());
+        response.setStatus(blog.getStatus());
+        response.setCreatedAt(blog.getCreatedAt());
+        response.setUpdatedAt(blog.getUpdatedAt());
+        
+        // Set author info (flattened to avoid circular references)
+        if (blog.getUser() != null) {
+            response.setAuthorUsername(blog.getUser().getUsername());
+            response.setAuthorProfileImage(blog.getUser().getProfileImage());
+        }
+        
+        // Set destinations (flattened)
+        response.setDestinations(blog.getDestinations());
+        response.setCustomDestinations(blog.getCustomDestinations());
+        
+        // Set counts
+        response.setCommentsCount(blog.getCommentsCount());
+        response.setMediaCount(blog.getMediaCount());
+        response.setHasMedia(blog.getHasMedia());
+        
+        return response;
+    }
+
+    // Helper method to convert Blog to BlogSuggestionResponse
+    private BlogSuggestionResponse convertToBlogSuggestionResponse(Blog blog) {
+        BlogSuggestionResponse response = new BlogSuggestionResponse();
         response.setId(blog.getId());
         response.setTitle(blog.getTitle());
         response.setContent(blog.getContent());
