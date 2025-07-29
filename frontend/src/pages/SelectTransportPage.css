@@ -363,6 +363,17 @@
   gap: 1rem;
 }
 
+.selected-transports-list:empty::after {
+  content: 'No transportation selected yet';
+  text-align: center;
+  color: hsl(var(--muted-foreground));
+  font-style: italic;
+  padding: 2rem;
+  background: hsl(var(--secondary));
+  border-radius: 8px;
+  border: 2px dashed hsl(var(--border));
+}
+
 .selected-transport-card {
   display: flex;
   justify-content: space-between;
@@ -399,10 +410,126 @@
 }
 
 .selected-transport-date input {
+  width: 100%;
   padding: 0.5rem;
   border: 1px solid hsl(var(--border));
   border-radius: 0.375rem;
   font-size: 0.875rem;
+  background: white;
+}
+
+.date-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border: 2px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 3rem;
+}
+
+.date-input-container:hover {
+  border-color: hsl(var(--primary));
+  background: hsl(var(--secondary));
+}
+
+.date-input-container:focus-within {
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.1);
+}
+
+.date-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: hsl(var(--muted-foreground));
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.date-input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.date-input::-webkit-calendar-picker-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.date-input::-webkit-datetime-edit,
+.date-input::-webkit-datetime-edit-fields-wrapper,
+.date-input::-webkit-datetime-edit-text,
+.date-input::-webkit-datetime-edit-month-field,
+.date-input::-webkit-datetime-edit-day-field,
+.date-input::-webkit-datetime-edit-year-field {
+  display: none;
+}
+
+.date-display {
+  flex: 1;
+  font-size: 0.875rem;
+  color: hsl(var(--foreground));
+  pointer-events: none;
+  z-index: 2;
+  position: relative;
+  transition: color 0.2s;
+}
+
+.date-input-container.empty-date .date-display {
+  color: hsl(var(--muted-foreground));
+}
+
+/* Selected date styling */
+.date-input-container:has(.date-input:not([value=""])) {
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  border-color: #10b981;
+}
+
+.date-input-container:has(.date-input:not([value=""])) .date-display {
+  color: white;
+  font-weight: 500;
+}
+
+.date-input-container:has(.date-input:not([value=""])) .date-icon {
+  color: white;
+}
+
+/* Hover effects for selected date */
+.date-input-container:has(.date-input:not([value=""])):hover {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  border-color: #059669;
+}
+
+.date-input-container:has(.date-input:not([value=""])):hover .date-display,
+.date-input-container:has(.date-input:not([value=""])):hover .date-icon {
+  color: white;
+}
+
+.date-hint {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.date-hint.error {
+  color: #dc2626;
+  font-weight: 500;
 }
 
 /* Navigation Buttons */
@@ -537,4 +664,171 @@
   .transport-card {
     padding: 1rem;
   }
+} 
+
+.selected-transport {
+  background: white;
+  border: 2px solid hsl(var(--border));
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.selected-transport:hover {
+  border-color: hsl(var(--primary));
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+}
+
+.selected-transport::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  border-radius: 0 2px 2px 0;
+}
+
+.selected-transport-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.selected-transport-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.selected-transport-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+
+.selected-transport-route {
+  font-size: 1rem;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.selected-transport-route::before {
+  content: '🛤️';
+  font-size: 0.875rem;
+}
+
+.selected-transport-costs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.cost-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  background: hsl(var(--secondary));
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.cost-label {
+  color: hsl(var(--muted-foreground));
+  font-weight: 500;
+}
+
+.cost-value {
+  color: hsl(var(--foreground));
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.cost-value.total {
+  color: #10b981;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.selected-transport-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.selected-transport-date {
+  flex: 1;
+  min-width: 0;
+}
+
+.selected-transport-date label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  margin-bottom: 0.5rem;
+}
+
+.remove-transport-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: fit-content;
+}
+
+.remove-transport-btn:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+}
+
+.remove-transport-btn:active {
+  transform: translateY(0);
+} 
+
+.selected-transportation-section {
+  background: white;
+  border: 2px solid hsl(var(--border));
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.selected-transportation-section h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.selected-transportation-section h3::before {
+  content: '🚗';
+  font-size: 1.125rem;
 } 

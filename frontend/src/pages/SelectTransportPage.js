@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "../context/AuthContext";
 import { useTour } from "../context/TourContext";
-import { Truck, ArrowLeft, Filter, Search, Calendar } from 'lucide-react';
+import { Truck, ArrowLeft, Filter, Search, Calendar, X } from 'lucide-react';
 import StepIndicator from '../components/StepIndicator';
 import './SelectTransportPage.css';
 
@@ -25,19 +25,53 @@ const SelectTransportPage = ({ isEditMode = false, onPrevious, onNext }) => {
   const [passengerCount, setPassengerCount] = useState(1);
   const [isManualRouteActive, setIsManualRouteActive] = useState(false);
 
-  // Available destinations for dropdowns
-  const destinations = [
-    { id: 1, name: "Cox's Bazar" },
-    { id: 2, name: "Sylhet" },
-    { id: 3, name: "Sreemangal" },
-    { id: 4, name: "Sunamganj" },
-    { id: 5, name: "Bandarban" },
-    { id: 6, name: "Khagrachari" },
-    { id: 7, name: "Chattogram" },
-    { id: 8, name: "Sundarbans" },
-    { id: 9, name: "Rangamati" },
-    { id: 10, name: "Dhaka" }
-  ];
+  // Get destinations from tour data (only destinations, not sub-places)
+  const getTourDestinations = () => {
+    if (!tourData.places || tourData.places.length === 0) {
+      return [
+        { id: 1, name: "Cox's Bazar" },
+        { id: 2, name: "Sylhet" },
+        { id: 3, name: "Sreemangal" },
+        { id: 4, name: "Sunamganj" },
+        { id: 5, name: "Bandarban" },
+        { id: 6, name: "Khagrachari" },
+        { id: 7, name: "Chattogram" },
+        { id: 8, name: "Sundarbans" },
+        { id: 9, name: "Rangamati" },
+        { id: 10, name: "Dhaka" }
+      ];
+    }
+    
+    // Extract only destinations from tour data
+    return tourData.places.map(place => ({
+      id: place.destination.id,
+      name: place.destination.name
+    }));
+  };
+
+  const destinations = getTourDestinations();
+
+  // Format date to readable format (July 7th, 2025)
+  const formatDateDisplay = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const month = date.toLocaleDateString('en-US', { month: 'long' });
+    const day = date.getDate();
+    const year = date.getFullYear();
+    
+    // Add ordinal suffix (st, nd, rd, th)
+    const getOrdinalSuffix = (day) => {
+      if (day > 3 && day < 21) return 'th';
+      switch (day % 10) {
+        case 1: return 'st';
+        case 2: return 'nd';
+        case 3: return 'rd';
+        default: return 'th';
+      }
+    };
+    
+    return `${month} ${day}${getOrdinalSuffix(day)}, ${year}`;
+  };
 
   useEffect(() => {
     fetchTransports();
@@ -107,6 +141,11 @@ const SelectTransportPage = ({ isEditMode = false, onPrevious, onNext }) => {
 
   const handleManualRouteFilter = () => {
     if (fromDestination && toDestination && passengerCount > 0) {
+      // Check if from and to destinations are the same
+      if (fromDestination === toDestination) {
+        alert('From and To destinations cannot be the same. Please select different destinations.');
+        return;
+      }
       setIsManualRouteActive(true);
     }
   };
@@ -116,6 +155,33 @@ const SelectTransportPage = ({ isEditMode = false, onPrevious, onNext }) => {
     setToDestination('');
     setPassengerCount(1);
     setIsManualRouteActive(false);
+  };
+
+  // Handle destination selection changes
+  const handleFromDestinationChange = (value) => {
+    setFromDestination(value);
+    // Clear manual route if from destination is same as to destination
+    if (value === toDestination && value !== '') {
+      alert('From and To destinations cannot be the same. Please select different destinations.');
+      setFromDestination('');
+      return;
+    }
+    if (isManualRouteActive) {
+      setIsManualRouteActive(false);
+    }
+  };
+
+  const handleToDestinationChange = (value) => {
+    setToDestination(value);
+    // Clear manual route if to destination is same as from destination
+    if (value === fromDestination && value !== '') {
+      alert('From and To destinations cannot be the same. Please select different destinations.');
+      setToDestination('');
+      return;
+    }
+    if (isManualRouteActive) {
+      setIsManualRouteActive(false);
+    }
   };
 
   const handleDateChange = (transportId, date) => {
@@ -128,11 +194,37 @@ const SelectTransportPage = ({ isEditMode = false, onPrevious, onNext }) => {
     );
   };
 
+  const handleRemoveTransport = (transportId) => {
+    setSelectedTransports(prev => prev.filter(transport => transport.transportId !== transportId));
+  };
+
   const handleNext = () => {
+    // Check if no transports are selected and show confirmation popup
+    if (selectedTransports.length === 0) {
+      const confirmed = window.confirm(
+        'You haven\'t selected any transportation for this tour. Are you sure you want to continue without transportation?'
+      );
+      if (!confirmed) {
+        return; // User cancelled, stay on current page
+      }
+    } else {
+      // Check if all selected transports have travel dates - STRICT VALIDATION
+      const transportsWithoutDates = selectedTransports.filter(transport => !transport.travelDate);
+      if (transportsWithoutDates.length > 0) {
+        alert(
+          `Please set travel dates for all selected transports:\n\n${transportsWithoutDates.map(t => `• ${t.transportName}`).join('\n')}\n\nYou cannot proceed without setting travel dates.`
+        );
+        return; // Prevent proceeding - user must set dates
+      }
+    }
+    
+    // Save transportation to context (can be empty array)
+    console.log('💾 Saving transportation to context:', selectedTransports);
+    setTransportation(selectedTransports);
+    
     if (isEditMode && onNext) {
       onNext();
     } else {
-      setTransportation(selectedTransports);
       navigate('/confirm-tour');
     }
   };
@@ -213,26 +305,68 @@ const SelectTransportPage = ({ isEditMode = false, onPrevious, onNext }) => {
     if (selectedTransports.length === 0) return null;
 
     return (
-      <div className="selected-transports-section">
+      <div className="selected-transportation-section">
         <h3>Selected Transportation</h3>
         <div className="selected-transports-list">
-          {selectedTransports.map((transport, index) => (
-            <div key={index} className="selected-transport-card">
-              <div className="selected-transport-info">
-                <h4>{transport.transportName}</h4>
-                <p>{transport.fromDestination} → {transport.toDestination}</p>
-                <p>Cost per person: ৳{transport.costPerPerson}</p>
-                <p>Total cost: ৳{transport.totalCost}</p>
+          {selectedTransports.map((transport) => (
+            <div key={transport.transportId} className="selected-transport">
+              <div className="selected-transport-header">
+                <div className="selected-transport-info">
+                  <h4 className="selected-transport-name">{transport.transportName}</h4>
+                  <div className="selected-transport-route">
+                    {transport.fromDestination} → {transport.toDestination}
+                  </div>
+                  <div className="selected-transport-costs">
+                    <div className="cost-item">
+                      <span className="cost-label">Cost per person:</span>
+                      <span className="cost-value">৳{transport.costPerPerson}</span>
+                    </div>
+                    <div className="cost-item">
+                      <span className="cost-label">Total cost:</span>
+                      <span className="cost-value total">৳{transport.totalCost}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="selected-transport-date">
-                <label>Travel Date:</label>
-                <input
-                  type="date"
-                  value={transport.travelDate}
-                  onChange={(e) => handleDateChange(transport.transportId, e.target.value)}
-                  min={tourData.startDate}
-                  max={tourData.endDate}
-                />
+              
+              <div className="selected-transport-actions">
+                <div className="selected-transport-date">
+                  <label>Travel Date:</label>
+                  <div 
+                    className={`date-input-container ${!transport.travelDate ? 'empty-date' : ''}`}
+                    onClick={() => {
+                      const input = document.querySelector(`input[data-transport-id="${transport.transportId}"]`);
+                      if (input) {
+                        input.showPicker ? input.showPicker() : input.click();
+                      }
+                    }}
+                  >
+                    <Calendar className="date-icon" />
+                    <input
+                      type="date"
+                      value={transport.travelDate}
+                      onChange={(e) => handleDateChange(transport.transportId, e.target.value)}
+                      min={tourData.startDate}
+                      max={tourData.endDate}
+                      className="date-input"
+                      data-transport-id={transport.transportId}
+                    />
+                    <div className="date-display">
+                      {transport.travelDate ? formatDateDisplay(transport.travelDate) : "Pick travel date"}
+                    </div>
+                  </div>
+                  {!transport.travelDate && (
+                    <small className="date-hint error">⚠️ Travel date is required</small>
+                  )}
+                </div>
+                
+                <button
+                  className="remove-transport-btn"
+                  onClick={() => handleRemoveTransport(transport.transportId)}
+                >
+                  <X size={16} />
+                  Remove
+                </button>
               </div>
             </div>
           ))}
@@ -288,23 +422,35 @@ const SelectTransportPage = ({ isEditMode = false, onPrevious, onNext }) => {
                     <div className="filter-inputs">
                       <select
                         value={fromDestination}
-                        onChange={(e) => setFromDestination(e.target.value)}
+                        onChange={(e) => handleFromDestinationChange(e.target.value)}
                         className="filter-select"
                       >
                         <option value="">From Destination</option>
                         {destinations.map(dest => (
-                          <option key={dest.id} value={dest.id}>{dest.name}</option>
+                          <option 
+                            key={dest.id} 
+                            value={dest.id}
+                            disabled={dest.id.toString() === toDestination}
+                          >
+                            {dest.name} {dest.id.toString() === toDestination ? '(Same as To)' : ''}
+                          </option>
                         ))}
                       </select>
                       
                       <select
                         value={toDestination}
-                        onChange={(e) => setToDestination(e.target.value)}
+                        onChange={(e) => handleToDestinationChange(e.target.value)}
                         className="filter-select"
                       >
                         <option value="">To Destination</option>
                         {destinations.map(dest => (
-                          <option key={dest.id} value={dest.id}>{dest.name}</option>
+                          <option 
+                            key={dest.id} 
+                            value={dest.id}
+                            disabled={dest.id.toString() === fromDestination}
+                          >
+                            {dest.name} {dest.id.toString() === fromDestination ? '(Same as From)' : ''}
+                          </option>
                         ))}
                       </select>
                       
@@ -409,7 +555,6 @@ const SelectTransportPage = ({ isEditMode = false, onPrevious, onNext }) => {
           <button
             className="btn btn-primary"
             onClick={handleNext}
-            disabled={selectedTransports.length === 0}
           >
             <span>Next</span>
           </button>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Calendar, Clock, MapPin, DollarSign, User, Navigation, Bed } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, MapPin, DollarSign, User, Navigation, Bed, Truck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import TourSpecialEvents from '../components/TourSpecialEvents';
 import './TourDetailsPage.css';
@@ -76,6 +76,9 @@ const TourDetailsPage = () => {
       console.log('🏨 Tour accommodations:', data.accommodations);
       console.log('🏨 Accommodations length:', data.accommodations?.length);
       console.log('🏨 Accommodations structure:', JSON.stringify(data.accommodations, null, 2));
+      console.log('🚗 Tour transportation:', data.transportation);
+      console.log('🚗 Transportation length:', data.transportation?.length);
+      console.log('🚗 Transportation structure:', JSON.stringify(data.transportation, null, 2));
       setTour(data);
     } catch (err) {
       console.error('❌ Fetch error:', err);
@@ -116,6 +119,12 @@ const TourDetailsPage = () => {
   const calculateAccommodationCost = (accommodations) => {
     if (!accommodations || accommodations.length === 0) return 0;
     return accommodations.reduce((total, acc) => total + (acc.totalCost || 0), 0);
+  };
+
+  // Calculate total transportation cost
+  const calculateTransportationCost = (transportation) => {
+    if (!transportation || transportation.length === 0) return 0;
+    return transportation.reduce((total, transport) => total + (transport.totalCost || 0), 0);
   };
 
   const handleBackNavigation = () => {
@@ -171,13 +180,97 @@ const TourDetailsPage = () => {
 
   const status = getTourStatus(tour.startDate, tour.endDate);
   const accommodationCost = calculateAccommodationCost(tour.accommodations);
+  const transportationCost = calculateTransportationCost(tour.transportation);
 
   console.log('🎯 Rendering tour details with:', {
     tourId: tour.id,
     accommodations: tour.accommodations,
     accommodationCost,
-    hasAccommodations: tour.accommodations && tour.accommodations.length > 0
+    hasAccommodations: tour.accommodations && tour.accommodations.length > 0,
+    transportation: tour.transportation,
+    transportationCost,
+    hasTransportation: tour.transportation && tour.transportation.length > 0
   });
+
+  console.log('🚗 Transportation display check:', {
+    hasTransportationData: !!tour.transportation,
+    transportationLength: tour.transportation?.length,
+    transportationCost,
+    willShowTransportationSection: tour.transportation && tour.transportation.length > 0,
+    willShowTransportationCost: transportationCost > 0
+  });
+
+  const renderPlacesList = () => {
+    // Use optimized route if available, otherwise use original places
+    const placesToShow = tour.isRouteOptimized && tour.optimizedRoute 
+      ? tour.optimizedRoute 
+      : tour.places;
+    
+    console.log('🗺️ Rendering places list:', {
+      hasPlaces: !!tour.places,
+      placesLength: tour.places?.length,
+      isRouteOptimized: tour.isRouteOptimized,
+      hasOptimizedRoute: !!tour.optimizedRoute,
+      placesToShow: placesToShow,
+      placesToShowLength: placesToShow?.length
+    });
+    
+    return (
+      <div className="destinations-section">
+        <div className="destinations-card">
+          <h3 className="destinations-title">
+            <Navigation className="destinations-icon" />
+            {tour.isRouteOptimized ? "Your Optimized Route:" : "Tour Route & Destinations"}
+          </h3>
+          <div className="destinations-list">
+            {placesToShow && placesToShow.map((item, index) => {
+              if (tour.isRouteOptimized && tour.optimizedRoute) {
+                // Display optimized route items
+                return (
+                  <div key={item.id} className="destination-item">
+                    <div className="destination-marker">
+                      <span className="marker-number">{index + 1}</span>
+                    </div>
+                    <div className="destination-content">
+                      <h4 className="destination-name">{item.name}</h4>
+                      <p className="place-type">{item.type}</p>
+                    </div>
+                  </div>
+                );
+              } else {
+                // Display original places structure
+                return (
+                  <div key={item.destination?.id || index} className="destination-item">
+                    <div className="destination-marker">
+                      <span className="marker-number">{index + 1}</span>
+                    </div>
+                    <div className="destination-content">
+                      <h4 className="destination-name">
+                        {item.destination?.name || item.name || `Destination ${item.destinationId || item.id}`}
+                      </h4>
+                      <p className="place-type">Destination</p>
+                      {item.subPlaces && item.subPlaces.length > 0 && (
+                        <div className="sub-places">
+                          <span className="sub-places-label">Sub-places:</span>
+                          <div className="sub-places-list">
+                            {item.subPlaces.map((subPlace, subIndex) => (
+                              <span key={subIndex} className="sub-place-tag">
+                                {subPlace.name || `Sub-place ${subPlace.id}`}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              }
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="tour-details-container">
@@ -268,6 +361,29 @@ const TourDetailsPage = () => {
                     </div>
                   </div>
                 )}
+
+                {/* Transportation Information */}
+                {tour.transportation && tour.transportation.length > 0 && (
+                  <div className="info-item">
+                    <Truck className="info-icon" />
+                    <div className="info-content">
+                      <span className="info-label">Transportation</span>
+                      <span className="info-value">
+                        {tour.transportation.length} transport{tour.transportation.length !== 1 ? 's' : ''} selected
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {transportationCost > 0 && (
+                  <div className="info-item">
+                    <DollarSign className="info-icon" />
+                    <div className="info-content">
+                      <span className="info-label">Transportation Cost</span>
+                      <span className="info-value">${transportationCost}</span>
+                    </div>
+                  </div>
+                )}
                 
                 <div className="info-item">
                   <User className="info-icon" />
@@ -282,44 +398,7 @@ const TourDetailsPage = () => {
             </div>
           </div>
 
-          {tour.places && tour.places.length > 0 ? (
-            <div className="destinations-section">
-              <div className="destinations-card">
-                <h3 className="destinations-title">
-                  <Navigation className="destinations-icon" />
-                  Tour Route & Destinations
-                </h3>
-                <div className="destinations-list">
-                  {tour.places
-                    .filter(place => !place.isStartingPoint) // Filter out starting point from destinations list
-                    .map((place, index) => (
-                    <div key={index} className="destination-item">
-                      <div className="destination-marker">
-                        <span className="marker-number">{index + 1}</span>
-                      </div>
-                      <div className="destination-content">
-                        <h4 className="destination-name">
-                          {place.destination?.name || place.name || `Destination ${place.destinationId || place.id}`}
-                        </h4>
-                        {place.subPlaces && place.subPlaces.length > 0 ? (
-                          <div className="sub-places">
-                            <span className="sub-places-label">Sub-places:</span>
-                            <div className="sub-places-list">
-                              {place.subPlaces.map((subPlace, subIndex) => (
-                                <span key={subIndex} className="sub-place-tag">
-                                  {subPlace.name || `Sub-place ${subPlace.id}`}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        ) : null}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ) : null}
+          {renderPlacesList()}
 
           {/* Hotel Information Section */}
           {tour.accommodations && tour.accommodations.length > 0 && (
@@ -346,6 +425,41 @@ const TourDetailsPage = () => {
                             </span>
                           )}
                           <span className="hotel-total">Total: ${accommodation.totalCost || accommodation.hotelPrice}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Transportation Information Section */}
+          {tour.transportation && tour.transportation.length > 0 && (
+            <div className="transportation-section">
+              <div className="transportation-card">
+                <h3 className="transportation-title">
+                  <Truck className="transportation-icon" />
+                  Transportation & Travel
+                </h3>
+                <div className="transportation-list">
+                  {tour.transportation.map((transport, index) => (
+                    <div key={transport.transportId} className="transport-item">
+                      <div className="transport-marker">
+                        <span className="marker-number">{index + 1}</span>
+                      </div>
+                      <div className="transport-content">
+                        <h4 className="transport-name">{transport.transportName}</h4>
+                        <p className="transport-route">{transport.fromDestination} → {transport.toDestination}</p>
+                        <div className="transport-details">
+                          <span className="transport-type">{transport.transportType} - {transport.transportClass}</span>
+                          <span className="transport-passengers">{transport.passengerCount} passenger{transport.passengerCount !== 1 ? 's' : ''}</span>
+                          {transport.travelDate && (
+                            <span className="transport-date">
+                              {formatDate(transport.travelDate)}
+                            </span>
+                          )}
+                          <span className="transport-total">Total: ${transport.totalCost}</span>
                         </div>
                       </div>
                     </div>

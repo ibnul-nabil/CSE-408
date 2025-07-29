@@ -608,7 +608,35 @@ public class TourController {
                 System.out.println("🏨 Tour " + tour.getId() + " has no accommodations");
             }
 
-            System.out.println("✅ Returning tour DTO with " + places.size() + " places and " + (dto.getAccommodations() != null ? dto.getAccommodations().size() : 0) + " accommodations");
+            // Get transportation information
+            List<TourTransport> tourTransports = tourTransportRepository.findByTourId(tour.getId());
+            if (tourTransports != null && !tourTransports.isEmpty()) {
+                List<TourResponseDTO.TransportationInfo> transportation = new ArrayList<>();
+                for (TourTransport tourTransport : tourTransports) {
+                    Transport transport = tourTransport.getTransport();
+                    TourResponseDTO.TransportationInfo transportationInfo = new TourResponseDTO.TransportationInfo(
+                            transport.getId(),
+                            transport.getName(),
+                            transport.getType(),
+                            transport.getTransportClass(),
+                            transport.getStartPlace() != null ? transport.getStartPlace().getName() : "Unknown",
+                            transport.getEndPlace() != null ? transport.getEndPlace().getName() : "Unknown",
+                            tourTransport.getTravelDate() != null ? tourTransport.getTravelDate().toString() : null,
+                            tourTransport.getPassengerCount(),
+                            tourTransport.getCostPerPerson(),
+                            tourTransport.getTotalCost()
+                    );
+                    transportation.add(transportationInfo);
+                }
+                dto.setTransportation(transportation);
+                System.out.println("🚗 Tour " + tour.getId() + " has " + transportation.size() + " transportation options");
+            } else {
+                System.out.println("🚗 Tour " + tour.getId() + " has no transportation");
+            }
+
+            System.out.println("✅ Returning tour DTO with " + places.size() + " places, " + 
+                (dto.getAccommodations() != null ? dto.getAccommodations().size() : 0) + " accommodations, and " + 
+                (dto.getTransportation() != null ? dto.getTransportation().size() : 0) + " transportation options");
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
             System.out.println("❌ Error in getTourById: " + e.getMessage());

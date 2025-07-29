@@ -220,7 +220,7 @@ const ConfirmTourPage = ({ isEditMode = false, onPrevious, onComplete }) => {
     if (isEditMode && onPrevious) {
       onPrevious();
     } else {
-      navigate('/finalize-route');
+      navigate('/select-transport');
     }
   };
 
@@ -464,16 +464,24 @@ const ConfirmTourPage = ({ isEditMode = false, onPrevious, onComplete }) => {
               <div className="transportation-number">{index + 1}</div>
               <div className="transportation-info">
                 <h5 className="transportation-name">{transport.transportName}</h5>
-                <p className="transportation-route">{transport.fromDestination} → {transport.toDestination}</p>
+                <div className="transportation-route">
+                  {transport.fromDestination} → {transport.toDestination}
+                </div>
                 <div className="transportation-details">
-                  <span className="transportation-type">{transport.transportType} - {transport.transportClass}</span>
-                  <span className="transportation-passengers">{transport.passengerCount} passenger{transport.passengerCount !== 1 ? 's' : ''}</span>
+                  <span className="transportation-type">
+                    {transport.transportType} - {transport.transportClass}
+                  </span>
+                  <span className="transportation-passengers">
+                    {transport.passengerCount} passenger{transport.passengerCount !== 1 ? 's' : ''}
+                  </span>
                   {transport.travelDate && (
                     <span className="transportation-date">
                       {formatDateDisplay(transport.travelDate)}
                     </span>
                   )}
-                  <span className="transportation-total">Total: ${transport.totalCost}</span>
+                  <span className="transportation-total">
+                    Total: ${transport.totalCost}
+                  </span>
                 </div>
               </div>
             </div>
