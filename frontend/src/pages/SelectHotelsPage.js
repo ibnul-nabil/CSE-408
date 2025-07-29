@@ -182,18 +182,41 @@ const SelectHotelsPage = ({ isEditMode = false, onPrevious, onNext }) => {
         prev.filter((_, index) => index !== existingIndex)
       );
     } else {
-      // Add hotel with default dates
+      // Add hotel with default dates and calculate cost
       console.log('➕ Adding hotel:', hotel.name);
+      
+      // Set default dates based on tour dates
+      const defaultCheckIn = tourData.startDate || '';
+      const defaultCheckOut = tourData.endDate || '';
+      
+      // Calculate initial cost based on default dates
+      let initialCost = hotel.pricePerNight;
+      if (defaultCheckIn && defaultCheckOut) {
+        const checkIn = new Date(defaultCheckIn);
+        const checkOut = new Date(defaultCheckOut);
+        const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+        initialCost = hotel.pricePerNight * nights;
+      }
+      
       const newAccommodation = {
         hotelId: hotel.id,
         hotelName: hotel.name,
         hotelLocation: hotel.location,
         hotelPrice: hotel.pricePerNight,
-        checkIn: tourData.startDate || '',
-        checkOut: tourData.endDate || '',
-        totalCost: hotel.pricePerNight,
+        checkIn: defaultCheckIn,
+        checkOut: defaultCheckOut,
+        totalCost: initialCost,
         amenities: hotel.amenities || []
       };
+      
+      console.log('💰 Initial cost calculation:', {
+        hotelName: hotel.name,
+        pricePerNight: hotel.pricePerNight,
+        checkIn: defaultCheckIn,
+        checkOut: defaultCheckOut,
+        nights: defaultCheckIn && defaultCheckOut ? Math.ceil((new Date(defaultCheckOut) - new Date(defaultCheckIn)) / (1000 * 60 * 60 * 24)) : 1,
+        totalCost: initialCost
+      });
       
       setSelectedAccommodations(prev => [...prev, newAccommodation]);
     }
@@ -212,6 +235,17 @@ const SelectHotelsPage = ({ isEditMode = false, onPrevious, onNext }) => {
             const checkOut = new Date(updated.checkOut);
             const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
             updated.totalCost = updated.hotelPrice * nights;
+            
+            console.log('💰 Cost recalculation for', updated.hotelName, ':', {
+              checkIn: updated.checkIn,
+              checkOut: updated.checkOut,
+              nights: nights,
+              pricePerNight: updated.hotelPrice,
+              totalCost: updated.totalCost
+            });
+          } else {
+            // If only one date is set, use single night cost
+            updated.totalCost = updated.hotelPrice;
           }
           
           return updated;
