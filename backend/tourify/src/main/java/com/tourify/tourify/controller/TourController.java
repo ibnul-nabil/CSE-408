@@ -78,6 +78,7 @@ public class TourController {
             tour.setStatus(Tour.TourStatus.Planned); // or Draft/Upcoming as needed
             if (req.getStartDate() != null) tour.setStartDate(LocalDate.parse(req.getStartDate()));
             if (req.getEndDate() != null) tour.setEndDate(LocalDate.parse(req.getEndDate()));
+            if (req.getStartingPoint() != null) tour.setStartingPoint(req.getStartingPoint());
             if (req.getEstimatedCost() != null) tour.setEstimatedCost(req.getEstimatedCost());
             tourRepository.save(tour);
 
@@ -166,10 +167,11 @@ public class TourController {
 
             System.out.println("✅ Updating tour: " + existingTour.getTitle());
 
-            // Update tour fields
+            // Update tour details
             existingTour.setTitle(req.getTitle());
             if (req.getStartDate() != null) existingTour.setStartDate(LocalDate.parse(req.getStartDate()));
             if (req.getEndDate() != null) existingTour.setEndDate(LocalDate.parse(req.getEndDate()));
+            if (req.getStartingPoint() != null) existingTour.setStartingPoint(req.getStartingPoint());
             if (req.getEstimatedCost() != null) existingTour.setEstimatedCost(req.getEstimatedCost());
             tourRepository.save(existingTour);
 
@@ -354,6 +356,7 @@ public class TourController {
                         TourResponseDTO dto = new TourResponseDTO(tour.getId(), tour.getTitle(), tour.getStatus().name());
                         dto.setStartDate(tour.getStartDate() != null ? tour.getStartDate().toString() : null);
                         dto.setEndDate(tour.getEndDate() != null ? tour.getEndDate().toString() : null);
+                        dto.setStartingPoint(tour.getStartingPoint());
                         dto.setEstimatedCost(tour.getEstimatedCost());
                         dto.setCreatedAt(tour.getCreatedAt());
 
@@ -465,6 +468,7 @@ public class TourController {
             TourResponseDTO dto = new TourResponseDTO(tour.getId(), tour.getTitle(), tour.getStatus().name());
             dto.setStartDate(tour.getStartDate() != null ? tour.getStartDate().toString() : null);
             dto.setEndDate(tour.getEndDate() != null ? tour.getEndDate().toString() : null);
+            dto.setStartingPoint(tour.getStartingPoint());
             dto.setEstimatedCost(tour.getEstimatedCost());
             dto.setCreatedAt(tour.getCreatedAt());
 
@@ -558,6 +562,7 @@ public class TourController {
 
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> places = (List<Map<String, Object>>) request.get("places");
+            String startingPoint = (String) request.get("startingPoint");
 
             if (places == null || places.size() < 2) {
                 return ResponseEntity.badRequest().body("Need at least 2 places to optimize route");
@@ -578,7 +583,7 @@ public class TourController {
             }
 
             // Use OpenRouteService for optimization
-            Map<String, Object> optimizedResult = optimizeRouteWithORS(placesWithCoords);
+            Map<String, Object> optimizedResult = optimizeRouteWithORS(placesWithCoords, startingPoint);
 
             if (optimizedResult != null) {
                 // Get the optimized route order
@@ -646,6 +651,7 @@ public class TourController {
             
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> places = (List<Map<String, Object>>) request.get("places");
+            String startingPoint = (String) request.get("startingPoint");
             
             if (places == null || places.size() < 2) {
                 return ResponseEntity.badRequest().body("Need at least 2 places to calculate distance");
@@ -663,6 +669,29 @@ public class TourController {
                 Map<String, Object> placeWithCoords = new HashMap<>(places.get(i));
                 placeWithCoords.put("coordinates", new double[]{coordinates.get(i).get(0), coordinates.get(i).get(1)});
                 placesWithCoords.add(placeWithCoords);
+            }
+
+            // If starting point is provided, ensure it's first in the route
+            if (startingPoint != null && !startingPoint.isEmpty()) {
+                // Find the starting point in the places list
+                int startingPointIndex = -1;
+                for (int i = 0; i < placesWithCoords.size(); i++) {
+                    Map<String, Object> place = placesWithCoords.get(i);
+                    if (startingPoint.equals(place.get("name"))) {
+                        startingPointIndex = i;
+                        break;
+                    }
+                }
+                
+                // If starting point found and not first, reorder to put it first
+                if (startingPointIndex > 0) {
+                    Map<String, Object> startingPointPlace = placesWithCoords.remove(startingPointIndex);
+                    placesWithCoords.add(0, startingPointPlace);
+                    
+                    // Reorder coordinates accordingly
+                    List<Double> startingPointCoords = coordinates.remove(startingPointIndex);
+                    coordinates.add(0, startingPointCoords);
+                }
             }
 
             double totalDistance = calculateDistanceForRoute(placesWithCoords);
@@ -830,7 +859,7 @@ public class TourController {
 
 
 
-    private Map<String, Object> optimizeRouteWithORS(List<Map<String, Object>> places) {
+    private Map<String, Object> optimizeRouteWithORS(List<Map<String, Object>> places, String startingPoint) {
         try {
             // Extract coordinates for ORS optimization
             List<List<Double>> coordinates = new ArrayList<>();
@@ -846,26 +875,40 @@ public class TourController {
                 return null;
             }
 
+            // Find the starting point in the places list
+            int startingPointIndex = 0;
+            if (startingPoint != null && !startingPoint.isEmpty()) {
+                for (int i = 0; i < places.size(); i++) {
+                    Map<String, Object> place = places.get(i);
+                    if (startingPoint.equals(place.get("name"))) {
+                        startingPointIndex = i;
+                        break;
+                    }
+                }
+            }
+
             // Use ORS optimization API
             String url = ORS_BASE_URL + "/optimization";
 
             Map<String, Object> requestBody = new HashMap<>();
 
-            // Create jobs (destinations to visit)
+            // Create jobs (destinations to visit) - exclude the starting point
             List<Map<String, Object>> jobs = new ArrayList<>();
-            for (int i = 1; i < coordinates.size(); i++) { // Skip first as starting point
-                Map<String, Object> job = new HashMap<>();
-                job.put("id", i);
-                job.put("location", coordinates.get(i));
-                jobs.add(job);
+            for (int i = 0; i < coordinates.size(); i++) {
+                if (i != startingPointIndex) { // Skip the starting point
+                    Map<String, Object> job = new HashMap<>();
+                    job.put("id", i);
+                    job.put("location", coordinates.get(i));
+                    jobs.add(job);
+                }
             }
 
-            // Create vehicle (starting from first location)
+            // Create vehicle (starting from starting point location)
             List<Map<String, Object>> vehicles = new ArrayList<>();
             Map<String, Object> vehicle = new HashMap<>();
             vehicle.put("id", 1);
-            vehicle.put("start", coordinates.get(0));
-            vehicle.put("end", coordinates.get(0)); // Return to start
+            vehicle.put("start", coordinates.get(startingPointIndex));
+            vehicle.put("end", coordinates.get(startingPointIndex)); // Return to start
             vehicle.put("profile", "driving-car");
             vehicles.add(vehicle);
 
@@ -894,7 +937,7 @@ public class TourController {
 
                     // Reorder places according to optimization result
                     List<Map<String, Object>> optimizedRoute = new ArrayList<>();
-                    optimizedRoute.add(places.get(0)); // Start location
+                    optimizedRoute.add(places.get(startingPointIndex)); // Start location
 
                     if (steps != null) {
                         for (JsonNode step : steps) {

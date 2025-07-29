@@ -11,6 +11,7 @@ public class TourResponseDTO {
     private String status;
     private String startDate;
     private String endDate;
+    private String startingPoint;
     private BigDecimal estimatedCost;
     private ZonedDateTime createdAt;
     private List<PlaceInfo> places;
@@ -33,6 +34,8 @@ public class TourResponseDTO {
     public void setStartDate(String startDate) { this.startDate = startDate; }
     public String getEndDate() { return endDate; }
     public void setEndDate(String endDate) { this.endDate = endDate; }
+    public String getStartingPoint() { return startingPoint; }
+    public void setStartingPoint(String startingPoint) { this.startingPoint = startingPoint; }
     public BigDecimal getEstimatedCost() { return estimatedCost; }
     public void setEstimatedCost(BigDecimal estimatedCost) { this.estimatedCost = estimatedCost; }
     public ZonedDateTime getCreatedAt() { return createdAt; }

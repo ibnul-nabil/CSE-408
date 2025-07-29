@@ -30,6 +30,9 @@ public class Tour {
     @Column(name = "end_date")
     private LocalDate endDate;
 
+    @Column(name = "starting_point", length = 100)
+    private String startingPoint;
+
     @Column(name = "estimated_cost", precision = 10, scale = 2)
     private BigDecimal estimatedCost;
 
@@ -124,6 +127,14 @@ public class Tour {
 
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
+    }
+
+    public String getStartingPoint() {
+        return startingPoint;
+    }
+
+    public void setStartingPoint(String startingPoint) {
+        this.startingPoint = startingPoint;
     }
 
     public BigDecimal getEstimatedCost() {

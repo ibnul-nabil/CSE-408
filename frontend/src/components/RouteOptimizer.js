@@ -23,7 +23,33 @@ const RouteOptimizer = ({ places = [], onRouteChange }) => {
     } else if (places.length > 0) {
       // Convert places to format expected by optimizer
       const formattedPlaces = [];
-      places.forEach(({ destination, subplaces }) => {
+      
+      // Add starting point first if it exists
+      const startingPointPlace = places.find(place => place.isStartingPoint);
+      if (startingPointPlace) {
+        formattedPlaces.push({
+          id: startingPointPlace.destination.id,
+          name: startingPointPlace.destination.name,
+          type: 'Destination',
+          isStartingPoint: true
+        });
+        startingPointPlace.subplaces.forEach(sub => {
+          formattedPlaces.push({
+            id: sub.id,
+            name: sub.name,
+            type: 'SubPlace',
+            parentDestinationId: startingPointPlace.destination.id
+          });
+        });
+      }
+      
+      // Add other places
+      places.forEach(({ destination, subplaces, isStartingPoint }) => {
+        // Skip if this is the starting point (already added)
+        if (isStartingPoint) {
+          return;
+        }
+        
         formattedPlaces.push({
           id: destination.id,
           name: destination.name,
@@ -55,7 +81,10 @@ const RouteOptimizer = ({ places = [], onRouteChange }) => {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ places: routePlaces })
+        body: JSON.stringify({ 
+          places: routePlaces,
+          startingPoint: tourData.startingPoint 
+        })
       });
 
       if (!response.ok) throw new Error('Failed to calculate distance');
@@ -66,7 +95,7 @@ const RouteOptimizer = ({ places = [], onRouteChange }) => {
       console.error('Distance calculation failed:', err);
       setTotalDistance(null);
     }
-  }, []);
+  }, [tourData.startingPoint]);
 
   // Calculate initial distance when places are loaded
   useEffect(() => {
@@ -91,7 +120,10 @@ const RouteOptimizer = ({ places = [], onRouteChange }) => {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ places: optimizedPlaces })
+        body: JSON.stringify({ 
+          places: optimizedPlaces,
+          startingPoint: tourData.startingPoint 
+        })
       });
 
       if (!response.ok) throw new Error('Route optimization failed');
@@ -135,27 +167,31 @@ const RouteOptimizer = ({ places = [], onRouteChange }) => {
       return;
     }
 
+    // Prevent moving the starting point
+    const draggedPlace = optimizedPlaces[draggedIndex];
+    if (draggedPlace.isStartingPoint) {
+      setDraggedIndex(null);
+      return;
+    }
+
     const newPlaces = [...optimizedPlaces];
-    const draggedPlace = newPlaces[draggedIndex];
+    const draggedPlaceItem = newPlaces[draggedIndex];
     
     // Remove dragged item
     newPlaces.splice(draggedIndex, 1);
     
     // Insert at new position
-    const insertIndex = draggedIndex < dropIndex ? dropIndex - 1 : dropIndex;
-    newPlaces.splice(insertIndex, 0, draggedPlace);
+    newPlaces.splice(dropIndex, 0, draggedPlaceItem);
     
     setOptimizedPlaces(newPlaces);
     setDraggedIndex(null);
     
-    // Recalculate distance for new order
-    calculateCurrentDistance(newPlaces);
-    
     // Update tour context
-    setOptimizedRoute(newPlaces, null); // Distance will be calculated async
+    setOptimizedRoute(newPlaces, totalDistance);
     
+    // Notify parent component
     if (onRouteChange) {
-      onRouteChange(newPlaces, null);
+      onRouteChange(newPlaces, totalDistance);
     }
   };
 
@@ -165,13 +201,22 @@ const RouteOptimizer = ({ places = [], onRouteChange }) => {
 
   // Remove place from route
   const removePlace = (index) => {
+    const placeToRemove = optimizedPlaces[index];
+    
+    // Prevent removing the starting point
+    if (placeToRemove.isStartingPoint) {
+      return;
+    }
+    
     const newPlaces = optimizedPlaces.filter((_, i) => i !== index);
     setOptimizedPlaces(newPlaces);
-    calculateCurrentDistance(newPlaces);
     
-    setOptimizedRoute(newPlaces, null);
+    // Update tour context
+    setOptimizedRoute(newPlaces, totalDistance);
+    
+    // Notify parent component
     if (onRouteChange) {
-      onRouteChange(newPlaces, null);
+      onRouteChange(newPlaces, totalDistance);
     }
   };
 
@@ -260,30 +305,38 @@ const RouteOptimizer = ({ places = [], onRouteChange }) => {
         {optimizedPlaces.map((place, index) => (
           <div
             key={`${place.type}-${place.id}`}
-            className={`route-place-item ${place.type.toLowerCase()}`}
-            draggable
-            onDragStart={(e) => handleDragStart(e, index)}
+            className={`route-place-item ${place.type.toLowerCase()} ${place.isStartingPoint ? 'starting-point' : ''}`}
+            draggable={!place.isStartingPoint}
+            onDragStart={(e) => !place.isStartingPoint && handleDragStart(e, index)}
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, index)}
             onDragEnd={handleDragEnd}
           >
             <div className="route-place-drag-handle">
-              <GripVertical className="drag-icon" />
+              {place.isStartingPoint ? (
+                <span className="starting-point-icon">🚀</span>
+              ) : (
+                <GripVertical className="drag-icon" />
+              )}
             </div>
             <div className="route-place-info">
               <div className="route-place-number">{index + 1}</div>
               <div className="route-place-details">
                 <h4 className="route-place-name">{place.name}</h4>
-                <span className="route-place-type">{place.type}</span>
+                <span className="route-place-type">
+                  {place.isStartingPoint ? 'Starting Point' : place.type}
+                </span>
               </div>
             </div>
-            <button
-              className="route-place-remove"
-              onClick={() => removePlace(index)}
-              title="Remove from route"
-            >
-              <X className="remove-icon" />
-            </button>
+            {!place.isStartingPoint && (
+              <button
+                className="route-place-remove"
+                onClick={() => removePlace(index)}
+                title="Remove from route"
+              >
+                <X className="remove-icon" />
+              </button>
+            )}
           </div>
         ))}
 
@@ -298,7 +351,7 @@ const RouteOptimizer = ({ places = [], onRouteChange }) => {
       {showMap && (
         <div className="route-map-container">
           <RouteMap 
-            places={places}
+            places={optimizedPlaces}
             optimizedRoute={optimizedPlaces}
             totalDistance={totalDistance}
           />

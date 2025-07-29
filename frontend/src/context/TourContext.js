@@ -5,6 +5,7 @@ const initialState = {
   title: '',
   startDate: '',
   endDate: '',
+  startingPoint: '',
   places: [],
   accommodations: [],
   route: [],
@@ -40,6 +41,7 @@ const tourReducer = (state, action) => {
         title: action.payload.title,
         startDate: action.payload.startDate,
         endDate: action.payload.endDate,
+        startingPoint: action.payload.startingPoint,
         estimatedCost: action.payload.estimatedCost
       };
     case TOUR_ACTIONS.SET_PLACES:
@@ -98,10 +100,10 @@ export const TourProvider = ({ children }) => {
   const [tourData, dispatch] = useReducer(tourReducer, initialState);
 
   // Action creators
-  const setTourInfo = (title, startDate, endDate, estimatedCost = null) => {
+  const setTourInfo = (title, startDate, endDate, startingPoint, estimatedCost = null) => {
     dispatch({
       type: TOUR_ACTIONS.SET_TOUR_INFO,
-      payload: { title, startDate, endDate, estimatedCost }
+      payload: { title, startDate, endDate, startingPoint, estimatedCost }
     });
   };
 

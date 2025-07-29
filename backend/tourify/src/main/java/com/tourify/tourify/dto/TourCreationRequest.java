@@ -9,6 +9,7 @@ public class TourCreationRequest {
     private String title;
     private String startDate;
     private String endDate;
+    private String startingPoint;
     private java.math.BigDecimal estimatedCost;
     private RouteDTO route;
     private Long userId;
@@ -37,6 +38,14 @@ public class TourCreationRequest {
 
     public void setEndDate(String endDate) {
         this.endDate = endDate;
+    }
+
+    public String getStartingPoint() {
+        return startingPoint;
+    }
+
+    public void setStartingPoint(String startingPoint) {
+        this.startingPoint = startingPoint;
     }
 
     public java.math.BigDecimal getEstimatedCost() {

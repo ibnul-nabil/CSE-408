@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, MapPin, Search, X } from "lucide-react";
 import { useTour } from '../context/TourContext';
 import StepIndicator from '../components/StepIndicator';
 import './CreateTourInfoPage.css';
+
+const API_URL = process.env.REACT_APP_URL;
 
 const CreateTourInfoPage = ({ isEditMode = false, onNext }) => {
   const navigate = useNavigate();
@@ -12,21 +14,67 @@ const CreateTourInfoPage = ({ isEditMode = false, onNext }) => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [error, setError] = useState("");
+  const [startingPoint, setStartingPoint] = useState("");
+  const [startingPointSearch, setStartingPointSearch] = useState("");
+  const [startingPointResults, setStartingPointResults] = useState([]);
+  const [showStartingPointResults, setShowStartingPointResults] = useState(false);
+  const [loadingStartingPoint, setLoadingStartingPoint] = useState(false);
   const startDateRef = useRef(null);
   const endDateRef = useRef(null);
 
     // Initialize form with existing tour data or reset for new tour
   useEffect(() => {
     // Always restore existing tour data from context if it exists
-    if (tourData.title || tourData.startDate || tourData.endDate) {
+    if (tourData.title || tourData.startDate || tourData.endDate || tourData.startingPoint) {
       if (tourData.title) setTitle(tourData.title);
       if (tourData.startDate) setStartDate(tourData.startDate);
       if (tourData.endDate) setEndDate(tourData.endDate);
+      if (tourData.startingPoint) setStartingPoint(tourData.startingPoint);
     } else if (!isEditMode) {
       // Only reset if no existing data and not in edit mode
       resetTour();
     }
-  }, [isEditMode, tourData.title, tourData.startDate, tourData.endDate, resetTour]);
+  }, [isEditMode, tourData.title, tourData.startDate, tourData.endDate, tourData.startingPoint, resetTour]);
+
+  // Search for starting point destinations
+  const handleStartingPointSearch = async (query) => {
+    setStartingPointSearch(query);
+    setError(null);
+    
+    if (query.length >= 2) {
+      setLoadingStartingPoint(true);
+      try {
+        const response = await fetch(`${API_URL}/api/destinations?search=${encodeURIComponent(query)}`);
+        if (!response.ok) throw new Error('Failed to fetch destinations');
+        const data = await response.json();
+        setStartingPointResults(data);
+        setShowStartingPointResults(true);
+      } catch (err) {
+        setError(err.message);
+        setStartingPointResults([]);
+      } finally {
+        setLoadingStartingPoint(false);
+      }
+    } else {
+      setStartingPointResults([]);
+      setShowStartingPointResults(false);
+    }
+  };
+
+  // Select starting point
+  const handleSelectStartingPoint = (destination) => {
+    setStartingPoint(destination.name);
+    setStartingPointSearch(destination.name);
+    setShowStartingPointResults(false);
+    updateField('startingPoint', destination.name);
+  };
+
+  // Clear starting point
+  const handleClearStartingPoint = () => {
+    setStartingPoint("");
+    setStartingPointSearch("");
+    updateField('startingPoint', "");
+  };
 
   // Format date to readable format (July 7th, 2025)
   const formatDateDisplay = (dateString) => {
@@ -106,6 +154,10 @@ const CreateTourInfoPage = ({ isEditMode = false, onNext }) => {
       setError("Tour title is required.");
       return;
     }
+    if (!startingPoint.trim()) {
+      setError("Starting point is required.");
+      return;
+    }
     if (!startDate) {
       setError("Start date is required.");
       return;
@@ -131,7 +183,7 @@ const CreateTourInfoPage = ({ isEditMode = false, onNext }) => {
     }
     
     // Save to context
-    setTourInfo(title, startDate, endDate);
+    setTourInfo(title, startDate, endDate, startingPoint);
     
     // Navigate to place selection
     if (isEditMode && onNext) {
@@ -175,6 +227,56 @@ const CreateTourInfoPage = ({ isEditMode = false, onNext }) => {
                   placeholder="My Amazing Tour"
                   className="input"
                 />
+              </div>
+
+              <div className="form-group">
+                <label className="label" htmlFor="startingPoint">From where do you want to start your tour?</label>
+                <div className="starting-point-container">
+                  <div className="search-input-container">
+                    <Search className="search-icon" />
+                    <input
+                      id="startingPoint"
+                      type="text"
+                      value={startingPointSearch}
+                      onChange={(e) => handleStartingPointSearch(e.target.value)}
+                      placeholder="Search for a starting point..."
+                      className="input search-input"
+                      required
+                    />
+                    {startingPoint && (
+                      <button
+                        type="button"
+                        onClick={handleClearStartingPoint}
+                        className="clear-btn"
+                        title="Clear starting point"
+                      >
+                        <X size={16} />
+                      </button>
+                    )}
+                  </div>
+                  
+                  {showStartingPointResults && (
+                    <div className="search-results">
+                      {loadingStartingPoint ? (
+                        <div className="loading-result">Searching...</div>
+                      ) : startingPointResults.length > 0 ? (
+                        startingPointResults.map(destination => (
+                          <div
+                            key={destination.id}
+                            className="search-result-item"
+                            onClick={() => handleSelectStartingPoint(destination)}
+                          >
+                            <MapPin size={16} />
+                            <span>{destination.name}</span>
+                            <span className="destination-location">{destination.location}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="no-results">No destinations found</div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
               
               <div className="form-row">

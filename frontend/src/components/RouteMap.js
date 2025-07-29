@@ -13,9 +13,11 @@ L.Icon.Default.mergeOptions({
 });
 
 // Custom icons for destinations and subplaces
-const createCustomIcon = (number, type) => {
-  const color = type === 'Destination' ? '#3b82f6' : '#10b981';
+const createCustomIcon = (number, type, isStartingPoint = false) => {
+  const color = isStartingPoint ? '#ef4444' : (type === 'Destination' ? '#3b82f6' : '#10b981');
   const size = type === 'Destination' ? 35 : 30;
+  const borderColor = isStartingPoint ? '#dc2626' : 'white';
+  const borderWidth = isStartingPoint ? 4 : 3;
   
   return L.divIcon({
     html: `
@@ -23,7 +25,7 @@ const createCustomIcon = (number, type) => {
         width: ${size}px;
         height: ${size}px;
         background: ${color};
-        border: 3px solid white;
+        border: ${borderWidth}px solid ${borderColor};
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -32,7 +34,7 @@ const createCustomIcon = (number, type) => {
         font-weight: 600;
         color: white;
         font-size: ${type === 'Destination' ? '12px' : '10px'};
-      ">${number}</div>
+      ">${isStartingPoint ? '🚀' : number}</div>
     `,
     className: 'custom-marker',
     iconSize: [size, size],
@@ -84,21 +86,23 @@ const RouteMap = ({ places = [], optimizedRoute = [], totalDistance }) => {
             points.push({
               ...place,
               coordinates: coords,
-              order: i + 1
+              order: i + 1,
+              isStartingPoint: place.isStartingPoint || false
             });
           }
         }
       } else if (places.length > 0) {
         // Use original places order
         let order = 1;
-        for (const { destination, subplaces } of places) {
+        for (const { destination, subplaces, isStartingPoint } of places) {
           const coords = await getCoordinatesForPlace(destination);
           if (coords) {
             points.push({
               ...destination,
               coordinates: coords,
               order: order++,
-              type: 'Destination'
+              type: 'Destination',
+              isStartingPoint: isStartingPoint || false
             });
           }
           
@@ -302,13 +306,16 @@ const RouteMap = ({ places = [], optimizedRoute = [], totalDistance }) => {
             <Marker
               key={`${point.type}-${point.id}`}
               position={[point.coordinates[1], point.coordinates[0]]}
-              icon={createCustomIcon(point.order, point.type)}
+              icon={createCustomIcon(point.order, point.type, point.isStartingPoint)}
             >
               <Popup>
                 <div className="marker-popup">
                   <strong>{point.name}</strong><br />
                   <small>{point.type}</small><br />
                   <small>Stop #{point.order}</small>
+                  {point.isStartingPoint && (
+                    <><br /><small style={{color: '#ef4444', fontWeight: 'bold'}}>🚀 Starting Point</small></>
+                  )}
                 </div>
               </Popup>
             </Marker>

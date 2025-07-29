@@ -239,3 +239,5 @@ VALUES (
 
 
 ALTER TABLE users ADD COLUMN cover_photo VARCHAR(255);
+
+INSERT INTO destinations (name, description, cover_image, location, coordinates) values ('Dhaka', 'Jadur Shohor.', 'dhaka.jpg', 'Dhaka', POINT(90.41732490062715, 23.735059367606503));

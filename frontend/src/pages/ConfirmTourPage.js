@@ -85,7 +85,23 @@ const ConfirmTourPage = ({ isEditMode = false, onPrevious, onComplete }) => {
 
     // Prepare request body for backend
     let stopOrder = 1;
+
+    // Add starting point as the first stop if it exists
     const stops = [];
+    if (tourData.startingPoint) {
+      // Find the starting point destination
+      const startingPointDestination = tourData.places.find(place => 
+        place.destination.name === tourData.startingPoint
+      );
+      
+      if (startingPointDestination) {
+        stops.push({
+          placeType: "Destination",
+          placeId: startingPointDestination.destination.id,
+          stopOrder: stopOrder++
+        });
+      }
+    }
     
     // Use optimized route if available, otherwise use original places
     const placesToUse = tourData.isRouteOptimized && tourData.optimizedRoute 
@@ -104,6 +120,11 @@ const ConfirmTourPage = ({ isEditMode = false, onPrevious, onComplete }) => {
     } else {
       // Use original places order
       tourData.places.forEach(({ destination, subplaces }) => {
+        // Skip if this destination is the starting point (already added)
+        if (tourData.startingPoint && destination.name === tourData.startingPoint) {
+          return;
+        }
+        
         stops.push({
           placeType: "Destination",
           placeId: destination.id,
@@ -126,6 +147,7 @@ const ConfirmTourPage = ({ isEditMode = false, onPrevious, onComplete }) => {
       title: tourData.title || "New Tour",
       startDate: tourData.startDate,
       endDate: tourData.endDate,
+      startingPoint: tourData.startingPoint,
       estimatedCost: totalAccommodationCost, // Use calculated accommodation cost
       route: {
         routeSource: "user",

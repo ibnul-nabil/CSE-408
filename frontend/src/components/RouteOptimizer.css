@@ -329,6 +329,27 @@
   background: #f0f9ff;
 }
 
+/* Starting Point Styles */
+.route-place-item.starting-point {
+  background-color: #fef2f2;
+  border-left: 4px solid #ef4444;
+}
+
+.route-place-item.starting-point .route-place-number {
+  background-color: #ef4444;
+  color: white;
+}
+
+.starting-point-icon {
+  font-size: 1.2rem;
+  color: #ef4444;
+}
+
+.route-place-item.starting-point .route-place-type {
+  color: #ef4444;
+  font-weight: 600;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .route-optimizer {

@@ -78,6 +78,50 @@ const CreateTourPage = ({ isEditMode = false, onPrevious, onNext }) => {
     }
   }, [tourData.places, loadSubplacesForDistrict, initialized]);
 
+  // Auto-add starting point to selected districts if it exists
+  useEffect(() => {
+    if (initialized && tourData.startingPoint && selectedDistricts.length > 0) {
+      // Check if starting point is already in selected districts
+      const startingPointExists = selectedDistricts.some(
+        ({ district }) => district.name === tourData.startingPoint
+      );
+      
+      if (!startingPointExists) {
+        // Find the starting point destination from the API
+        const addStartingPoint = async () => {
+          try {
+            const response = await fetch(`${API_URL}/api/destinations?search=${encodeURIComponent(tourData.startingPoint)}&type=district`);
+            if (response.ok) {
+              const data = await response.json();
+              const startingPointDistrict = data.find(d => d.name === tourData.startingPoint);
+              if (startingPointDistrict) {
+                setSelectedDistricts(prev => {
+                  // Check if already exists
+                  if (prev.some(d => d.district.id === startingPointDistrict.id)) {
+                    return prev;
+                  }
+                  
+                  const newDistrict = {
+                    district: startingPointDistrict,
+                    selectedSubplaces: []
+                  };
+                  return [newDistrict, ...prev]; // Add at the beginning
+                });
+                
+                // Load subplaces for starting point
+                await loadSubplacesForDistrict(startingPointDistrict.id);
+              }
+            }
+          } catch (err) {
+            console.error('Failed to add starting point:', err);
+          }
+        };
+        
+        addStartingPoint();
+      }
+    }
+  }, [initialized, tourData.startingPoint, selectedDistricts, loadSubplacesForDistrict]);
+
   // Search for districts (Bangladesh districts)
   const handleDistrictSearchChange = async (e) => {
     const query = e.target.value;
@@ -195,10 +239,36 @@ const CreateTourPage = ({ isEditMode = false, onPrevious, onNext }) => {
   // Update context whenever selection changes - with proper memoization
   useEffect(() => {
     if (initialized) {
-      const places = selectedDistricts.map(({ district, selectedSubplaces }) => ({
-        destination: district,
-        subplaces: selectedSubplaces
-      }));
+      const places = [];
+      
+      // Add starting point as the first place if it exists
+      if (tourData.startingPoint) {
+        // Find the starting point destination from selected districts
+        const startingPointDistrict = selectedDistricts.find(({ district }) => 
+          district.name === tourData.startingPoint
+        );
+        
+        if (startingPointDistrict) {
+          places.push({
+            destination: startingPointDistrict.district,
+            subplaces: startingPointDistrict.selectedSubplaces,
+            isStartingPoint: true
+          });
+        }
+      }
+      
+      // Add other selected districts
+      selectedDistricts.forEach(({ district, selectedSubplaces }) => {
+        // Skip if this is the starting point (already added)
+        if (tourData.startingPoint && district.name === tourData.startingPoint) {
+          return;
+        }
+        
+        places.push({
+          destination: district,
+          subplaces: selectedSubplaces
+        });
+      });
       
       // Only update if places actually changed
       const currentPlaces = tourData.places || [];
@@ -218,7 +288,7 @@ const CreateTourPage = ({ isEditMode = false, onPrevious, onNext }) => {
         setPlaces(places);
       }
     }
-  }, [selectedDistricts, setPlaces, initialized, tourData.places]);
+  }, [selectedDistricts, setPlaces, initialized, tourData.places, tourData.startingPoint]);
 
   // Navigation handlers
   const handleNext = async () => {
@@ -266,6 +336,7 @@ const CreateTourPage = ({ isEditMode = false, onPrevious, onNext }) => {
         title: tourData.title,
         startDate: tourData.startDate,
         endDate: tourData.endDate,
+        startingPoint: tourData.startingPoint,
         estimatedCost: tourData.estimatedCost,
         route: {
           routeSource: 'user',
@@ -275,6 +346,22 @@ const CreateTourPage = ({ isEditMode = false, onPrevious, onNext }) => {
 
       // Convert selected districts to route stops
       let stopOrder = 1;
+      
+      // Add starting point as the first stop if it exists
+      if (tourData.startingPoint) {
+        // Find the starting point destination
+        const startingPointDestination = selectedDistricts.find(({ district }) => 
+          district.name === tourData.startingPoint
+        );
+        
+        if (startingPointDestination) {
+          updateData.route.stops.push({
+            placeType: 'Destination',
+            placeId: startingPointDestination.district.id,
+            stopOrder: stopOrder++
+          });
+        }
+      }
       
       // Use optimized route if available in edit mode, otherwise use selected districts
       if (isEditing && tourData.isRouteOptimized && tourData.optimizedRoute) {
@@ -289,6 +376,11 @@ const CreateTourPage = ({ isEditMode = false, onPrevious, onNext }) => {
       } else {
         // Use selected districts order
         selectedDistricts.forEach(({ district, selectedSubplaces }) => {
+          // Skip if this destination is the starting point (already added)
+          if (tourData.startingPoint && district.name === tourData.startingPoint) {
+            return;
+          }
+          
           // Add the district as a stop
           updateData.route.stops.push({
             placeType: 'Destination',
