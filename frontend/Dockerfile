@@ -25,6 +25,9 @@ COPY --from=build /app/build /usr/share/nginx/html
 # Copy nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+# Create images directory
+RUN mkdir -p /app/images
+
 # Expose port 80
 EXPOSE 80
 

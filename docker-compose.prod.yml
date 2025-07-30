@@ -34,6 +34,8 @@ services:
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - SPRING_JPA_GENERATE_DDL=true
       - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
+    volumes:
+      - ./images:/app/images  # Mount images directory
     networks:
       - tourify-network
     depends_on:
@@ -53,7 +55,9 @@ services:
     ports:
       - "80:80"
     environment:
-      - REACT_APP_API_URL=http://20.40.57.81:8080
+      - REACT_APP_URL=http://20.40.57.81
+    volumes:
+      - ./images:/app/images  # Mount images directory
     networks:
       - tourify-network
     depends_on:

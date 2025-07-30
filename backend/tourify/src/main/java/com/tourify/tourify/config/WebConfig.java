@@ -9,8 +9,8 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Serve images from the images/ directory
+        // Serve images from the images/ directory (Docker path)
         registry.addResourceHandler("/images/**")
-                .addResourceLocations("file:images/");
+                .addResourceLocations("file:/app/images/");
     }
 } 
